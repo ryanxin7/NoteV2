@@ -1,0 +1,847 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="物理备份与恢复 XBK[[toc]] 1.上节回顾  1.1 mysqldump核心参数 -A  全备 -B  单表备份  库 表  备份   --master-data&#x3D;2 (1) 以注释的形式记录二进制日志信息 (2) 自动开启锁表的功能 记录二进制日志在备份时的起点号 （就是到23.59分截止的binlog日志position号 ）由于备份时不开启二进制日志所以记录的是备份开始时的起点号用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="物理备份与恢复 XBK">
+<meta property="og:url" content="http://example.com/2020/07/19/dba07-1/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="物理备份与恢复 XBK[[toc]] 1.上节回顾  1.1 mysqldump核心参数 -A  全备 -B  单表备份  库 表  备份   --master-data&#x3D;2 (1) 以注释的形式记录二进制日志信息 (2) 自动开启锁表的功能 记录二进制日志在备份时的起点号 （就是到23.59分截止的binlog日志position号 ）由于备份时不开启二进制日志所以记录的是备份开始时的起点号用">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-5.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-6.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-7.png">
+<meta property="article:published_time" content="2020-07-18T18:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.452Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-2.png">
+  
+  <title>物理备份与恢复 XBK - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="物理备份与恢复 XBK">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-19 02:13" pubdate>
+        2020年7月19日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.9k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      21 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">物理备份与恢复 XBK</h1>
+            
+            <div class="markdown-body">
+              <hr>
+<h1 id="物理备份与恢复-XBK"><a href="#物理备份与恢复-XBK" class="headerlink" title="物理备份与恢复 XBK"></a>物理备份与恢复 XBK</h1><p>[[toc]]</p>
+<h2 id="1-上节回顾"><a href="#1-上节回顾" class="headerlink" title="1.上节回顾"></a>1.上节回顾</h2><br>
+
+<h3 id="1-1-mysqldump核心参数"><a href="#1-1-mysqldump核心参数" class="headerlink" title="1.1 mysqldump核心参数"></a>1.1 mysqldump核心参数</h3><ul>
+<li>-A  全备</li>
+<li>-B  单表备份</li>
+<li> 库 表  备份</li>
+</ul>
+<p> <code>--master-data=2</code></p>
+<p>(1) 以注释的形式记录二进制日志信息</p>
+<p>(2) 自动开启锁表的功能</p>
+<p>记录二进制日志在备份时的起点号 （就是到23.59分截止的binlog日志position号 ）由于备份时不开启二进制日志所以记录的是备份开始时的起点号用作恢复起点</p>
+ <br>
+
+<br>
+
+<p><code>--single-transaction</code> 针对InnoDB进行快照备份</p>
+<p><code>-R</code> </p>
+<p><code>-E</code></p>
+<p><code>--triggers</code> </p>
+<p> <code>--set-gtid-purged=AUTO/ON/OFF</code></p>
+<p>默认是auto，主从复制忽略此参数普通备份,可以设置为OFF。</p>
+<p><code>-F</code> 每次备份刷新出一个新的二进制日志，但是在数据库多的时候会刷一堆出来</p>
+ <br>
+
+<br>
+
+<h2 id="2-Xtrabackup"><a href="#2-Xtrabackup" class="headerlink" title="2. Xtrabackup"></a>2. Xtrabackup</h2><h3 id="2-1-备份的过程"><a href="#2-1-备份的过程" class="headerlink" title="2.1 备份的过程"></a>2.1 备份的过程</h3><ul>
+<li>非InnoDB表,进行短暂的锁表,然后Copy数据文件</li>
+<li>对于InnoDB表,立即出发checkpoint,会立即记录一个LSN,COPY数据文件</li>
+<li>将备份过程中产生的redo进行截取和保存,并记录此时最新的LSN</li>
+</ul>
+<br>
+
+<br>
+
+<h3 id="2-2-恢复过程"><a href="#2-2-恢复过程" class="headerlink" title="2.2 恢复过程"></a>2.2 恢复过程</h3><ul>
+<li>模拟了CSR的全过程,在恢复之前,将数据的LSN号和redo LSN号追平</li>
+<li>恢复方法就是直接cp回去即可</li>
+</ul>
+ <br>
+
+<br>
+
+<h3 id="2-3-XBK全备和恢复体验"><a href="#2-3-XBK全备和恢复体验" class="headerlink" title="2.3. XBK全备和恢复体验"></a>2.3. XBK全备和恢复体验</h3><p>MySQL 物理备份工具  xtrabackup(XBK、Xbackup)</p>
+<br>
+
+<p> <strong>安装依赖包</strong>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo<br>yum -y install perl perl-devel libaio libaio-devel perl-Time-HiRes perl-DBD-MySQL libev<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>下载软件并安装</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">wget https://www.percona.com/downloads/XtraBackup/Percona-XtraBackup-2.4.12/binary/redhat/7/x86_64/percona-xtrabackup-24-2.4.12-1.el7.x86_64.rpm<br>wget https://www.percona.com/downloads/XtraBackup/Percona-XtraBackup-2.4.4/binary/redhat/6/x86_64/percona-xtrabackup-24-2.4.4-1.el6.x86_64.rpm<br>yum -y install percona-xtrabackup-24-2.4.4-1.el7.x86_64.rpm<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>备份命令</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --user=root --password=123  /data/backup<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<br>
+
+
+
+<p><strong>面试题</strong>： xbk 在innodb表备份恢复的流程</p>
+<ul>
+<li>对于非Innodb表（比如 myisam）是，锁表cp数据文件，属于一种温备份。</li>
+<li>对于Innodb的表（支持事务的），不锁表，拷贝数据页，最终以数据文件的方式保存下来，把一部分redo和undo一并备走，属于热备方式。</li>
+</ul>
+ <br>
+
+<br>
+
+<h3 id="2-4-innobackupex-命令使用"><a href="#2-4-innobackupex-命令使用" class="headerlink" title="2.4 innobackupex 命令使用"></a>2.4 innobackupex 命令使用</h3><p><strong>全备</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --user=root --password=123 /data/backup<br></code></pre></td></tr></table></figure>
+
+<p><strong>参数介绍</strong>：</p>
+<p><strong>自主定制备份路径名</strong></p>
+<p> 全备时有2个比较有意思的参数</p>
+<p><code>--no-timestamp</code>：自定义备份的名字</p>
+<p><code>--defaults-file</code>：读取想要的<code>my.cnf</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --user=root --password=123 --no-timestamp /data/backup/full<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<br>
+
+<p><strong>备份集中多出来的文件：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">-rw-r----- 1 root root    24 Jun 29 09:59 xtrabackup_binlog_info<br>-rw-r----- 1 root root   119 Jun 29 09:59 xtrabackup_checkpoints<br>-rw-r----- 1 root root   489 Jun 29 09:59 xtrabackup_info<br>-rw-r----- 1 root root   2560 Jun 29 09:59 xtrabackup_logfile<br></code></pre></td></tr></table></figure>
+
+<p><code>xtrabackup_binlog_info</code> ：（备份时刻的binlog位置）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat xtrabackup_binlog_info<br>mysql-bin.000003  536749<br>79de40d3-5ff3-11e9-804a-000c2928f5dd:1-7<br></code></pre></td></tr></table></figure>
+
+<p>记录的是备份时刻，binlog的文件名字和当时的结束的position，可以用来作为截取 binlog 时的起点。</p>
+ <br>
+
+
+
+<p><code>xtrabackup_checkpoints</code> ：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">backup_type <span class="hljs-operator">=</span> <span class="hljs-keyword">full</span><span class="hljs-operator">-</span>backuped<br>from_lsn <span class="hljs-operator">=</span> <span class="hljs-number">0</span>     <span class="hljs-comment">--上次所到达的LSN号(对于全备就是从0开始,对于增量有别的显示方法)</span><br>to_lsn <span class="hljs-operator">=</span> <span class="hljs-number">160683027</span>  <span class="hljs-comment">--备份开始时间(ckpt)点数据页的LSN</span><br>last_lsn <span class="hljs-operator">=</span> <span class="hljs-number">160683036</span>  <span class="hljs-comment">--备份结束后，redo日志最终的LSN</span><br>compact <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br>recover_binlog_info <span class="hljs-operator">=</span> <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>备份时刻，立即将已经commit过的，内存中的数据页刷新到磁盘(CKPT).开始备份数据，数据文件的LSN会停留在to_lsn位置。</li>
+<li>备份时刻有可能会有其他的数据写入，已备走的数据文件就不会再发生变化了。</li>
+<li>在备份过程中，备份软件会一直监控着redo的undo，如果一旦有变化会将日志也一并备走，并记录LSN到last_lsn。</li>
+<li>从to_lsn —-&gt; last_lsn 就是，备份过程中产生的数据变化。</li>
+</ul>
+ <br>
+
+ <br>
+
+<h3 id="2-5-全备的恢复"><a href="#2-5-全备的恢复" class="headerlink" title="2.5 全备的恢复"></a>2.5 全备的恢复</h3>  <br>
+
+<p><strong>准备备份（Prepared）</strong></p>
+<p>将redo进行重做，已提交的写到数据文件，未提交的使用undo回滚掉。模拟了CSR的过程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --apply-log /backup/full<br></code></pre></td></tr></table></figure>
+
+<p><code>apply-log-only</code> 参数（only 指的就是只回放 redo log 阶段，跳过 undo 阶段），避免未完成事务的回滚。</p>
+  <br>
+
+
+
+<p><strong>恢复备份</strong></p>
+<p> <strong>前提</strong>：</p>
+<ul>
+<li>被恢复的目录是空</li>
+<li>被恢复的数据库的实例是关闭</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">systemctl stop mysqld<br></code></pre></td></tr></table></figure>
+
+<p><strong>创建新目录</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mkdir /data/mysql1<br></code></pre></td></tr></table></figure>
+
+<p><strong>数据授权</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">chown -R mysql.mysql /data/mysql1<br></code></pre></td></tr></table></figure>
+
+<p><strong>恢复备份</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">cp -a /backup/full/* /data/mysql1/<br></code></pre></td></tr></table></figure>
+
+<p><strong>启动数据库</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/my.cnf<br>datadir=/data/mysql1<br>chown -R mysql.mysql /data/mysql1<br>systemctl start mysqld<br></code></pre></td></tr></table></figure>
+
+
+
+  <br>
+
+  <br>
+
+
+
+<h2 id="3-增量备份-Incremental"><a href="#3-增量备份-Incremental" class="headerlink" title="3. 增量备份 Incremental"></a>3. 增量备份 Incremental</h2><p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-2.png" srcset="/img/loading.gif" lazyload alt="&quot;增量备份"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --user=root --password=123 --no-timestamp /backup/full <br>innobackupex --apply-log /backup/full <br></code></pre></td></tr></table></figure>
+
+<h3 id="3-1-备份产生的文件介绍"><a href="#3-1-备份产生的文件介绍" class="headerlink" title="3.1 备份产生的文件介绍"></a>3.1 备份产生的文件介绍</h3>   <br>
+
+<p><code>xtrabackup_binlog_info</code></p>
+<p>记录备份时刻的二进制日志信息. 可以作为binlog截取的起点.</p>
+  <br>
+
+<p><code>xtrabackup_checkpoints</code></p>
+<p>可以检测备份对不对</p>
+<p><code>from</code> : 备份中包含的LSN号的起点,全备:0,增量:上次备份的结束位置</p>
+<p><code>to</code>     : ckpt 时的LSN</p>
+<p><code>last-9</code> : 备份结束时的LSN.下次增量备份的起始位置. 预留了9个 说明没有</p>
+  <br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-1.png" srcset="/img/loading.gif" lazyload alt="xtrabackup_checkpoints"></p>
+  <br>
+
+  <br>
+
+<h3 id="3-2-物理备份过程"><a href="#3-2-物理备份过程" class="headerlink" title="3.2  物理备份过程"></a>3.2  物理备份过程</h3><h4 id="3-2-1-清空备份路径"><a href="#3-2-1-清空备份路径" class="headerlink" title="3.2.1 清空备份路径"></a>3.2.1 清空备份路径</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">\rm -rf /backup/*<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<h4 id="3-2-2-模拟数据"><a href="#3-2-2-模拟数据" class="headerlink" title="3.2.2 模拟数据"></a>3.2.2 模拟数据</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> database <span class="hljs-keyword">full</span> charset utf8mb4;<br>use <span class="hljs-keyword">full</span>;<br><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1 (id <span class="hljs-type">int</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>),(<span class="hljs-number">2</span>),(<span class="hljs-number">3</span>);<br><span class="hljs-keyword">commit</span>;<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<h4 id="3-2-3-进行周日的全备"><a href="#3-2-3-进行周日的全备" class="headerlink" title="3.2.3 进行周日的全备"></a>3.2.3 进行周日的全备</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">innobackupex <span class="hljs-comment">--user=root --password=123 --no-timestamp /backup/full</span><br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<h4 id="3-2-4-模拟周一的数据变化"><a href="#3-2-4-模拟周一的数据变化" class="headerlink" title="3.2.4 模拟周一的数据变化"></a>3.2.4 模拟周一的数据变化</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> database inc1 charset utf8mb4;<br>use inc1;<br><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1 (id <span class="hljs-type">int</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>),(<span class="hljs-number">2</span>),(<span class="hljs-number">3</span>);<br><span class="hljs-keyword">commit</span>;<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<h4 id="3-2-5-进行周一的增量备份"><a href="#3-2-5-进行周一的增量备份" class="headerlink" title="3.2.5 进行周一的增量备份"></a>3.2.5 进行周一的增量备份</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex  --user=root --password=123 --no-timestamp --incremental --incremental-basedir=/backup/full /backup/inc1 <br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<p><strong>说明</strong>:<br><code>--incremental</code>    开关 开启增量备份<br><code>--incremental-basedir=/backup/full</code> 基于哪个备份进行增量<br><code>/backup/inc1</code>     增量备份的位置点</p>
+  <br>
+
+  <br>
+
+<h4 id="3-2-6-检查备份的LSN"><a href="#3-2-6-检查备份的LSN" class="headerlink" title="3.2.6 检查备份的LSN"></a>3.2.6 检查备份的LSN</h4>  <br>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat /backup/full/xtrabackup_checkpoints #全备的<br>backup_type = full-backuped<br>from_lsn = 0<br>to_lsn = 217478672 #结束位置<br>last_lsn = 217478681 #默认间隔9个<br>compact = 0<br>recover_binlog_info = 0<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat /backup/inc1/xtrabackup_checkpoints #增量备份1的<br>backup_type = incremental<br>from_lsn = 217478672  #全备结束位置<br>to_lsn = 217484653<br>last_lsn = 217484662 #默认间隔9个<br>compact = 0<br>recover_binlog_info = 0<br></code></pre></td></tr></table></figure>
+
+
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-3.png" srcset="/img/loading.gif" lazyload alt="xtrabackup_checkpoints对应图"></p>
+<h4 id="3-2-7-模拟周二数据变化"><a href="#3-2-7-模拟周二数据变化" class="headerlink" title="3.2.7 模拟周二数据变化"></a>3.2.7 模拟周二数据变化</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> database inc2 charset utf8mb4;<br>use inc2;<br><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1 (id <span class="hljs-type">int</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>),(<span class="hljs-number">2</span>),(<span class="hljs-number">3</span>);<br><span class="hljs-keyword">commit</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+
+<h4 id="3-2-8-周二的增量备份"><a href="#3-2-8-周二的增量备份" class="headerlink" title="3.2.8  周二的增量备份"></a>3.2.8  周二的增量备份</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex  --user=root --password=123 --no-timestamp --incremental --incremental-basedir=/backup/inc1 /backup/inc2 <br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-2-9-周三的数据变化"><a href="#3-2-9-周三的数据变化" class="headerlink" title="3.2.9 周三的数据变化"></a>3.2.9 周三的数据变化</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> database inc3 charset utf8mb4;<br>use inc3;<br><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1 (id <span class="hljs-type">int</span>);<br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>),(<span class="hljs-number">2</span>),(<span class="hljs-number">3</span>);<br><span class="hljs-keyword">commit</span>;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-4.png" srcset="/img/loading.gif" lazyload alt="xtrabackup_checkpoints对应图"></p>
+<br>
+
+<h3 id="3-3-模拟数据库崩溃安全演练"><a href="#3-3-模拟数据库崩溃安全演练" class="headerlink" title="3.3 模拟数据库崩溃安全演练"></a>3.3 模拟数据库崩溃安全演练</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">pkill mysqld <br>\rm -rf /data/mysql/data/*<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-3-1-恢复思路"><a href="#3-3-1-恢复思路" class="headerlink" title="3.3.1 恢复思路"></a>3.3.1 恢复思路</h4><ol>
+<li><p>停业务,挂维护页</p>
+</li>
+<li><p>查找可用备份并处理备份:full+inc1+inc2 </p>
+</li>
+<li><p>binlog: inc2 到 故障时间点的binlog</p>
+</li>
+<li><p>恢复全备+增量+binlog</p>
+</li>
+<li><p>验证数据</p>
+</li>
+<li><p>起业务,撤维护页</p>
+  <br>
+
+  <br></li>
+</ol>
+<h4 id="3-3-2-恢复前的准备"><a href="#3-3-2-恢复前的准备" class="headerlink" title="3.3.2 恢复前的准备"></a>3.3.2 恢复前的准备</h4><p>(1) 整理full</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --apply-log --redo-only  /backup/full   <br></code></pre></td></tr></table></figure>
+
+<p><code>apply-log</code>  把rudo undo 都应用一下 CSR过程</p>
+<p><code>redo-only</code> 这个选项在整理全备和所有的增量备份合并时使用 除了最后一次增量 ,不做UNDO</p>
+ <br>
+
+<p>(2) 合并inc1到full,并整理备份</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --apply-log --redo-only --incremental-dir=/backup/inc1 /backup/full <br></code></pre></td></tr></table></figure>
+
+<p>(3) 合并inc2到full,并整理备份 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --apply-log --incremental-dir=/backup/inc2 /backup/full <br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-5.png" srcset="/img/loading.gif" lazyload alt="last_lsn追上了"></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-6.png" srcset="/img/loading.gif" lazyload alt="last_lsn追上了"></p>
+<p>合并后可以看到 last_lsn的号码都一致了</p>
+<p>(4) 最后一次整理full</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">innobackupex --apply-log /backup/full<br></code></pre></td></tr></table></figure>
+
+<p>此时已经恢复到周二晚上的备份</p>
+<br>
+
+<br>
+
+<h4 id="3-3-3-截取二进制日志恢复"><a href="#3-3-3-截取二进制日志恢复" class="headerlink" title="3.3.3 截取二进制日志恢复"></a>3.3.3 截取二进制日志恢复</h4><br>
+
+<p>首先要确认昨晚的备份到今天数据库宕机之前的binlog 起点和终点用于恢复</p>
+<p><strong>起点</strong>: 参数记录的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat /backup/inc2/xtrabackup_binlog_info<br>mysql-bin.000031	1997	aa648280-a6a6-11e9-949f-000c294a1b3b:1-17,<br>e16db3fd-a6e8-11e9-aee9-000c294a1b3b:1-9<br></code></pre></td></tr></table></figure>
+
+<p><strong>终点</strong>: 查询当前二进制日志文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysqlbinlog /data/binlog/mysql-bin.000031 |grep &#x27;SET&#x27;<br>SET @@SESSION.GTID_NEXT= &#x27;e16db3fd-a6e8-11e9-aee9-000c294a1b3b:12&#x27;/*!*/;<br></code></pre></td></tr></table></figure>
+
+<br>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section7-2-7.png" srcset="/img/loading.gif" lazyload alt="确定终点"></p>
+<br>
+
+<p>通过分析得到 是从10号开始到12号结束，截取二进制文件得到昨晚到今天宕机之前的数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysqlbinlog --skip-gtids --include-gtids=&#x27;e16db3fd-a6e8-11e9-aee9-000c294a1b3b:10-12&#x27; /data/binlog/mysql-bin.000031&gt;/backup/binlog.sql<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="3-3-4-恢复备份数据"><a href="#3-3-4-恢复备份数据" class="headerlink" title="3.3.4 恢复备份数据"></a>3.3.4 恢复备份数据</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">cp -a /backup/full/* /data/mysql/data/<br>chown -R mysql. /data/<br>/etc/init.d/mysqld start<br><span class="hljs-meta">mysql&gt;</span><span class="bash"> <span class="hljs-built_in">set</span> sql_log_bin=0;</span><br><span class="hljs-meta">mysql&gt;</span><span class="bash"> <span class="hljs-built_in">source</span> /backup/binlog.sql</span><br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>验证数据</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> full.t1;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> inc1.t1;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> inc2.t1;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> inc3.t1;<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+ <br>
+
+<h2 id="4-旧版数据迁移到新版"><a href="#4-旧版数据迁移到新版" class="headerlink" title="4. 旧版数据迁移到新版"></a>4. 旧版数据迁移到新版</h2><p>(5.6.44  —&gt;  5.7.26) 版本</p>
+<h3 id="4-1-搭建5-6的测试环境"><a href="#4-1-搭建5-6的测试环境" class="headerlink" title="4.1 搭建5.6的测试环境"></a>4.1 搭建5.6的测试环境</h3><p>(1)创建必须的目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">mkdir /data/mysql/data  -p <br>mkdir /application/ -p<br>mkdir /data/binlog -p<br></code></pre></td></tr></table></figure>
+
+<p>上传软件至 <code>/application</code> 下并解压</p>
+<p>上传软件至 <code>/application</code> 下并解压</p>
+<p>(2) 建用户,改权限</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">useradd mysql<br>chown -R mysql. /data /application/<br></code></pre></td></tr></table></figure>
+
+
+<p>(3) 修改环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/profile<br>export PATH=/application/mysql/bin:$PATH<br>source /etc/profile<br></code></pre></td></tr></table></figure>
+
+<p>(4)数据初始化 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum remove mariadb-libs<br>yum install -y libaio-devel<br>\rm -rf /data/mysql/data/*<br>/application/mysql/scripts/mysql_install_db --user=mysql --basedir=/application/mysql --datadir=/data/mysql/data<br></code></pre></td></tr></table></figure>
+
+<p>(5) 准备配置文件和启动脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat &gt; /etc/my.cnf &lt;&lt;EOF<br>[mysqld]<br>basedir=/application/mysql <br>datadir=/data/mysql/data <br>server_id=99<br>user=mysql<br>log_bin=/data/binlog/mysql-bin<br>binlog_format=row<br>socket=/tmp/mysql.sock <br>[mysql]<br>socket=/tmp/mysql.sock<br>EOF<br><br>cp  /application/mysql/support-files/mysql.server /etc/init.d/mysqld<br></code></pre></td></tr></table></figure>
+
+<p>(5) 启动数据库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">/etc/init.d/mysqld start<br>mysqladmin -uroot -p password 123<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-2-迁移5-6-数据到-5-7"><a href="#4-2-迁移5-6-数据到-5-7" class="headerlink" title="4.2 迁移5.6 数据到 5.7"></a>4.2 迁移5.6 数据到 5.7</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--导入t100w数据</span><br><span class="hljs-keyword">select</span> count（<span class="hljs-operator">*</span>）<span class="hljs-keyword">from</span> t100w;<br></code></pre></td></tr></table></figure>
+
+<p>(1) 5.6 数据库备份</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysqldump -uroot -p123 -A --master-data=2 --single-transaction -R -E --triggers &gt;/tmp/full.sql<br>scp /tmp/full.sql 10.0.0.51:/data/3308 <br></code></pre></td></tr></table></figure>
+
+
+<p>(2)恢复数据到 5.7版本数据库</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs powershell">systemctl <span class="hljs-built_in">start</span> mysqld3308<br>mysql <span class="hljs-literal">-S</span> /<span class="hljs-keyword">data</span>/<span class="hljs-number">3308</span>/mysql.sock<br>mysql&gt; source /<span class="hljs-keyword">data</span>/<span class="hljs-number">3308</span>/full.sql<br>mysql_upgrade  <span class="hljs-literal">-uroot</span> <span class="hljs-literal">-p123</span> <span class="hljs-literal">-S</span> /<span class="hljs-keyword">data</span>/<span class="hljs-number">3308</span>/mysql.sock --数据升级到新版本<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<p>最后通过不断追加新的二进制日志在数据同步的差不多时候，停业务业务割接,恢复剩余的binlog，原始库一般要静止2月。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/20/dba07/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">逻辑备份与恢复</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/18/dba06/">
+                        <span class="hidden-mobile">常用日志文件类型介绍</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

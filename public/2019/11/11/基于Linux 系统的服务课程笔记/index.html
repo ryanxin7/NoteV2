@@ -1,0 +1,644 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="基于 Linux 系统的服务课程笔记    ​           互联网运维是一个融合多学科（网络、系统、开发、安全、应用架构、存储等）的综合性技术岗位，给运维工程师提供了一个很好的个人能力与技术的发展空间。运维工作的相关经验将会变得非常重要，而且也将成为个人的核心竞争力，优秀的运维工程师具备很好的各层面问题的解决能力及方案提供、全局思考的能力等。由于运维岗位所接触的知识面非常广阔，更容易培养或">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Linux 系统的服务课程笔记">
+<meta property="og:url" content="http://example.com/2019/11/11/%E5%9F%BA%E4%BA%8ELinux%20%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9C%8D%E5%8A%A1%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="基于 Linux 系统的服务课程笔记    ​           互联网运维是一个融合多学科（网络、系统、开发、安全、应用架构、存储等）的综合性技术岗位，给运维工程师提供了一个很好的个人能力与技术的发展空间。运维工作的相关经验将会变得非常重要，而且也将成为个人的核心竞争力，优秀的运维工程师具备很好的各层面问题的解决能力及方案提供、全局思考的能力等。由于运维岗位所接触的知识面非常广阔，更容易培养或">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-11T03:11:01.000Z">
+<meta property="article:modified_time" content="2021-11-19T02:33:23.729Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="Linux学习之旅">
+<meta property="article:tag" content="集群架構">
+<meta name="twitter:card" content="summary_large_image">
+  
+  <title>基于 Linux 系统的服务课程笔记 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="基于 Linux 系统的服务课程笔记">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-11-11 11:11" pubdate>
+        2019年11月11日 上午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      2.5k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      8 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">基于 Linux 系统的服务课程笔记</h1>
+            
+            <div class="markdown-body">
+              <h1 id="基于-Linux-系统的服务课程笔记"><a href="#基于-Linux-系统的服务课程笔记" class="headerlink" title="基于 Linux 系统的服务课程笔记"></a>基于 Linux 系统的服务课程笔记</h1><br>
+
+<br>
+
+<p>​           互联网运维是一个融合多学科（网络、系统、开发、安全、应用架构、存储等）的综合性技术岗位，给运维工程师提供了一个很好的个人能力与技术的发展空间。运维工作的相关经验将会变得非常重要，而且也将成为个人的核心竞争力，优秀的运维工程师具备很好的各层面问题的解决能力及方案提供、全局思考的能力等。由于运维岗位所接触的知识面非常广阔，更容易培养或发挥出个人某些方面的特长或爱好，如内核、网络、开发、数据库等方面，可以做得非常深入精通、成为这方面的专家。</p>
+<br>
+
+<br>
+
+<br>
+
+<h2 id="Linux-运维工程师技术图谱"><a href="#Linux-运维工程师技术图谱" class="headerlink" title="Linux 运维工程师技术图谱"></a>Linux 运维工程师技术图谱</h2><table>
+<thead>
+<tr>
+<th align="center">运维架构技术类型</th>
+<th align="center"><img width=213/>主要技术关键词  <img width=213/></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">脚本编程</td>
+<td align="center"><strong>AWK、Sed、Grep、Shell、Python</strong></td>
+</tr>
+<tr>
+<td align="center">Web服务</td>
+<td align="center">Apache、<strong>Nginx</strong>、<strong>Tomcat</strong>、JBoss、Resin</td>
+</tr>
+<tr>
+<td align="center">数据传输</td>
+<td align="center">Rsync、Scp、Inodify/Sersync</td>
+</tr>
+<tr>
+<td align="center">性能分析</td>
+<td align="center">top、free、df、iftop、iostat、vmstat、dstat、sar、sysdig</td>
+</tr>
+<tr>
+<td align="center">进程管理</td>
+<td align="center">Supervisor</td>
+</tr>
+<tr>
+<td align="center">网络服务</td>
+<td align="center">vsftp、nfs、samba、bind、dhcp、postfifix</td>
+</tr>
+<tr>
+<td align="center">数据库</td>
+<td align="center"><strong>MySQL</strong>、MariaDB、PostgreSQL，Oracle</td>
+</tr>
+<tr>
+<td align="center">NoSQL</td>
+<td align="center">Redis、MongoDB</td>
+</tr>
+<tr>
+<td align="center">消息中间件</td>
+<td align="center">RabbitMQ、ActiveMQ</td>
+</tr>
+<tr>
+<td align="center">版本管理</td>
+<td align="center">SVN、<strong>Git</strong></td>
+</tr>
+<tr>
+<td align="center">静态缓存</td>
+<td align="center">Squid、Varnish、<strong>Nginx</strong></td>
+</tr>
+<tr>
+<td align="center">负载均衡</td>
+<td align="center"><strong>LVS</strong>、HAProxy、<strong>Nginx</strong></td>
+</tr>
+<tr>
+<td align="center">高可用软件</td>
+<td align="center"><strong>Keepalived</strong>、Heartbeat、DRBD、corosync+pacemaker</td>
+</tr>
+<tr>
+<td align="center">集中管理工具</td>
+<td align="center"><strong>Ansible</strong>、Saltstack、Chef、Puppet</td>
+</tr>
+<tr>
+<td align="center">虚拟化</td>
+<td align="center">KVM、Xen、Openstack、Cloudstack</td>
+</tr>
+<tr>
+<td align="center">容器化</td>
+<td align="center"><strong>Docker</strong>、<strong>Kubernetes</strong>、Rancher、Openshift</td>
+</tr>
+<tr>
+<td align="center">自动装机</td>
+<td align="center">Kickstart、Cobbler</td>
+</tr>
+<tr>
+<td align="center">抓包分析</td>
+<td align="center">Tcpdump、Wireshark</td>
+</tr>
+<tr>
+<td align="center">持续集成</td>
+<td align="center"><strong>Jenkins</strong>、Gitlab</td>
+</tr>
+<tr>
+<td align="center">MySQL代理</td>
+<td align="center">Altas、Cobar、Mycat</td>
+</tr>
+<tr>
+<td align="center">压力测试</td>
+<td align="center">ab、fifio、sysbench、mysqlslap、Jemter</td>
+</tr>
+<tr>
+<td align="center">日志收集</td>
+<td align="center"><strong>ELK Stack</strong>、Graylog</td>
+</tr>
+<tr>
+<td align="center">监控系统</td>
+<td align="center">Zabbix、<strong>Prometheus</strong>、Open-falcon</td>
+</tr>
+<tr>
+<td align="center">分布式文件系统</td>
+<td align="center"><strong>Ceph</strong>、GlusterFS、FastDFS</td>
+</tr>
+</tbody></table>
+<br>
+
+<br>
+
+<p>:::tip 课程知识指南</p>
+<ul>
+<li><p><strong>Linux</strong> 初始基础阶段需要熟悉 Linux 操作系统安装，目录结构、文件权限、网卡文件等配置、系统启动流程等。</p>
+</li>
+<li><p><strong>系统管理</strong>  主要学习Linux系统，掌握常用的几十个基本管理命令，包括用户管理、磁盘分区、软件包管理、文件权限、文本处理、进程管理、性能分析工具等。</p>
+</li>
+<li><p><strong>网络基础</strong> OSI和TCP/IP模型一定要熟悉。基本的交换机、路由器概念及实现原理要知道。</p>
+</li>
+<li><p><strong>Shell脚本编程基础</strong> 掌握Shell基本语法结构，能编写简单的脚本即可。</p>
+</li>
+<li><p><strong>网络服务</strong>  常见的网络服务要会部署，比如vsftp、nfs、samba、bind、dhcp等。 代码版本管理系统少不了，可以学习下主流的GIT，能部署和简单使用就可以了。 经常在服务器之间传输数据，所以要会使用：rsync和scp。 数据同步：inotify/sersync。 重复性完成一些工作，可写成脚本定时去运行，所以得会配置Linux下的定时任务服务crond。 </p>
+</li>
+<li><p><strong>Web服务</strong> 每个公司基本都会有网站，能让网站跑起来，就需要搭建Web服务平台了。 如果是用PHP语言开发的，通常搭建LNMP网站平台，这是一个技术名词组合的拼写，分开讲就是得会部署Nginx、MySQL和PHP。 如果是JAVA语言开发的，通常使用Tomcat运行项目，为了提高访问速度，可以使用Nginx反向代理Tomcat，Nginx处理静态页面，Tomcat处理动态页面，实现动静分离。 不是会部署这么简单，还要知道HTTP协议工作原理、简单的性能调优。</p>
+</li>
+<li><p><strong>负载均衡器</strong> 单台服务器终究资源有限，抵抗高访问量肯定是无法支撑的，解决此问题最关键的技术就是采用负载均衡器，水平扩展多台Web服务器，同时对外提供服务，这样就成倍扩展性能了。负载均衡器主流开源技术有LVS、HAProxy和Nginx。一定要熟悉一两个！</p>
+</li>
+<li><p><strong>数据库</strong> 数据库选择MySQL，它是世界上使用最为广泛的开源数据库。学它准没错！ 也要会一些简单的SQL语句、用户管理、常用存储引擎、数据库备份与恢复。 想要深入点，必须会主从复制、性能优化、主流集群方案：MHA、MGR等。 NoSQL这么流行当然也少不了，学下Redis、MongoDB这两个就好了。</p>
+</li>
+<li><p><strong>监控系统</strong> 监控必不可少，是及时发现问题和追溯问题的救命稻草。可以选择学习主流的Zabbix、Prometheus开源监控系统，功能丰富，能满足企业级监控需求。监控点包括服务器硬件、服务器性能、API、业务、PV/UV、日志等方面。 也可以弄个仪表盘展示几个实时关键的数据，比如Grafana，会非常炫酷。</p>
+</li>
+<li><p><strong>日志分析系统</strong> 日志也很重要，定期的分析，可发现潜在隐患，提炼出有价值的东西。 主流日志系统：ELK Stack 学会部署使用，能分析日志并可视化，方便故障排查。</p>
+</li>
+<li><p><strong>安全防范</strong> 安全很重要，不要等到系统被攻击了，再做安全策略，此时已晚！所以，当一台服务器上线后应马上做安全访问控制策略，比如使用iptables限制只允许信任源IP访问，关闭一些无用的服务和端口等。 一些常见的攻击类型一定得知道啊，否则怎么对症下药呢！比如CC、DDOS、ARP等。</p>
+</li>
+<li><p><strong>Shell脚本编程进阶</strong> Shell脚本是Linux自动完成工作的利器，必须得熟练编写，所以得进一步学习函数、数组、信号、发邮件等。 文本处理三剑客（grep、sed、awk）得玩6啊，Linux下文本处理就指望它们了。</p>
+</li>
+<li><p><strong>Python/Go 开发基础</strong> Shell脚本只能完成一些基本的任务，想要完成更复杂些的任务，比如调用API、多进程等。就需要学高级语言了。Python是运维领域使用最多的语言，简单易用，学它准没错！此阶段掌握基础就可以了，例如基本语法结构、文件对象操作、函数、迭代对象、异常处理、发邮件、数据库编程等。</p>
+<p>:::</p>
+</li>
+</ul>
+<p>::: warning  版权声明</p>
+<p>本站文章来源于互联网与个人学习笔记总结，仅用于技术分享交流使用。未经允许不得转载！</p>
+<p>:::</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux学习之旅</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%A7%8B/">集群架構</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/11/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B9%8B%E4%B8%80/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">伺服器集群架構之一</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

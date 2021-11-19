@@ -1,0 +1,1183 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="title: 常用日志文件类型介绍##intro:  集群架构环境统一规划说明##featured_image: ss5.jpgtags:    - DBA    - RDBMScategories:   DBAdate: 2020-7-16 13:13:01   常用日志文件类型介绍[[toc]] 日志管理       错误日志是用来拍错 慢速查询用来调优 二进制日志恢复数据另外与主从复制相关">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常用日志文件类型介绍">
+<meta property="og:url" content="http://example.com/2020/07/18/dba06/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="title: 常用日志文件类型介绍##intro:  集群架构环境统一规划说明##featured_image: ss5.jpgtags:    - DBA    - RDBMScategories:   DBAdate: 2020-7-16 13:13:01   常用日志文件类型介绍[[toc]] 日志管理       错误日志是用来拍错 慢速查询用来调优 二进制日志恢复数据另外与主从复制相关">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-5.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-6.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-7.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-8.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-9.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-10.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-11.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-12.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-13.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-14.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-15.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-16.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-17.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-18.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-19.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-20.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-21.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-22.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-23.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-24.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-25.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-26.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-34.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-28.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-41.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-40.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-32.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-33.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-31.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-35.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-36.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-37.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-38.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-39.png">
+<meta property="article:published_time" content="2020-07-17T18:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.451Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1.png">
+  
+  <title>常用日志文件类型介绍 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="常用日志文件类型介绍">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-18 02:13" pubdate>
+        2020年7月18日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      13k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      42 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">常用日志文件类型介绍</h1>
+            
+            <div class="markdown-body">
+              <hr>
+<p>title: 常用日志文件类型介绍<br>##intro:  集群架构环境统一规划说明<br>##featured_image: ss5.jpg<br>tags:<br>    - DBA<br>    - RDBMS<br>categories: </p>
+<ul>
+<li>DBA<br>date: 2020-7-16 13:13:01</li>
+</ul>
+<hr>
+<h1 id="常用日志文件类型介绍"><a href="#常用日志文件类型介绍" class="headerlink" title="常用日志文件类型介绍"></a>常用日志文件类型介绍</h1><p>[[toc]]</p>
+<h2 id="日志管理"><a href="#日志管理" class="headerlink" title="日志管理"></a>日志管理</h2><br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1.png" srcset="/img/loading.gif" lazyload alt="日志管理1"></p>
+<br>
+
+<ul>
+<li>错误日志是用来拍错</li>
+<li>慢速查询用来调优</li>
+<li>二进制日志恢复数据另外与主从复制相关</li>
+</ul>
+<br>
+
+<h3 id="1-错误日志"><a href="#1-错误日志" class="headerlink" title="1. 错误日志"></a><strong>1. 错误日志</strong></h3><h4 id="1-1-作用"><a href="#1-1-作用" class="headerlink" title="1.1 作用"></a>1.1 作用</h4><p>用来排查 MySQL 服务运行过程中的故障。</p>
+<br>
+
+<br>
+
+<h4 id="1-2-默认配置"><a href="#1-2-默认配置" class="headerlink" title="1.2 默认配置"></a>1.2 默认配置</h4><p><strong>默认开启</strong></p>
+<p><strong>默认路径和名字</strong>: <code>datadir/hostname.err</code></p>
+<p><strong>查看方法</strong>: <code>[ERROR]</code> 重点关注</p>
+<br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-2.png" srcset="/img/loading.gif" lazyload alt="日志管理2"></p>
+<br>
+
+<h4 id="1-3-自定义日志存储位置"><a href="#1-3-自定义日志存储位置" class="headerlink" title="1.3 自定义日志存储位置"></a>1.3 自定义日志存储位置</h4><p>建议异地存放，日志位置和数据存储分开，避免目录磁盘坏了时日志文件也丢失了可能导致无法恢复。</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-3.png" srcset="/img/loading.gif" lazyload alt="日志管理3"></p>
+<p><code>vim /etc/my.cnf</code>  添加到配置文件</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-4.png" srcset="/img/loading.gif" lazyload alt="日志管理4"></p>
+<p>可以看到已经有这个文件了</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-5.png" srcset="/img/loading.gif" lazyload alt="日志管理5"></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">log_error<span class="hljs-operator">=</span><span class="hljs-operator">/</span>tmp<span class="hljs-operator">/</span>mysql3306.log <span class="hljs-comment">-- 重启生效</span><br><span class="hljs-keyword">select</span> @<span class="hljs-variable">@log</span>_error; <span class="hljs-comment">--查询错误日志位置</span><br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+
+
+<ol>
+<li><h3 id="二进制日志（重要知识点-star2-）"><a href="#二进制日志（重要知识点-star2-）" class="headerlink" title="二进制日志（重要知识点:star2:）"></a>二进制日志（重要知识点:star2:）</h3></li>
+</ol>
+<br>
+
+<h4 id="2-1-作用"><a href="#2-1-作用" class="headerlink" title="2.1 作用"></a>2.1 作用</h4><ul>
+<li>部署主从复制依赖二进制日志</li>
+<li>数据恢复时需要依赖于二进制日志</li>
+</ul>
+<h3 id="2-2-如何配置？"><a href="#2-2-如何配置？" class="headerlink" title="2.2 如何配置？"></a>2.2 如何配置？</h3><p>(1) 参数介绍</p>
+<p> 默认没有开启需要手动定义开启。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">server_id=6    一共65535<br>log_bin=/data/binlog/mysql-bin  设置二进制日志的位置<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>说明</strong>：</p>
+<p><code>/data/binlog</code> : 提前定制好的目录, 而且要有<code>mysql.mysql</code> 的权限<br><code>mysql-bin</code>      : 二进制日志文件名的前缀<br>例如: <code>mysql-bin.000001</code>  ,<code>mysql-bin.000002</code> ……</p>
+<p>(2) 参数配置</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">server_id=6<br>log_bin=/data/binlog/mysql-bin<br>binlog_format=row<br></code></pre></td></tr></table></figure>
+
+
+
+<p>(3) 创建目录和授权</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">mkdir -p /data/binlog/<br>chown -R mysql.mysql /data<br></code></pre></td></tr></table></figure>
+
+
+
+<p>(4)重启生效</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">[root@db01 tmp]<span class="hljs-comment"># /etc/init.d/mysqld restart</span><br>Shutting down MySQL.. SUCCESS! <br>Starting MySQL. SUCCESS! <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="3-二进制文件记录了什么？"><a href="#3-二进制文件记录了什么？" class="headerlink" title="3. 二进制文件记录了什么？"></a>3. 二进制文件记录了什么？</h3><h4 id="3-1-概括"><a href="#3-1-概括" class="headerlink" title="3.1 概括"></a>3.1 概括</h4><p>记录的数据库所有变更类的操作日志  如：</p>
+<ul>
+<li>DDL 以语句的方式,原模原样的记录.</li>
+<li>DCL 以语句的方式,原模原样的记录.</li>
+<li>DML insert  update delete 操作 （记录的已提交的事务DML语句）</li>
+</ul>
+<p>DML记录格式(statement,row,mixed),通过<code>binlog_format=row</code>参数控制</p>
+<br>
+
+<p><strong>说明:</strong></p>
+<ul>
+<li><strong>statement</strong>:SBR,语句模式记录日志,做什么命令,记录什么命令.</li>
+<li><strong>row</strong>  :RBR,行模式, 记录数据行的变化 记录数据行 由A=1 变成 A=2的变化过程 redo是记录数据页的变化</li>
+<li><strong>mixed</strong>:MBR,混合模式由MySQL自己调整决定用那种模式 。 一般不用</li>
+</ul>
+<br>
+
+<p><strong>面试问题:</strong> SBR和RBR什么区别?  怎么选择?</p>
+<p><strong>SBR</strong>:  可读性较强,对于范围操作日志量少,但是可能会出现记录不准确的情况.          </p>
+<p><strong>如</strong>：<code>update t1 set name=&#39;zs&#39;  where id &gt; 5</code> 对五行数据进行修改，但只记录命令。</p>
+<p><code>instart into t1 values （1，&#39;zs&#39;,now()）</code>; 时间列录入时是以前的时间，有可能出现记录不准确问题</p>
+<br>
+
+<p><strong>RBR</strong>:  可读性较弱,对于范围操作日志大,不会出现记录错误.</p>
+<p> 高可用环境中的新特性要依赖于RBR</p>
+<p><strong>如</strong>：同一个语句要记录5行操作  哪一行变动了就记录几行</p>
+<p>我们公司对数据的严谨性要求较高,也用用到了新型的架构,所以选择RBR。</p>
+<br>
+
+<br>
+
+<h3 id="4-二进制日志记录单元"><a href="#4-二进制日志记录单元" class="headerlink" title="4  二进制日志记录单元"></a>4  二进制日志记录单元</h3><h4 id="4-1-event-事件"><a href="#4-1-event-事件" class="headerlink" title="4.1 event 事件"></a>4.1 event 事件</h4><p>二进制日志的最小单元</p>
+<br>
+
+<p><strong>如</strong>：DDL   <code>create database xin;</code>  事件1</p>
+<p>对于DDL等语句是每一个语句就是一个事件</p>
+<br>
+
+<p>而 DML: 一个事务包含了多个语句</p>
+<p><code>begin;</code>     事件1<br><code>a</code>             事件2<br><code>b</code>             事件3<br><code>commit;</code>   事件4 </p>
+<br>
+
+
+
+<h4 id="4-2-event-事件的开始和结束位置"><a href="#4-2-event-事件的开始和结束位置" class="headerlink" title="4.2 event 事件的开始和结束位置"></a>4.2 event 事件的开始和结束位置</h4><p>方便我们从日志中截取我们想要的日志事件.</p>
+<br>
+
+<br>
+
+
+
+<h3 id="5-二进制日志的管理"><a href="#5-二进制日志的管理" class="headerlink" title="5. 二进制日志的管理"></a>5. 二进制日志的管理</h3><h4 id="5-1-查看二进制日志存储位置"><a href="#5-1-查看二进制日志存储位置" class="headerlink" title="5.1 查看二进制日志存储位置"></a>5.1 查看二进制日志存储位置</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> variables <span class="hljs-keyword">like</span> <span class="hljs-string">&#x27;%log_bin%&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-6.png" srcset="/img/loading.gif" lazyload alt="Section6-1-6.png"></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-7.png" srcset="/img/loading.gif" lazyload alt="Section6-1-7.png"><br><br></p>
+<h4 id="5-2-查看所有已存在的二进制日志"><a href="#5-2-查看所有已存在的二进制日志" class="headerlink" title="5.2 查看所有已存在的二进制日志"></a>5.2 查看所有已存在的二进制日志</h4><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">show</span> <span class="hljs-type">binary</span> logs;<br>flush logs; <span class="hljs-comment">--滚动一个新的日志</span><br><span class="hljs-keyword">show</span> <span class="hljs-type">binary</span> logs;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-8.png" srcset="/img/loading.gif" lazyload alt="Section6-1-8.png"></p>
+<br>
+
+<p><strong>查看正在使用的二进制日志</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> master status ;<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-9.png" srcset="/img/loading.gif" lazyload alt="Section6-1-9.png"><br><br></p>
+<p><strong>查看二进制日志事件</strong> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql">模拟建表操作<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> database binlog charset utf8mb4;<br>mysql<span class="hljs-operator">&gt;</span> use binlog<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1(id <span class="hljs-type">int</span>);<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>);<br></code></pre></td></tr></table></figure>
+
+<p>:hammer_and_wrench:注意：二进制日志只记录事务提交后的日志 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> master status ;<br><span class="hljs-operator">+</span><span class="hljs-comment">------------------+----------+--------------+------------------+-------------------+</span><br><span class="hljs-operator">|</span> File       <span class="hljs-operator">|</span> Position <span class="hljs-operator">|</span> Binlog_Do_DB <span class="hljs-operator">|</span> Binlog_Ignore_DB <span class="hljs-operator">|</span> Executed_Gtid_Set <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">------------------+----------+--------------+------------------+-------------------+</span><br><span class="hljs-operator">|</span> mysql<span class="hljs-operator">-</span>bin<span class="hljs-number">.000004</span> <span class="hljs-operator">|</span>   <span class="hljs-number">501</span> <span class="hljs-operator">|</span>       <span class="hljs-operator">|</span>         <span class="hljs-operator">|</span>          <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">------------------+----------+--------------+------------------+-------------------+</span><br><span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.00</span> sec)<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>查看日志：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> binlog events <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;mysql-bin.000004&#x27;</span> limit <span class="hljs-number">5</span>; 只看前五行内容<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>前两行为二进制文件的头部格式信息何版本信息</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-10.png" srcset="/img/loading.gif" lazyload alt="Section6-1-10.png"></p>
+<p>经过查找从第三行开始</p>
+<p>根据Position号码截取事务 219-335 标识事务开始位置和结束位置</p>
+<p> 只记录事务提交后的日志提交后：</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-11.png" srcset="/img/loading.gif" lazyload alt="Section6-1-11.png"></p>
+<h4 id="5-3-查看二进制文件内容"><a href="#5-3-查看二进制文件内容" class="headerlink" title="5.3 查看二进制文件内容"></a>5.3 <strong>查看二进制文件内容</strong></h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysqlbinlog mysql-bin.000004 | grep -v <span class="hljs-string">&#x27;^SET&#x27;</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-12.png" srcset="/img/loading.gif" lazyload alt="Section6-1-12.png"></p>
+<p><strong>翻译一下：</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysqlbinlog --base64-output=decode-rows -vvv mysql-bin.000004 <br></code></pre></td></tr></table></figure>
+
+<p>sssss</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-13.png" srcset="/img/loading.gif" lazyload alt="Section6-1-13.png"></p>
+<p>意思是 在1号列插入值1</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysqlbinlog -d haoge mysql-bin.000004 按库过滤日志 <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="5-4-截取二进制日志"><a href="#5-4-截取二进制日志" class="headerlink" title="5.4 截取二进制日志"></a>5.4 截取二进制日志</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">[root@db01 binlog]<span class="hljs-comment"># mysqlbinlog --start-position=219 --stop-position=335 mysql-bin.000004 &gt;/tmp/a.sql</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="5-5-通过binlog恢复数据"><a href="#5-5-通过binlog恢复数据" class="headerlink" title="5.5 通过binlog恢复数据"></a>5.5 通过binlog恢复数据</h4><p>只要二进制日志全就会恢复任何时间点的数据，因为记录日志还做一遍就恢复了</p>
+<p><strong>(1) 模拟数据</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> database test11 charset utf8mb4;<br>mysql<span class="hljs-operator">&gt;</span> use haoge;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1(id <span class="hljs-type">int</span>);<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>);<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">commit</span>;<br></code></pre></td></tr></table></figure>
+
+
+<p><strong>(2)模拟故障</strong> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">drop</span> database test11;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>(3)分析和截取 binlog</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> master status ;    		<span class="hljs-comment">---&gt;确认使用的是哪一个日志 确认是004号日志文件</span><br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> binlog events <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;mysql-bin.000004&#x27;</span> ;   <span class="hljs-comment">---&gt;查看事件</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-14.png" srcset="/img/loading.gif" lazyload alt="日志截取"></p>
+<p><strong>说明:</strong> 找到起点和终点,进行截取</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysqlbinlog --start-position=823 --stop-position=1420 /data/binlog/mysql-bin.000004 &gt;/tmp/bin.sql<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-15.png" srcset="/img/loading.gif" lazyload alt="日志截取2"></p>
+<p><strong>(4) 恢复binlog</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">0</span>;    <span class="hljs-comment">---&gt;在此会话中临时关闭二进制日志    避免恢复时产生的新日志</span><br>mysql<span class="hljs-operator">&gt;</span> source <span class="hljs-operator">/</span>tmp<span class="hljs-operator">/</span>bin.sql<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">1</span>; <span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">1</span>;    <span class="hljs-comment">---&gt;改回来</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-16.png" srcset="/img/loading.gif" lazyload alt="日志截取"></p>
+<p><strong>问题来了， 如果业务跑了两年了，怎么找日志？</strong> </p>
+<p>二进制虽然可以数据恢复，但是它的功能性上是有缺陷的导致它只能作为数据恢复的辅助手段</p>
+<p><strong>如</strong>： 全备份 +二进制日志恢复，先找到最新的全备份然后在用二进制日志恢复到今天的数据就行。</p>
+<br>
+
+<br>
+
+
+
+<h3 id="6-GTID-记录模式管理-star"><a href="#6-GTID-记录模式管理-star" class="headerlink" title="6. GTID 记录模式管理  :star:"></a>6. GTID 记录模式管理  :star:</h3><h4 id="6-1-GTID-介绍"><a href="#6-1-GTID-介绍" class="headerlink" title="6.1 GTID 介绍"></a>6.1 GTID 介绍</h4><ul>
+<li><p>对于binlog中的每一个事务,都会生成一个GTID号码</p>
+</li>
+<li><p>DDL ,DCL 一个event就是一个事务,就会有一个GTID号.</p>
+</li>
+<li><p>DML语句来讲,begin到commit,是一个事务,就是一个GTID号</p>
+</li>
+</ul>
+<br>
+
+<h4 id="6-2-GTID的组成"><a href="#6-2-GTID的组成" class="headerlink" title="6.2 GTID的组成"></a><strong>6.2 GTID的组成</strong></h4><p>由两部分组成<br><strong>severi_uuid:TID</strong> 事务的号码</p>
+<p><strong>severi_uuid</strong> 在 <code>auto.cnf</code> 中查看</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">[root@db01 data]<span class="hljs-comment"># cat auto.cnf </span><br>[auto]<br>server-uuid=d60b549f-9e10-11e9-ab04-000c294a1b3b<br></code></pre></td></tr></table></figure>
+
+
+
+<p>**TID **是一个自增长的数据,从1开始  如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">d60b549f-9e10-11e9-ab04-000c294a1b3b:1-15<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h4 id="6-3-GTID的幂等性"><a href="#6-3-GTID的幂等性" class="headerlink" title="6.3 GTID的幂等性"></a>6.3 GTID的幂等性</h4><p>如果拿有GTID的日志去恢复时,检查当前系统中是否有相同GTID号,有相同的就自动跳过  </p>
+<p>同Ansible剧本跳过同理会影响到binlog恢复和主从复制。</p>
+<br>
+
+<br>
+
+<h4 id="6-4-GTID的开启和配置"><a href="#6-4-GTID的开启和配置" class="headerlink" title="6.4 GTID的开启和配置"></a>6.4 GTID的开启和配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /etc/my.cnf<br>gtid-mode=on<br>enforce-gtid-consistency=<span class="hljs-literal">true</span> 强制gtid一致性<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-17.png" srcset="/img/loading.gif" lazyload alt="GTID"></p>
+<p><strong>注意</strong>：开启后止影响以后的事务 以前的管不着</p>
+<br>
+
+
+<h4 id="6-5-查看GTID信息"><a href="#6-5-查看GTID信息" class="headerlink" title="6.5 查看GTID信息"></a>6.5 查看GTID信息</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> database gtid charset utf8mb4; 创建一个库<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> master status; 查看gtid号码 已经产生gtid<br>mysql<span class="hljs-operator">&gt;</span> use gtid;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1(id <span class="hljs-type">int</span>); 创建一个表<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> master status;  查看gtid号码 已经产生gtid <span class="hljs-number">1</span><span class="hljs-number">-2</span><br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-18.png" srcset="/img/loading.gif" lazyload alt="GTID2"></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> t1 <span class="hljs-keyword">values</span>(<span class="hljs-number">1</span>);<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">commit</span>;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> master status; <br></code></pre></td></tr></table></figure>
+
+<p><strong>提交之后才算一个事务</strong>  </p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-19.png" srcset="/img/loading.gif" lazyload alt="GTID3"><br><br></p>
+<p><strong>开了GTID 后的日志信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> binlog events <span class="hljs-keyword">in</span> <span class="hljs-string">&#x27;mysql-bin.000005&#x27;</span> <br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-20.png" srcset="/img/loading.gif" lazyload alt="GTID3"></p>
+<br>
+
+<br>
+
+<h3 id="7-基于GTID-恢复数据"><a href="#7-基于GTID-恢复数据" class="headerlink" title="7. 基于GTID 恢复数据"></a>7. 基于GTID 恢复数据</h3><p>开启GTID 后只需截取GTID日志就可以了，GTID是全局事务唯一标号。</p>
+<br>
+
+<h4 id="7-1-截取日志"><a href="#7-1-截取日志" class="headerlink" title="7.1 截取日志"></a>7.1 <strong>截取日志</strong></h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">[root@db01 data]<span class="hljs-comment"># cd /data/binlog/</span><br>[root@db01 binlog]<span class="hljs-comment"># mysqlbinlog --include-gtids=&#x27;d60b549f-9e10-11e9-ab04-000c294a1b3b:1-3&#x27; mysql-bin.000005 &gt;/tmp/gtid.sql</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="7-2-恢复数据"><a href="#7-2-恢复数据" class="headerlink" title="7.2 恢复数据"></a>7.2 恢复数据</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">0</span>; 暂时关闭日志<br>mysql<span class="hljs-operator">&gt;</span> source <span class="hljs-operator">/</span>tmp<span class="hljs-operator">/</span>gtid.sql 恢复<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">1</span>; 开启日志<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-21.png" srcset="/img/loading.gif" lazyload alt="GTID恢复"><br><br></p>
+<br>
+
+<h4 id="7-3-报错"><a href="#7-3-报错" class="headerlink" title="7.3 报错"></a>7.3 报错</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">ERROR <span class="hljs-number">1049</span> (<span class="hljs-number">42000</span>): <span class="hljs-literal">Unknown</span> database <span class="hljs-string">&#x27;gtid&#x27;</span><br>Query OK, <span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> affected (<span class="hljs-number">0.00</span> sec)<br>ERROR <span class="hljs-number">1046</span> (<span class="hljs-number">3</span>D000): <span class="hljs-keyword">No</span> database selected<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-22.png" srcset="/img/loading.gif" lazyload alt="GTID恢复报错"><br><br></p>
+<p><strong>为什么报错?</strong></p>
+<p>因为幂等性的检查,1-3事务已经做过了。</p>
+<p><strong>正确的做法</strong>：</p>
+<p>在导出的时候应该忽略GTID的幂等性。 当成新的事务来对待 1-4  跳过并记录新ID号</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">mysqlbinlog --skip-gtids --include-gtids=<span class="hljs-string">&#x27;d60b549f-9e10-11e9-ab04-000c294a1b3b:1-3&#x27;</span> mysql-bin.000005 &gt;/tmp/gtid.sql<br>--skip-gtids <br></code></pre></td></tr></table></figure>
+
+<p><strong>作用</strong>:在导出时,忽略原有的gtid信息,恢复时生成最新的 GTID 信息</p>
+<p><strong>恢复数据</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">0</span>;<br>source <span class="hljs-operator">/</span>tmp<span class="hljs-operator">/</span>gtid.sql<br><span class="hljs-keyword">set</span> sql_log_bin<span class="hljs-operator">=</span><span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>GTID相关的参数</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">--skip-gtids <span class="hljs-comment">#忽略原有的GTID 信息,恢复时生成最新的 GTID 信息</span><br>--include-gtids=<span class="hljs-string">&#x27;d60b549f-9e10-11e9-ab04-000c294a1b3b:6&#x27;</span>,<span class="hljs-string">&#x27;d60b549f-9e10-11e9-ab04-000c294a1b3b:8&#x27;</span> <span class="hljs-comment">#只截取6和8</span><br>--exclude-gtids=<span class="hljs-string">&#x27;d60b549f-9e10-11e9-ab04-000c294a1b3b:6&#x27;</span>,<span class="hljs-string">&#x27;d60b549f-9e10-11e9-ab04-000c294a1b3b:8&#x27;</span> <span class="hljs-comment">#排除</span><br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+
+
+<h3 id="8-慢日志-（slow-log-）"><a href="#8-慢日志-（slow-log-）" class="headerlink" title="8. 慢日志 （slow-log ）"></a>8. 慢日志 （slow-log ）</h3><br>
+
+
+
+<p><strong>作用</strong>：记录运行较慢的语句,优化过程中常用的工具日志。</p>
+<h4 id="8-1-慢日志配置"><a href="#8-1-慢日志配置" class="headerlink" title="8.1 慢日志配置"></a>8.1 慢日志配置</h4><p><strong>开关</strong></p>
+<p><code>slow_query_log=1</code> </p>
+<p><strong>文件位置及名字</strong> </p>
+<p><code>slow_query_log_file=/data/mysql/slow.log</code></p>
+<p><strong>设定慢查询时间</strong></p>
+<p><code>long_query_time=0.1</code></p>
+<p><strong>没走索引的语句也记录</strong></p>
+<p><code>log_queries_not_using_indexes</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">vim /etc/my.cnf<br>slow_query_log=1 <br>slow_query_log_file=/data/mysql/slow.log<br>long_query_time=0.1<br>log_queries_not_using_indexes<br></code></pre></td></tr></table></figure>
+
+
+<p>默认定义慢语句的时间 十秒</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-23.png" srcset="/img/loading.gif" lazyload alt="GTID恢复报错"></p>
+<br>
+
+<br>
+
+<h4 id="8-2-模拟慢查询分析日志"><a href="#8-2-模拟慢查询分析日志" class="headerlink" title="8.2 模拟慢查询分析日志"></a>8.2 模拟慢查询分析日志</h4><p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-24.png" srcset="/img/loading.gif" lazyload alt="慢日志分析"><br><br></p>
+<p><strong>分析慢日志</strong></p>
+<p><code>mysqldumpslow -s c -t 10 /data/mysql/slow.log</code>  优化前十个 自动以时间为第二维度<br><code>-s</code>  排序<br><code>-c</code> 次数<br><code>-t</code> 前十个记录</p>
+<ul>
+<li>不显示重复的 最慢的优先处理</li>
+<li>优先处理优化使用次数最多的语句</li>
+</ul>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-25.png" srcset="/img/loading.gif" lazyload alt="慢日志分析"><br><br></p>
+<p><strong>超过01秒的和不走索引的语句</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-26.png" srcset="/img/loading.gif" lazyload alt="慢日志分析2"></p>
+<p><strong>结论</strong>：以查询时间和运行次数为分析结论</p>
+<p>1.运行次数<br>2.时间</p>
+<h3 id="9-第三方工具"><a href="#9-第三方工具" class="headerlink" title="9.  第三方工具"></a>9.  第三方工具</h3><br>
+
+<p><a target="_blank" rel="noopener" href="https://www.percona.com/downloads/percona-toolkit/LATEST/">Percona Toolkit 3.2.0</a> </p>
+<p>Pt-query-digest是用于分析MySQL慢查询的一个工具，它也可以分析binlog、General log、slowlog，也可以通过SHOWPROCESSLIST或者通过tcpdump抓取的MySQL协议数据来进行分析。可以把分析结果输出到文件中，分析过程是先对查询语句的条件进行参数化，然后对参数化以后的查询进行分组统计，统计出各查询的执行时间、次数、占比等，可以借助分析结果找出问题进行优化。</p>
+<br>
+
+<br>
+
+<h4 id="9-1-下载安装"><a href="#9-1-下载安装" class="headerlink" title="9.1 下载安装"></a>9.1 下载安装</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">wget https://www.percona.com/downloads/percona-toolkit/3.2.0/binary/redhat/7/x86_64/percona-toolkit-3.2.0-1.el7.x86_64.rpm<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">安装依赖<br>yum install -y perl-DBI perl-DBD-MySQL perl-Time-HiRes perl-IO-Socket-SSL perl-Digest-MD5<br>rpm -ivh percona-toolkit-3.2.0-1.el7.x86_64.rpm <br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<h4 id="9-2-使用说明"><a href="#9-2-使用说明" class="headerlink" title="9.2 使用说明"></a>9.2 使用说明</h4><br>
+
+<p><code>shell&gt; pt-query-digest [OPTIONS] [DSN]</code></p>
+<p><strong>详情可参考</strong></p>
+<p> <code>shell&gt;pt-query-digest --help</code></p>
+<p><strong>常用参数</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">--create-review-table ：当使用--review参数把分析结果输出到表中时，如果没有表就自动创建。<br>--create-history-table：当使用--<span class="hljs-built_in">history</span>参数把分析结果输出到表中时，如果没有表就自动创建。<br>--filter ： 对输入的慢查询按指定的字符串进行匹配过滤后再进行分析<br>--<span class="hljs-built_in">limit</span>：限制输出结果百分比或数量，默认值是20,即将最慢的20条语句输出，如果是95%则按总响应时间占比从大到小排序，输出到总和达到95%位置截止。<br>--<span class="hljs-built_in">log</span>=s ：指定输出的日志文件<br>--<span class="hljs-built_in">history</span> 将分析结果保存到表中，分析结果比较详细，下次再使用--<span class="hljs-built_in">history</span>时，如果存在相同的语句，且查询所在的时间区间和历史表中的不同，则会记录到数据表中，可以通过查询同一CHECKSUM来比较某类型查询的历史变化。<br>--review：将分析结果保存到表中，这个分析只是对查询条件进行参数化，一个类型的查询一条记录，比较简单。当下次使用--review时，如果存在相同的语句分析，就不会记录到数据表中。<br>--output 分析结果输出类型，值可以是report(标准分析报告)、slowlog(Mysql slow <span class="hljs-built_in">log</span>)、json、json-anon，一般使用report，以便于阅读。<br>--since：从该指定日期开始分析。<br>--until：截止时间，配合—since可以分析一段时间内的慢查询。<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>9.3 使用示例</strong></p>
+<br>
+
+<p><strong>Toolkit工具包中的命令:</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs shell">pt-query-diagest  /data/mysql/slow.log<br><span class="hljs-meta">#</span><span class="bash">pt-query-digest分析慢查询日志</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --report slow.log</span><br><span class="hljs-meta">#</span><span class="bash">报告最近半个小时的慢查询：</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --report --since 1800s slow.log</span><br><span class="hljs-meta">#</span><span class="bash">报告一个时间段的慢查询：</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --report --since <span class="hljs-string">&#x27;2013-02-10 21:48:59&#x27;</span> --until <span class="hljs-string">&#x27;2013-02-16 02:33:50&#x27;</span> slow.log</span><br><span class="hljs-meta">#</span><span class="bash">报告只含select语句的慢查询:</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --filter <span class="hljs-string">&#x27;$event-&gt;&#123;fingerprint&#125; =~ m/^select/i&#x27;</span> slow.log</span><br><span class="hljs-meta">#</span><span class="bash">报告针对某个用户的慢查询:</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --filter <span class="hljs-string">&#x27;($event-&gt;&#123;user&#125; || &quot;&quot;) =~ m/^root/i&#x27;</span> slow.log</span><br><span class="hljs-meta">#</span><span class="bash">报告所有的全表扫描或full join的慢查询:</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --filter <span class="hljs-string">&#x27;(($event-&gt;&#123;Full_scan&#125; || &quot;&quot;) eq &quot;yes&quot;) || (($event-&gt;&#123;Full_join&#125; || &quot;&quot;) eq &quot;yes&quot;)&#x27;</span> slow.log</span><br><span class="hljs-meta">#</span><span class="bash">把查询保存到query_review表</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --user=root –password=abc123 --review h=localhost,D=<span class="hljs-built_in">test</span>,t=query_review --create-review-table  slow.log</span><br><span class="hljs-meta">#</span><span class="bash">把查询保存到query_history表</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --user=root –password=abc123 --<span class="hljs-built_in">history</span>  h=localhost,D=<span class="hljs-built_in">test</span>,t=query_history --create-history-table  slow.log</span><br><span class="hljs-meta">#</span><span class="bash">通过tcpdump抓取mysql的tcp协议数据，然后再分析</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> tcpdump -s 65535 -x -nn -q -tttt -i any -c 1000 port 3306 &gt; mysql.tcp.txt</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --<span class="hljs-built_in">type</span> tcpdump mysql.tcp.txt&gt; slow_report.log</span><br><span class="hljs-meta">#</span><span class="bash">分析binlog</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> mysqlbinlog mysql-bin.000093 &gt; mysql-bin000093.sql</span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --<span class="hljs-built_in">type</span>=binlog mysql-bin000093.sql &gt; slow_report.log</span><br><span class="hljs-meta">#</span><span class="bash">分析general <span class="hljs-built_in">log</span></span><br><span class="hljs-meta">shell&gt;</span><span class="bash"> pt-query-digest --<span class="hljs-built_in">type</span>=genlog localhost.log &gt; slow_report.log</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p>如下为输入结果示例：</p>
+<br>
+
+<br>
+
+<h4 id="9-4-将分析结果可视化"><a href="#9-4-将分析结果可视化" class="headerlink" title="9.4 将分析结果可视化"></a>9.4 将分析结果可视化</h4><p><strong>原理</strong>：使用pt-query-digest分析慢查询日志并将查询分析数据保存到MySQL数据库表中，然后使用应用程序来展示分析结果.</p>
+<p>目前有基于LAMP的Query-Digest-UI、Anemometer开源项目支持。</p>
+<br>
+
+<br>
+
+
+
+<p><strong>介绍：</strong></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/box/Anemometer">Anemometer</a> 是一个图形化显示MySQL慢日志的工具。</p>
+<p>结合Percona-toolkit中pt-query-digest，Anemometer可以很轻松的帮你去分析慢查询日志，让你很容易就能找到哪些SQL需要优化。</p>
+<br>
+
+<p><strong>需要安装的步骤如下：</strong></p>
+<ol>
+<li>percona-toolkit工具的安装</li>
+<li>php web环境的搭建</li>
+<li>安装Anemometer并配置</li>
+<li>导入慢查询日志</li>
+<li>访问界面，查看慢查询</li>
+<li>其他相关和问题解决</li>
+</ol>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-34.png" srcset="/img/loading.gif" lazyload alt="Anemomete构架图"><br><br></p>
+<br>
+
+<p><strong>php&amp;web环境的搭建</strong></p>
+<p> <strong>LAMP环境的安装</strong></p>
+<br>
+
+<p><strong>安装apache</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum install httpd httpd-devel -y<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>安装php</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">yum install php php-mysql php-common php-bcmath php-dba php-cli php-gd php-mbstring php-mcrypt php-devel php-xml php-pdo -y<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>修改时区</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">vim /etc/php.ini，<br><span class="hljs-comment">#修改为 </span><br>date.timezone = PRC<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>LAMP环境启动</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">systemctl start httpd<br>systemctl stop httpd<br>systemctl restart httpd<br>systemctl status httpd<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+
+
+<p><strong>安装Anemometer并配置</strong></p>
+<p><strong>1.下载安装</strong></p>
+<p><strong>下载地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/box/Anemometer">https://github.com/box/Anemometer</a></p>
+<br>
+
+<p><strong>下载后上传到服务器并解压</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">unzip Anemometer.master.zip<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>移动到web根目录</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mv Anemometer /var/www/html/anemometer<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>2.授予权限</strong></p>
+<p>目标慢查询数据库上需要授予Anemometer主机对应的权限，用于分析目标慢查询数据库<strong>explain</strong>执行计划</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">grant</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> <span class="hljs-string">&#x27;anemometer&#x27;</span>@<span class="hljs-string">&#x27;$ip&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123456&#x27;</span>;<br>flush privileges;  <span class="hljs-comment">--（$ip为Anemometer主机对应ip地址）</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>3.修改配置文件</strong></p>
+<p>增加<strong>explain</strong>读取用户密码信息</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">cp conf/sample.config.inc.php conf/config.inc.php<br>vim conf/config.inc.php<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-28.png" srcset="/img/loading.gif" lazyload alt="修改配置文件2"></p>
+<br>
+
+<p>修改配置文件指向数据源文件</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-41.png" srcset="/img/loading.gif" lazyload alt="修改配置文件2"></p>
+<p>初始化数据源的数据库表的配置</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-40.png" srcset="/img/loading.gif" lazyload alt="修改配置文件3"><br><br></p>
+<p><strong>4.推送慢语句分析</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">pt-query-digest --user=slowlog --password=1 <br>--review h=10.0.0.51,D=slow_query_log,t=global_query_review<br>--<span class="hljs-built_in">history</span> h=10.0.0.51,D=slow_query_log,t=global_query_review_history --no-report <br>--<span class="hljs-built_in">limit</span>=0% --filter=<span class="hljs-string">&quot; \$event-&gt;&#123;Bytes&#125; = length(\$event-&gt;&#123;arg&#125;) and \$event-&gt;&#123;hostname&#125;=\&quot;<span class="hljs-variable">$HOSTNAME</span>\&quot;&quot;</span> <br>slow.log<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>5.访问网页，查看慢语句可视化分析</strong></p>
+<p><a target="_blank" rel="noopener" href="http://127.0.0.1/anemometer">http://127.0.0.1/anemometer</a></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-32.png" srcset="/img/loading.gif" lazyload alt="web界面1"></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-33.png" srcset="/img/loading.gif" lazyload alt="web界面2"></p>
+<p><strong>Query-Digest-UI</strong> 应用</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-31.png" srcset="/img/loading.gif" lazyload alt="Query-Digest-UI"></p>
+<br>
+
+<br>
+
+
+
+<p><strong>6.踩坑问题解决</strong></p>
+<p><strong>MySQL 5.7 时间格式问题</strong></p>
+<p>MySQL升级5.7后，出现异常<code>Invalid default value for &#39;create_time&#39;</code> <br></p>
+<p>5.7之后版本 datetime 默认值设置 ‘0000-00-00’<br></p>
+<br>
+
+<p><strong>解决方案</strong>：</p>
+<p>打开MySQL安装位置，找到<code>my.ini</code>配置文件，添加或修改如下配置：<br></p>
+<p>在 <code>[mysqld]</code> 中添加<br></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">sql-mode=ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,<br>NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>临时解决方案</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> session sql_mode<span class="hljs-operator">=</span><span class="hljs-string">&#x27;ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p> <br>  <br></p>
+<p><code>Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggre</code> 问题解决</p>
+<p><strong>问题出现的原因：</strong> </p>
+<p><strong>MySQL 5.7.5及以上功能依赖检测功能。如果启用了ONLY_FULL_GROUP_BY SQL模式（默认情况下），MySQL将拒绝选择列表，HAVING条件或ORDER BY列表的查询引用在GROUP BY子句中既未命名的非集合列，也不在功能上依赖于它们。（5.7.5之前，MySQL没有检测到功能依赖关系，默认情况下不启用ONLY_FULL_GROUP_BY。有关5.7.5之前的行为的说明，请参见“MySQL 5.6参考手册”。）</strong></p>
+<p><strong>解决方法一：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> @<span class="hljs-variable">@global</span>.sql_mode<br></code></pre></td></tr></table></figure>
+
+<p>查询出来的值为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-string">&#x27;ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<p> 去掉 <strong>ONLY_FULL_GROUP_BY</strong>，重新设置值。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">set</span> @<span class="hljs-variable">@global</span>.sql_mode <span class="hljs-operator">=</span><span class="hljs-string">&#x27;STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p><strong>解决方法二：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/mysql/conf.d/mysql.cnf<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">[mysqld] <br>sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION<br>service mysqld restart<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>3.时间不同步问题</strong></p>
+<p><strong>问题描述</strong>：MySQL 5.7 开启慢日志后发现日志的时间与系统时间相差8小时</p>
+<br>
+
+<p><strong>Time</strong>: <strong>2020-08-05T05:35:50.667976K</strong>，实际时间应该是<strong>12:24:30</strong><br></p>
+<p>这是由于<strong>log_timestamps</strong>这个参数设置造成的，查询当前设置<br></p>
+<br> 
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> variables <span class="hljs-keyword">like</span> <span class="hljs-string">&#x27;%log_time%&#x27;</span>;<br><span class="hljs-operator">+</span><span class="hljs-comment">----------------+-------+</span><br><span class="hljs-operator">|</span> Variable_name <span class="hljs-operator">|</span> <span class="hljs-keyword">Value</span>  <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">----------------+-------+</span><br><span class="hljs-operator">|</span> log_timestamps <span class="hljs-operator">|</span> UTC   <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">----------------+-------+</span><br><span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.01</span> sec)<br></code></pre></td></tr></table></figure>
+
+<p><strong>UTC</strong>是世界统一时间，而现在的系统为北京时间是东八区，比<strong>UTC</strong>早了8个小时，所以这里设置为<strong>SYSTEM</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">global</span> log_timestamps<span class="hljs-operator">=</span><span class="hljs-keyword">SYSTEM</span>;<br><br>Query OK, <span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> affected (<span class="hljs-number">0.00</span> sec)<br><br> mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> variables <span class="hljs-keyword">like</span> <span class="hljs-string">&#x27;%log_time%&#x27;</span>;<br><span class="hljs-operator">+</span><span class="hljs-comment">----------------+--------+</span><br><span class="hljs-operator">|</span> Variable_name <span class="hljs-operator">|</span> <span class="hljs-keyword">Value</span> <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">----------------+--------+</span><br><span class="hljs-operator">|</span> log_timestamps <span class="hljs-operator">|</span> <span class="hljs-keyword">SYSTEM</span> <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">----------------+--------+</span><br><span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.01</span> sec)<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+<br>
+
+ 
+
+<p>Mysql 5.7 时间字段不得为空或0000-00-00 00:00:00</p>
+<p><strong>问题原因：</strong></p>
+<p><code>NO_ZERO_IN_DATE</code>,<code>NO_ZERO_DATE</code> 限制无法默认为 <code>0000-00-00 00:00:</code>00</p>
+<p><code>NO_ZERO_IN_DATE</code>：在严格模式下，不接受月或日部分为0的日期</p>
+<p><code>NO_ZERO_DATE</code>：在严格模式，<code>0000-00-00</code>报错</p>
+ <br>
+
+<br>
+
+<p><strong>解决方法：</strong></p>
+<p>1、使用root登陆数据库，命令界面执行 ，查看sql_mode</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> @<span class="hljs-variable">@sql</span>_mode;<br></code></pre></td></tr></table></figure>
+
+<p>返回结果如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-string">&#x27;ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<p> 修改 <code>sql_mode</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SET</span> <span class="hljs-keyword">GLOBAL</span> sql_mode<span class="hljs-operator">=</span><span class="hljs-string">&#x27;ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="10-慢查询可视化帮助文档"><a href="#10-慢查询可视化帮助文档" class="headerlink" title="10. 慢查询可视化帮助文档"></a>10. 慢查询可视化帮助文档</h3><p> <a target="_blank" rel="noopener" href="https://www.jianshu.com/p/092fd6359e43">文章来源</a></p>
+<p>该系统使用pt-query-digest搜集慢查询日志，目前策略是每10分钟搜集分析一次。</p>
+<p>将数据存储在两张表中：该系统使用pt-query-digest搜集慢查询日志，目前策略是每10分钟搜集分析一次。将数据存储在两张表中：<code>global_query_review</code> 和 <code>global_query_review_history</code>。将数据展现出来，方便查询分析。</p>
+<br>
+
+<p>表结构</p>
+<p><code>global_query_review</code> 表结构：</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-35.png" srcset="/img/loading.gif" lazyload alt="表结构1"></p>
+<p><br><br></p>
+<p><strong>主要字段说明</strong>：</p>
+<ul>
+<li>checksum : 主键，是按fingerprint算出来的hash值</li>
+<li>finger : 是每条sql语句的指纹，去掉了一些变化的值同一类型的sql语句，条件值不一样在该表中只会存在一条记录</li>
+<li>sample: 符合finger的一条sql示例</li>
+</ul>
+<br>
+
+<br>
+
+<p><code>global_query_review_history</code> 表结构</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-36.png" srcset="/img/loading.gif" lazyload alt="表结构2"></p>
+<p><strong>主要字段说明</strong>：</p>
+<ul>
+<li><strong>hostname_max</strong> :  MySQL服务所在主机名称</li>
+<li><strong>db_max</strong>: 数据库名称</li>
+<li><strong>checksum</strong> :     同global_query_review表中的checksum，两张表通过该值关联</li>
+<li><strong>sample</strong> : sql示例</li>
+<li><strong>ts_min</strong> :     本次统计(每10分钟一次)该类型sql语句出现的最小时间</li>
+<li><strong>ts_max</strong>:     本次统计(每10分钟一次)该类型sql语句出现的最大时间</li>
+<li><strong>ts_cnt</strong> :     本次统计该sql语句出现的次数</li>
+<li><strong>Query_time_sum</strong> :     本次统计该类型sql语句花费的总时间</li>
+<li><strong>Query_time_min</strong> :     本次统计该类型sql语句执行最快的那个sql语句花费的时间</li>
+<li><strong>Query_time_max</strong>:     本次统计该类型sql语句执行最慢的那个sql语句花费的时间</li>
+<li><strong>Query_time_pct_95</strong>:     本次统计该类型sql语句执行时间位于95%分位的sql执行时间</li>
+<li><strong>Query_time_stddev</strong>:     本次统计该类型sql语句执行时间标准差（统计学概念）</li>
+<li><strong>Query_time_median</strong>:     本次统计该类型sql语句执行时间位于中位数位置的sql执行时间</li>
+<li><strong>index_ratio</strong>：表示的是扫描的行数/返回的结果行数</li>
+</ul>
+<p><br><br></p>
+<p><strong>Anemometer</strong> 应用</p>
+<p><strong>1.主页面说明如下</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-37.png" srcset="/img/loading.gif" lazyload alt="界面1"><br><br></p>
+<p><strong>2.点击checksum值进入分析页面</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-38.png" srcset="/img/loading.gif" lazyload alt="界面2"></p>
+<br>
+
+<p><strong>下面图形是该页面的中间部分</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section6-1-39.png" srcset="/img/loading.gif" lazyload alt="界面3"></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/19/dba07-1/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">物理备份与恢复 XBK</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/17/dba06-2/">
+                        <span class="hidden-mobile">慢日志分析</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

@@ -1,0 +1,1062 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Ryan&#39;s Notebook">
+<meta property="og:url" content="http://example.com/page/3/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Ryan">
+<meta name="twitter:card" content="summary_large_image">
+  
+  <title>Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 100vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Ryan&#39;s Notebook">
+              
+            </span>
+
+            
+          </div>
+
+          
+            <div class="scroll-down-bar">
+              <i class="iconfont icon-arrowdown"></i>
+            </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-x-md">
+        <div class="py-5" id="board"
+          style=margin-top:0>
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
+
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/15/dba04/" target="_self">
+          第三章回顾 补充元数据查询部分
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/15/dba04/" target="_self">
+          
+          
+            
+          
+          第三章回顾 补充元数据查询部分[[toc]]
+1.上节回顾1.1 group by name  分组   排序 对比 去重
+1.2 关于group by 的sql_mode:::tip 说明
+only_full_group_by  参数
+
+在5.7版本中MySQL sql_mode参数中自带，5.6和8.0都没有
+在带有group by 字句的select中，select 后的条件列（非主键列），
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-15 03:13" pubdate>
+              2020-07-15
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/15/dba05/" target="_self">
+          存储引擎介绍与企业案例
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/15/dba05/" target="_self">
+          
+          
+            
+          
+          存储引擎介绍与企业案例[[toc]]
+1. 前情回顾案例补充explain (desc) 使用场景
+相关问题：
+
+你做过哪些优化?
+
+你用过什么优化工具? explain
+
+你对索引这块怎么优化的?
+
+
+题目意思: 我们公司业务慢,请你从数据库的角度分析原因
+
+mysql出现性能问题,有两种情况:
+
+
+
+第一种情况：应急性的慢：突然夯住  突然慢
+应急情况:数据库卡了,资源耗尽
+处理过程:
+
+sh
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-15 02:13" pubdate>
+              2020-07-15
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/14/dba03-2/" target="_self">
+          DQL 查询语句与元数据
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/14/dba03-2/" target="_self">
+          
+          
+            
+          
+          DQL 查询语句与元数据[[toc]]
+1. DQL 介绍
+
+主要对应操作：
+
+select 语句
+show 元数据属性
+
+ 
+
+2. Select 语句的应用
+
+2.1 select 单独使用的情况
+
+查看系统参数
+123456mysql&gt; select @@basedir;mysql&gt; select @@port;mysql&gt; select @@innodb_flush_lo
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-14 21:13" pubdate>
+              2020-07-14
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/13/dba03-1/" target="_self">
+          DDL 语句的应用
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/13/dba03-1/" target="_self">
+          
+          
+            
+          
+          DDL 语句的应用[[toc]]
+1. 对库的定义 
+
+作用： 对数据库 逻辑对象库或表的定义操作 
+  
+
+  
+
+创建数据库
+1CREATE DATABASE zabbix CHARSET utf8mb4 COLLATE utf8mb4_bin;
+
+
+
+查看库信息
+12SHOW DATABASES;SHOW CREATE DATABASE zabbix;
+
+ 
+
+删除数据库
+生产中危险操作 :
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-13 22:23" pubdate>
+              2020-07-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/13/dba03/" target="_self">
+          SQL 基本概念引入
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/13/dba03/" target="_self">
+          
+          
+            
+          
+          SQL 基本概念引入[[toc]]
+1. MySQL数据库的内置功能
+
+
+
+1.1 连接数据库参数介绍
+-u  &emsp;&emsp;指定登录用户
+-p  &emsp; &emsp;指定密码
+-S  &emsp;&emsp;使用Socket文件方式登录
+-h  &emsp;&emsp;指定远程主机登录地址
+-P  &emsp;&emsp;指定连接数据库的端口
+-e  &emsp;&emsp;免交
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-13 02:13" pubdate>
+              2020-07-13
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/12/dba02/" target="_self">
+          体系结构及管理
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/12/dba02/" target="_self">
+          
+          
+            
+          
+          体系结构及管理[[toc]]
+1. MySQL C/S结构介绍
+
+两种连接方式：
+TCP/IP：mysql -uroot -xin123 -h 10.0.0.51 -P3306
+Socket：mysql -uroot -xin123 -S /tmp/mysql.sock
+
+
+
+
+2. MySQL实例的构成
+
+举例说明：
+公司： 老板 + 经理 + 员工 + 办公区
+实例： mysqld + mas
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-12 12:43" pubdate>
+              2020-07-12
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/07/11/dba01/" target="_self">
+          数据库版本介绍与安装
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2020/07/11/dba01/" target="_self">
+          
+          
+            
+          
+          :::tip
+   数据库是数据管理的有效技术，是由一批数据构成的有序集合，这些数据被存放在结构化的数据表里。数据表之间相互关联，反映客观事物间的本质联系。数据库能有效地帮助一个组织或企业科学地管理各类信息资源。数据是数据库中存储的基本对象，是按一定顺序排列组合的物理符号。
+   数据有多种表现形式，可以是数字、文字、图像，甚至是音频或视频，它们都可以经过数字化后存入计算机。数据库是数据的集合，具
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-07-11 22:43" pubdate>
+              2020-07-11
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/DBA/">DBA</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/DBA/">DBA</a>
+            
+              <a href="/tags/RDBMS/">RDBMS</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/22/webserver/" target="_self">
+          HTTP 协议与网站原理介绍
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/22/webserver/" target="_self">
+          
+          
+            
+          
+          当用户访问一个网站时，都发生了事情？
+用户在浏览器输入网址信息点击回车 ryanxin.com客户端计算机完成域名的解析过程(DNS)后直接访问相应网站服务器建立TCP三次握手过程多次发送HTTP请求报文，服务端响应客户端请求多次回复HTTP响应报文，这时用户使用浏览器可以看到网站页面，用户关掉网页结束访问网站的过程，客户端计算机完成TCP四次挥手过程，客户端与服务端断开连接。
+
+
+1. DNS迭
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-22 21:45" pubdate>
+              2019-11-22
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+            
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/">网络协议</a>
+            
+              <a href="/tags/Http/">Http</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/21/Linux%E7%9A%84%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/" target="_self">
+          Linux的目录结构特点
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/21/Linux%E7%9A%84%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/" target="_self">
+          
+          
+            
+          
+          Linux的目录结构特点
+
+目录结构特点
+
+
+一切从根root 开始
+
+Linux中每个设备可以挂在任何目录上面
+
+Linux下面设备没有挂载无法使用
+
+linux中一切皆文件
+
+
+
+
+什么是挂载？
+把苹果挂载到树上 `mount`
+给磁盘分区 开了一个入口 进入到光盘中 入口=挂载点=目录
+
+举例：在 linux 系统下面使用光盘
+
+把光盘放入光驱中
+
+查看光盘 ll  /dev/cdrom
+
+
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-21 23:45" pubdate>
+              2019-11-21
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/21/lnmp/" target="_self">
+          LNMP网站架构实战
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/21/lnmp/" target="_self">
+          
+          
+            
+          
+          LNMP网站架构实战[[toc]]
+1. 实施步骤说明
+
+
+
+:::tip 服务实施步骤
+
+了解LNMP架构的组成作用
+架构的部署
+架构通讯原理
+LNMP服务之间如何建立管理
+运维人员代码上线 
+NFS服务器和Web服务器建立联系
+数据库、存储远端迁移
+
+:::
+
+
+
+
+
+
+1.1 Nginx 模块回顾
+
+Nginx 服务的企业应用 (nginx模块)
+
+实现网站页面目录索引功能  (yum仓库搭
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-21 23:45" pubdate>
+              2019-11-21
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+            
+              <a href="/tags/%E8%AF%BE%E7%A8%8B%E5%AE%9E%E6%88%98/">课程实战</a>
+            
+              <a href="/tags/LNMP/">LNMP</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+
+
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <a class="extend prev" rel="prev" href="/page/2/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/#board">4</a><a class="extend next" rel="next" href="/page/4/#board"><i class="iconfont icon-arrowright"></i></a>
+    </span>
+  </nav>
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      jQuery.ajax({
+        type: 'GET',
+        url: 'https://v1.hitokoto.cn/',
+        headers: {},
+        dataType: 'json',
+        success: function (result) {
+          var text;
+          if (result) {
+            var keys = 'hitokoto'.split('.')
+            if (result instanceof Array) {
+              result = result[0]
+            }
+            for (const k of keys) {
+              var value = result[k]
+              if (typeof value === 'string') {
+                text = value
+                break
+              } else if (value instanceof Object) {
+                result = value
+              }
+            }
+          }
+          text ? typing(text) : typing(title);
+        },
+        error: function () {
+          typing(title)
+        }
+      })
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

@@ -1,0 +1,838 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="LNMP网站架构实战[[toc]] 1. 实施步骤说明    :::tip 服务实施步骤  了解LNMP架构的组成作用 架构的部署 架构通讯原理 LNMP服务之间如何建立管理 运维人员代码上线  NFS服务器和Web服务器建立联系 数据库、存储远端迁移  :::       1.1 Nginx 模块回顾  Nginx 服务的企业应用 (nginx模块)  实现网站页面目录索引功能  (yum仓库搭">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LNMP网站架构实战">
+<meta property="og:url" content="http://example.com/2019/11/21/lnmp/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="LNMP网站架构实战[[toc]] 1. 实施步骤说明    :::tip 服务实施步骤  了解LNMP架构的组成作用 架构的部署 架构通讯原理 LNMP服务之间如何建立管理 运维人员代码上线  NFS服务器和Web服务器建立联系 数据库、存储远端迁移  :::       1.1 Nginx 模块回顾  Nginx 服务的企业应用 (nginx模块)  实现网站页面目录索引功能  (yum仓库搭">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-5.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-6.png">
+<meta property="article:published_time" content="2019-11-21T15:45:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.477Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="Linux 服务">
+<meta property="article:tag" content="课程实战">
+<meta property="article:tag" content="LNMP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-2.png">
+  
+  <title>LNMP网站架构实战 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="LNMP网站架构实战">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-11-21 23:45" pubdate>
+        2019年11月21日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      5.2k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      16 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">LNMP网站架构实战</h1>
+            
+            <div class="markdown-body">
+              <h1 id="LNMP网站架构实战"><a href="#LNMP网站架构实战" class="headerlink" title="LNMP网站架构实战"></a>LNMP网站架构实战</h1><p>[[toc]]</p>
+<h2 id="1-实施步骤说明"><a href="#1-实施步骤说明" class="headerlink" title="1. 实施步骤说明"></a>1. 实施步骤说明</h2><br>
+
+<br>
+
+<p>:::tip 服务实施步骤</p>
+<ul>
+<li>了解LNMP架构的组成作用</li>
+<li>架构的部署</li>
+<li>架构通讯原理</li>
+<li>LNMP服务之间如何建立管理</li>
+<li>运维人员代码上线 </li>
+<li>NFS服务器和Web服务器建立联系</li>
+<li>数据库、存储远端迁移</li>
+</ul>
+<p>:::</p>
+<br>
+
+<br>
+
+
+
+<h3 id="1-1-Nginx-模块回顾"><a href="#1-1-Nginx-模块回顾" class="headerlink" title="1.1 Nginx 模块回顾"></a>1.1 Nginx 模块回顾</h3><br>
+
+<p><strong>Nginx 服务的企业应用 (nginx模块)</strong></p>
+<ul>
+<li><p>实现网站页面目录索引功能  (yum仓库搭建)</p>
+</li>
+<li><p>实现网站访问别名功能     server_name</p>
+</li>
+</ul>
+<br>
+
+<br>
+
+
+
+<p><strong>实现网站页面用户访问监控</strong> </p>
+<p><code>keepalived_timeout 65s</code></p>
+<ul>
+<li><p> HTTP请求报文: 请求头—connection: keepalived…/closed 短连接</p>
+</li>
+<li><p> HTTP响应报文: 响应头—connection: closed 短连接</p>
+</li>
+<li><p>VPN—无法访问外网/xshell无法远程连接</p>
+</li>
+</ul>
+<br>
+
+   <br>
+
+<p><strong>实现网站服务日志功能配置</strong> </p>
+<p>错误日志: 错误日志级别 </p>
+<p>访问日志: 日志的格式信息 自动化分析日志(ELK 三个软件)</p>
+  <br>
+
+  <br>
+
+<p><strong>根据用户访问uri进行匹配处理</strong></p>
+<ul>
+<li><p>   <code>location = xxx</code>    精确匹配            优先级01</p>
+</li>
+<li><p>   <code>location ^~ xxx</code>   优先匹配               优先级02</p>
+</li>
+<li><p>  <code>location ~</code>        区分大小写匹配     优先级03</p>
+</li>
+<li><p>​     <code>location ~*</code>         不区分大小写        优先级03</p>
+</li>
+<li><p>​     <code>location uri</code>        根据uri进行匹配    优先级03</p>
+</li>
+<li><p>​     <code>location /</code>        默认匹配                 优先级最低</p>
+</li>
+</ul>
+<p>​    </p>
+  <br>
+
+  <br>
+
+<h3 id="1-2-企业应用-网站-location应用案例"><a href="#1-2-企业应用-网站-location应用案例" class="headerlink" title="1.2 企业应用: 网站 location应用案例"></a>1.2 企业应用: 网站 location应用案例</h3><p>例如在活动时期打折促销，网站的页面信息和平常不一样。我们不可能把平常的页面为活动直接进行修改，这时我们就需要调用一个专门在活动时上线的页面作为主站广告。<br>       <br></p>
+<p><strong>有两个站点目录:</strong></p>
+<ul>
+<li>平常网站的站点目录   <code>/html/jd-normal</code></li>
+<li>节日网站的站点目录   <code>/html/jd-teshu</code></li>
+<li>​    <code>location / &#123; root /html/jd-normal &#125;</code></li>
+<li>   <code>  location / 特殊     &#123; root /html/jd-teshu &#125;</code></li>
+</ul>
+<br>
+
+  <br>
+
+<h3 id="1-3-网站页面跳转功能"><a href="#1-3-网站页面跳转功能" class="headerlink" title="1.3 网站页面跳转功能"></a>1.3 网站页面跳转功能</h3><p>​     </p>
+<p>第一种方法：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-section">server</span><br>&#123;<br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">rewrite</span><span class="hljs-regexp"> ^/(.*)$</span> https://www.ryanxin.com/<span class="hljs-variable">$1</span> <span class="hljs-literal">permanent</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p>第二种方法：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-section">server</span><br>&#123;<br>    <span class="hljs-attribute">location</span> / &#123;<br>        <span class="hljs-attribute">return</span> <span class="hljs-number">301</span> https://www.ryanxin.com;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h2 id="2-LNMP-架构介绍"><a href="#2-LNMP-架构介绍" class="headerlink" title="2.  LNMP 架构介绍"></a>2.  LNMP 架构介绍</h2><p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-2.png" srcset="/img/loading.gif" lazyload alt="LNMP-2"></p>
+<br>
+
+<br>
+
+<p><strong>L  代表 Linux系统</strong></p>
+<p><strong>注意:</strong>  </p>
+<ul>
+<li> <code>selinux</code>必须关闭  防火墙关闭</li>
+<li><code>/tmp 1777 mysql</code> 服务无法启动</li>
+</ul>
+<br>
+
+<p><strong>N 代表 Nginx服务</strong></p>
+<p><strong>作用:</strong></p>
+<p>处理用户的静态请求 <code>html</code> <code>jpg</code> <code>txt</code> <code>mp4/avi</code></p>
+<br>
+
+
+
+
+
+<p><strong>P  代表  php 服务</strong></p>
+<p><strong>作用:</strong></p>
+<ul>
+<li><p>处理动态的页面请求</p>
+</li>
+<li><p>负责和数据库建立关系</p>
+<br></li>
+</ul>
+<p><strong>M  代表  mysql服务部署</strong> </p>
+<br>
+
+<p><strong>作用:</strong></p>
+<p>存储用户的字符串数据信息</p>
+<br>
+
+<br>
+
+<h2 id="3-网站的-LNMP-架构部署"><a href="#3-网站的-LNMP-架构部署" class="headerlink" title="3. 网站的 LNMP 架构部署"></a>3. 网站的 LNMP 架构部署</h2><h3 id="3-1创建虚拟用户和根目录"><a href="#3-1创建虚拟用户和根目录" class="headerlink" title="3.1创建虚拟用户和根目录"></a>3.1创建虚拟用户和根目录</h3><p><strong>创建用户</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">useradd -M -s /sbin/nologin www -u 1002<br>id www<br>systemctl restart nginx<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>创建战点根目录</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">mkdir -p /html/bbs/<br>chown -R www.www /html/bbs/<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<h3 id="3-2-编写-Nginx-配置文件"><a href="#3-2-编写-Nginx-配置文件" class="headerlink" title="3.2 编写 Nginx 配置文件"></a>3.2 编写 Nginx 配置文件</h3><br>
+
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">vim</span> /etc/nginx/nginx.conf<br><br>server &#123;<br><span class="hljs-attribute">server_name</span>    ryanxin.com;<br><span class="hljs-attribute">rewrite</span><span class="hljs-regexp"> ^/(.*)</span> http://www.ryanxin.com/<span class="hljs-variable">$1</span> <span class="hljs-literal">permanent</span>;<br>&#125;<br><br><span class="hljs-section">server</span> &#123;<br>      <span class="hljs-attribute">listen</span>    <span class="hljs-number">80</span>;<br>      <span class="hljs-attribute">server_name</span>   www.ryanxin.com;<br>      <span class="hljs-attribute">error_page</span>    <span class="hljs-number">500</span> <span class="hljs-number">502</span> <span class="hljs-number">503</span> <span class="hljs-number">504</span> /50x.html;<br>      <span class="hljs-attribute">location</span> / &#123;<br>      <span class="hljs-attribute">root</span>  /html/bbs;<br>      <span class="hljs-attribute">index</span>   index.html;<br>      &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="3-3-安装数据库软件"><a href="#3-3-安装数据库软件" class="headerlink" title="3.3 安装数据库软件"></a>3.3 安装数据库软件</h3><br>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum install mariadb-server mariadb -y<br><span class="hljs-meta"></span><br><span class="hljs-meta">#</span><span class="bash">补充: 数据库初始化过程 mysql_install_db</span><br>	<br>--basedir=path       The path to the MariaDB installation directory.<br>	                     #指定mysql程序目录<br>--datadir=path       The path to the MariaDB data directory.<br>	                     #指定数据信息保存的目录<br>--user=mysql             #让mysql管理数据目录  700	<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+<p><strong>创建数据库的密码信息:</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">/application/mysql/bin/mysqladmin -u root      password <span class="hljs-string">&#x27;new-password&#x27;</span>  <span class="hljs-comment"># 给本地数据库设置密码</span><br>/application/mysql/bin/mysqladmin -u root -h web01 password <span class="hljs-string">&#x27;new-password&#x27;</span>  <span class="hljs-comment"># 给远程数据库设置密码</span><br><br>mysqladmin -u root  password <span class="hljs-string">&#x27;xin123&#x27;</span>    --- 设置密码  	<br>mysql -u root -pxin123<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>启动数据库服务</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">systemctl start mariadb.service <br>systemctl enable mariadb.service<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+
+
+<h2 id="4-PHP服务部署流程"><a href="#4-PHP服务部署流程" class="headerlink" title="4. PHP服务部署流程"></a>4. PHP服务部署流程</h2><br>
+
+<h3 id="4-1-更新-源卸载系统自带的PHP软件"><a href="#4-1-更新-源卸载系统自带的PHP软件" class="headerlink" title="4.1 更新 源卸载系统自带的PHP软件"></a>4.1 更新 源卸载系统自带的PHP软件</h3><p>​    <br></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">yum remove php-mysql php php-fpm php-common	<br>rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm<br>rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="4-2-安装-PHP"><a href="#4-2-安装-PHP" class="headerlink" title="4.2 安装 PHP"></a>4.2 安装 PHP</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">yum install -y php71w php71w-cli php71w-common php71w-devel php71w-embedded php71w-gd php71w-mcrypt php71w-mbstring php71w-pdo php71w-xml php71w-fpm php71w-mysqlnd php71w-opcache php71w-pecl-memcached php71w-pecl-redis php71w-pecl-mongodb<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="4-3-编写配置文件"><a href="#4-3-编写配置文件" class="headerlink" title="4.3 编写配置文件"></a>4.3 编写配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs BASH">vim /etc/php-fpm.d/www.conf<br>user = www  <br>group = www<br><span class="hljs-comment">#保证nginx进程的管理用户和php服务进程的管理用户保持一致</span><br>systemctl start php-fpm <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>LNMP 服务间调用图</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-1.png" srcset="/img/loading.gif" lazyload alt="LNMP-1"></p>
+<br>
+
+
+
+<p>Nginx 通过location匹配以PHP结尾的文件，调用Fastcgi接口执行fastcgi_pass 命令发送给PHP的php-fam进程接收，wrapper进程进行处理，处理后在原路返回给nginx最后客户端可以看到动态页面，如果需要调用数据库在通过php解析器解析成sql语句与数据库进行调用数据操作。最后生成动态页面返回给nginx客户端可以看到页面。</p>
+ <br>
+
+
+
+<p><strong>调用流程</strong></p>
+<p>用户访问网站 — &gt; nginx(fastcgi_pass) –  FastCGI–&gt;  (php-fpm – wrapper) php (php解析器) —&gt;  mysql(读取或写入)</p>
+ <br>
+
+ <br>
+
+<h2 id="5-实现-LNMP-架构服务之间建立关系"><a href="#5-实现-LNMP-架构服务之间建立关系" class="headerlink" title="5. 实现 LNMP 架构服务之间建立关系"></a>5. 实现 LNMP 架构服务之间建立关系</h2> <br>
+
+<p>Nginx无法直接 和 数据库建立联系，因此要先和PHP 建立关系。</p>
+ <br>
+
+<h3 id="5-1-实现-Nginx与-PHP-建立关系"><a href="#5-1-实现-Nginx与-PHP-建立关系" class="headerlink" title="5.1 实现 Nginx与 PHP 建立关系"></a>5.1 实现 Nginx与 PHP 建立关系</h3><p><strong>编写 nginx 配置文件</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">location</span> <span class="hljs-regexp">~ \.php$</span> &#123; <br><span class="hljs-attribute">root</span> /www; <br><span class="hljs-attribute">fastcgi_index</span> index.php;  <br><span class="hljs-attribute">fastcgi_param</span> SCRIPT_FILENAME $document_root$fastcgi_script_name; <br><span class="hljs-attribute">fastcgi_pass</span> <span class="hljs-number">127.0.0.1:9000</span>; <br><span class="hljs-attribute">include</span> fastcgi_params;  <span class="hljs-comment">#变量配置文件 </span><br> &#125; <br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">systemctl</span> nginx restart <span class="hljs-comment">#重启服务</span><br><br>server &#123;<br><span class="hljs-attribute">server_name</span> ryanxin.com<br>rewrite<span class="hljs-regexp"> ^/(.*)</span> http://www.ryanxin.com/<span class="hljs-variable">$1</span> <span class="hljs-literal">permanent</span>;<br>&#125;<br><br><span class="hljs-section">server</span> &#123;<br>    <span class="hljs-attribute">listen</span>   <span class="hljs-number">80</span>;<br>    <span class="hljs-attribute">server_name</span> www.ryanxin.com;<br>    <span class="hljs-attribute">error_page</span>  <span class="hljs-number">500</span> <span class="hljs-number">502</span> <span class="hljs-number">503</span> <span class="hljs-number">504</span> /50x.html;<br>    <span class="hljs-attribute">location</span> /&#123;<br>        <span class="hljs-attribute">root</span> /html/bbs;<br>        <span class="hljs-attribute">index</span> index.html;<br>    &#125;<br>    <br>   <span class="hljs-attribute">location</span> <span class="hljs-regexp">~ \.php$</span> &#123; <br>               <span class="hljs-attribute">root</span> /bbs; <br>               <span class="hljs-attribute">fastcgi_index</span> index.php;  <br>               <span class="hljs-attribute">fastcgi_param</span> SCRIPT_FILENAME $document_root$fastcgi_script_name; <br>               <span class="hljs-attribute">fastcgi_pass</span> <span class="hljs-number">127.0.0.1:9000</span>; <br>               <span class="hljs-attribute">include</span> fastcgi_params;   <br>    &#125;   <br> &#125; <br></code></pre></td></tr></table></figure>
+
+
+
+<p> <br> <br></p>
+<h3 id="5-2-编写动态资源文件测试页面"><a href="#5-2-编写动态资源文件测试页面" class="headerlink" title="5.2 编写动态资源文件测试页面"></a>5.2 编写动态资源文件测试页面</h3> <br>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php">vim /html/blog/test_php.php  <br><span class="hljs-meta">&lt;?php</span> <br>phpinfo(); <br><span class="hljs-meta">?&gt;</span> <br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>浏览器输入地址进行访问测试</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.ryanxin.com/">http://www.ryanxin.com/index.php</a></p>
+<p><strong>注意</strong> ： 要在本地Host文件手动添加域名地址，才能实现本地域名解析访问。</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-3.png" srcset="/img/loading.gif" lazyload alt="LNMP-3"></p>
+ <br>
+
+ <br>
+
+<h2 id="6-实现-PHP-与数据库建立关系"><a href="#6-实现-PHP-与数据库建立关系" class="headerlink" title="6. 实现 PHP 与数据库建立关系"></a>6. 实现 PHP 与数据库建立关系</h2> <br>
+
+<h3 id="6-1-编写-PHP-连接数据库测试文件"><a href="#6-1-编写-PHP-连接数据库测试文件" class="headerlink" title="6.1 编写 PHP 连接数据库测试文件"></a>6.1 编写 PHP 连接数据库测试文件</h3> <br>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment"># vim test_mysql.php </span><br><br><span class="hljs-meta">&lt;?php</span> <br><span class="hljs-variable">$servername</span> = <span class="hljs-string">&quot;localhost&quot;</span>; <br><span class="hljs-variable">$username</span> = <span class="hljs-string">&quot;root&quot;</span>; <br><span class="hljs-variable">$password</span> = <span class="hljs-string">&quot;oldboy123&quot;</span>; <br><span class="hljs-comment">//$link_id=mysql_connect(&#x27;主机名&#x27;,&#x27;用户&#x27;,&#x27;密码&#x27;); </span><br><span class="hljs-comment">//mysql -u用户 -p密码 -h 主机 </span><br><span class="hljs-variable">$conn</span> = mysqli_connect(<span class="hljs-variable">$servername</span>, <span class="hljs-variable">$username</span>, <span class="hljs-variable">$password</span>); <br><span class="hljs-keyword">if</span>(<span class="hljs-variable">$conn</span>) &#123; <br><span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;mysql successful by root !\n&quot;</span>; <br>&#125;<span class="hljs-keyword">else</span>&#123; <br><span class="hljs-keyword">die</span>(<span class="hljs-string">&quot;Connection failed: &quot;</span> . mysqli_connect_error());  <br>&#125; <br><span class="hljs-meta">?&gt;</span> <br></code></pre></td></tr></table></figure>
+
+ <br>
+
+ <br>
+
+<h3 id="6-2-访问测试"><a href="#6-2-访问测试" class="headerlink" title="6.2 访问测试"></a>6.2 访问测试</h3><p><a target="_blank" rel="noopener" href="https://www.ryanxin.com/">http://www.ryanxin.com/test_mysql.php</a></p>
+<p><strong>如果连接成功</strong> ：提示 Mysql successful by root！ </p>
+<p>失败则提示报错信息</p>
+<br>
+
+ <br>
+
+<h2 id="7-部署搭建网站页面-代码上线"><a href="#7-部署搭建网站页面-代码上线" class="headerlink" title="7. 部署搭建网站页面 代码上线"></a>7. 部署搭建网站页面 代码上线</h2> <br>
+
+<h3 id="7-1-常用的开源源码网站"><a href="#7-1-常用的开源源码网站" class="headerlink" title="7.1 常用的开源源码网站"></a>7.1 常用的开源源码网站</h3> <br>
+
+<ul>
+<li>​    <strong>主站网站页面</strong>: <a target="_blank" rel="noopener" href="http://www.dedecms.com/">http://www.dedecms.com/</a></li>
+<li>​    <strong>论坛网站页面</strong>: <a target="_blank" rel="noopener" href="http://www.discuz.net/forum.php">http://www.discuz.net/forum.php</a></li>
+<li>​    <strong>博客网站页面</strong>: <a target="_blank" rel="noopener" href="https://cn.wordpress.org/">https://cn.wordpress.org/</a></li>
+<li>​    <strong>知乎类型网站页面</strong>: <a target="_blank" rel="noopener" href="http://www.wecenter.com/?copyright">http://www.wecenter.com/?copyright</a></li>
+</ul>
+ <br>
+
+<h3 id="7-3-将源码解压后放入到站点目录中"><a href="#7-3-将源码解压后放入到站点目录中" class="headerlink" title="7.3 将源码解压后放入到站点目录中"></a>7.3 将源码解压后放入到站点目录中</h3> <br>
+
+<p>这里演示的是 <a target="_blank" rel="noopener" href="https://cn.wordpress.org/">Wordpress</a> 博客系统</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">tar xf wordpress-5.2.1.tar.gz<br>mv ./* /html/bbs<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>修改站点目录权限</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">chown -R www.www blog<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+ <br>
+
+<h3 id="7-4-进行网站页面初始化操作"><a href="#7-4-进行网站页面初始化操作" class="headerlink" title="7.4 进行网站页面初始化操作"></a>7.4 进行网站页面初始化操作</h3> <br>
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-4.png" srcset="/img/loading.gif" lazyload alt="LNMP-4"></p>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-5.png" srcset="/img/loading.gif" lazyload alt="LNMP-5"><br><br></p>
+<h3 id="7-5-对数据库服务进行配置"><a href="#7-5-对数据库服务进行配置" class="headerlink" title="7.5 对数据库服务进行配置"></a>7.5 对数据库服务进行配置</h3><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--创建数据库</span><br><span class="hljs-keyword">create</span> databases wordpress;  <br><br><span class="hljs-comment">--检查</span><br><span class="hljs-keyword">show</span> databases;<br><br><span class="hljs-comment">--创建数据库管理用户: </span><br><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> wordpress.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> <span class="hljs-string">&#x27;wordpress&#x27;</span>@<span class="hljs-string">&#x27;localhost&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;xin123&#x27;</span>;<br><br><span class="hljs-comment">--检查</span><br><span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>,host <span class="hljs-keyword">from</span> mysql.user <br><br><span class="hljs-comment">--优化: 删除无用的用户信息</span><br><br><span class="hljs-keyword">delete</span> <span class="hljs-keyword">from</span> mysql.user <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span><span class="hljs-operator">=</span>&quot;&quot; <span class="hljs-keyword">and</span> host<span class="hljs-operator">=</span>&quot;localhost&quot;;<br><span class="hljs-keyword">delete</span> <span class="hljs-keyword">from</span> mysql.user <span class="hljs-keyword">where</span> <span class="hljs-keyword">user</span><span class="hljs-operator">=</span>&quot;&quot; <span class="hljs-keyword">and</span> host<span class="hljs-operator">=</span>&quot;web01&quot;;<br><br>flush privileges; <br><br><span class="hljs-comment">--刷新</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>利用blog网站发布博文</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-LinuxLNMP-6.png" srcset="/img/loading.gif" lazyload alt="LNMP-6"></p>
+<br>
+
+<h2 id="8-常见问题解决"><a href="#8-常见问题解决" class="headerlink" title="8. 常见问题解决"></a>8. 常见问题解决</h2><p><strong>上传wordpress主题,报413错误,如何解决?</strong></p>
+<p>1.修改nginx配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim blog.conf<br>server &#123;<br>client_max_body_size 50m;  #指定用户上传数据的大小限制(默认1M)	<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<ol>
+<li>修改php.ini配置文件</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">upload_max_filesize = 50M   #使PHP接收用户上传的更大的数据(默认2M)<br></code></pre></td></tr></table></figure>
+
+
+
+ <br>
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E8%AF%BE%E7%A8%8B%E5%AE%9E%E6%88%98/">课程实战</a>
+                    
+                      <a class="hover-with-bg" href="/tags/LNMP/">LNMP</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/11/21/Linux%E7%9A%84%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Linux的目录结构特点</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/11/20/Keepalived%20%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2/">
+                        <span class="hidden-mobile">Keepalived 高可用服务部署</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

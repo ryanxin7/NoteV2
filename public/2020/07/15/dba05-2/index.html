@@ -1,0 +1,870 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="InnoDB 核心特性[[toc]] 1. 事务  事务保证金融交易类服务的安全性完整性和公平性。   1.1 事务的 ACID 特性     Atomic（原子性）  所有语句作为一个单元全部成功执行或全部取消。不能出现中间状态。  Consistent（一致性）  如果数据库在事务开始时处于一致状态，则在执行该事务期间将保留一致状态。  Isolated（隔离性）  事务之间不相互影响。  D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InnoDB 核心特性">
+<meta property="og:url" content="http://example.com/2020/07/15/dba05-2/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="InnoDB 核心特性[[toc]] 1. 事务  事务保证金融交易类服务的安全性完整性和公平性。   1.1 事务的 ACID 特性     Atomic（原子性）  所有语句作为一个单元全部成功执行或全部取消。不能出现中间状态。  Consistent（一致性）  如果数据库在事务开始时处于一致状态，则在执行该事务期间将保留一致状态。  Isolated（隔离性）  事务之间不相互影响。  D">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-5.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-6.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-7.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-8.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-9.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-9.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-10.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-11.png">
+<meta property="article:published_time" content="2020-07-15T15:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.446Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-1.png">
+  
+  <title>InnoDB 核心特性 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="InnoDB 核心特性">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-15 23:13" pubdate>
+        2020年7月15日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      5k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      16 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">InnoDB 核心特性</h1>
+            
+            <div class="markdown-body">
+              <h1 id="InnoDB-核心特性"><a href="#InnoDB-核心特性" class="headerlink" title="InnoDB 核心特性"></a>InnoDB 核心特性</h1><p>[[toc]]</p>
+<h2 id="1-事务"><a href="#1-事务" class="headerlink" title="1. 事务"></a>1. 事务</h2><br>
+
+<p>事务保证金融交易类服务的安全性完整性和公平性。</p>
+<br>
+
+<h3 id="1-1-事务的-ACID-特性"><a href="#1-1-事务的-ACID-特性" class="headerlink" title="1.1 事务的 ACID 特性"></a>1.1 事务的 ACID 特性</h3><br>
+
+
+
+<ul>
+<li><strong>Atomic（原子性）</strong></li>
+</ul>
+<p>所有语句作为一个单元全部成功执行或全部取消。不能出现中间状态。</p>
+<ul>
+<li><strong>Consistent（一致性）</strong></li>
+</ul>
+<p>如果数据库在事务开始时处于一致状态，则在执行该事务期间将保留一致状态。</p>
+<ul>
+<li><strong>Isolated（隔离性）</strong></li>
+</ul>
+<p>事务之间不相互影响。</p>
+<ul>
+<li><strong>Durable（持久性）</strong></li>
+</ul>
+<p>事务成功完成后，所做的所有更改都会准确地记录在数据库中。所做的更改不会丢失。</p>
+<p>断电时，也会在磁盘上永久保存，事务的完整性</p>
+<br>
+
+<h3 id="1-2-事务控制语句"><a href="#1-2-事务控制语句" class="headerlink" title="1.2 事务控制语句"></a>1.2 事务控制语句</h3><br>
+
+<p><strong>(1)</strong> <strong>如何开启事务</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span> ;<br><span class="hljs-keyword">start</span> transaction；<br></code></pre></td></tr></table></figure>
+
+<p><strong>(2)</strong> <strong>标准的事务语句</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql">DML : <br><span class="hljs-keyword">insert</span> <br>update <br><span class="hljs-keyword">delete</span><br>mysql<span class="hljs-operator">&gt;</span> use world;<br>mysql<span class="hljs-operator">&gt;</span> update city <span class="hljs-keyword">set</span> countrycode<span class="hljs-operator">=</span><span class="hljs-string">&#x27;CHN&#x27;</span> <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span>;<br>mysql<span class="hljs-operator">&gt;</span> update city <span class="hljs-keyword">set</span> countrycode<span class="hljs-operator">=</span><span class="hljs-string">&#x27;CHN&#x27;</span> <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">2</span>;<br>mysql<span class="hljs-operator">&gt;</span> update city <span class="hljs-keyword">set</span> countrycode<span class="hljs-operator">=</span><span class="hljs-string">&#x27;CHN&#x27;</span> <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">3</span>;<br></code></pre></td></tr></table></figure>
+
+<p><strong>(3) 事务的结束</strong> </p>
+<p> 正常的结束有两种，只能回滚未提交的事务</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--提交:</span><br><span class="hljs-keyword">commit</span>;<br><br><span class="hljs-comment">--回滚:</span><br><span class="hljs-keyword">rollback</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<h3 id="1-3-事务自动提交机制-（autocommit）"><a href="#1-3-事务自动提交机制-（autocommit）" class="headerlink" title="1.3 事务自动提交机制 （autocommit）"></a>1.3 事务自动提交机制 （autocommit）</h3><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> @<span class="hljs-variable">@autocommit</span>;<br><span class="hljs-operator">+</span><span class="hljs-comment">--------------+</span><br><span class="hljs-operator">|</span> @<span class="hljs-variable">@autocommit</span> <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">--------------+</span><br><span class="hljs-operator">|</span>      <span class="hljs-number">1</span> <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">--------------+ </span><br></code></pre></td></tr></table></figure>
+
+<p><strong>在线修改参数:</strong></p>
+<p><strong>(1) 会话级别:</strong> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> autocommit<span class="hljs-operator">=</span><span class="hljs-number">0</span>;<br><span class="hljs-comment">--及时生效,只影响当前登录会话</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>(2)全局级别:</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">global</span> autocommit<span class="hljs-operator">=</span><span class="hljs-number">0</span>; <br><span class="hljs-comment">--断开窗口重连后生效,影响到所有新开的会话</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>(3)永久修改(重启生效)</strong> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">vim <span class="hljs-operator">/</span>etc<span class="hljs-operator">/</span>my.cnf  <span class="hljs-comment">--修改配置文件</span><br>autocommit<span class="hljs-operator">=</span><span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<h3 id="1-4-隐式提交的情况"><a href="#1-4-隐式提交的情况" class="headerlink" title="1.4  隐式提交的情况"></a>1.4  <strong>隐式提交的情况</strong></h3><p><strong>触发隐式提交的语句</strong></p>
+<p><strong>导致提交的非事务语句：</strong></p>
+<p>DDL语句： （ALTER、CREATE 和 DROP）</p>
+<p>DCL语句： （GRANT、REVOKE 和 SET PASSWORD）</p>
+<p>锁定语句：（LOCK TABLES 和 UNLOCK TABLES）</p>
+<p><strong>导致隐式提交的语句示例：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">TRUNCATE</span> <span class="hljs-keyword">TABLE</span>   <span class="hljs-comment">--清除表数据</span><br>LOAD DATA INFILE <span class="hljs-comment">--导入</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">FOR</span> UPDATE <span class="hljs-comment">--查询更新</span><br></code></pre></td></tr></table></figure>
+
+
+<br>
+
+<h2 id="2-事务的ACID-特性如何保证"><a href="#2-事务的ACID-特性如何保证" class="headerlink" title="2. 事务的ACID 特性如何保证"></a>2. 事务的ACID 特性如何保证</h2><br>
+
+
+
+<h3 id="2-1-相关概念名词-（初步了解）"><a href="#2-1-相关概念名词-（初步了解）" class="headerlink" title="2.1 相关概念名词 （初步了解）"></a>2.1 相关概念名词 （初步了解）</h3><br>
+
+<table>
+<thead>
+<tr>
+<th>相关名词</th>
+<th>作用注释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Redo log</td>
+<td>重做日志，默认设置两个文件 ib_logfile0~1 默认大小50M，轮询使用</td>
+</tr>
+<tr>
+<td>Redo log buffer</td>
+<td>Redo log 的内存区域</td>
+</tr>
+<tr>
+<td>IBD</td>
+<td>用于存储 数据行和索引</td>
+</tr>
+<tr>
+<td>Data butter pool</td>
+<td>对应IBD 文件，缓冲区池，数据行和索引的缓存区</td>
+</tr>
+<tr>
+<td>LSN</td>
+<td>日志的序列号，类似Git 版本号。数据库启动,会比较<strong>磁盘数据页和redo log的LSN,两者一致才能正常启动</strong></td>
+</tr>
+<tr>
+<td>WAL</td>
+<td>日志优先写，Write Ahead Log 日志优先写的方式实现持久化,<strong>日志是优先于数据写入磁盘的</strong></td>
+</tr>
+<tr>
+<td>脏页</td>
+<td>内存中发生了修改,<strong>没写入到磁盘之前</strong>,我们把内存页称之为脏页</td>
+</tr>
+<tr>
+<td>CKPT</td>
+<td>Check Point 检查点,就是将<strong>脏页刷写到磁盘的动作</strong></td>
+</tr>
+<tr>
+<td>TXID</td>
+<td>事务号,InnoDB会为每一个事务生成一个事务号,伴随着整个事务</td>
+</tr>
+</tbody></table>
+<br>
+
+<h3 id="2-2-事务日志——-Redo-重做日志"><a href="#2-2-事务日志——-Redo-重做日志" class="headerlink" title="2.2 事务日志—— Redo 重做日志"></a>2.2 事务日志—— Redo 重做日志</h3><br>
+
+<h4 id="2-2-1-重做日志的作用"><a href="#2-2-1-重做日志的作用" class="headerlink" title="2.2.1 重做日志的作用:"></a>2.2.1 <strong>重做日志的作用:</strong></h4><p>保证事务的 “D” 持久性 , A 原子性和C 一致性也有一定得作用</p>
+<p><strong>（1） 记录了内存数据页的变化</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-1.png" srcset="/img/loading.gif" lazyload alt="rodo1"></p>
+<br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-2.png" srcset="/img/loading.gif" lazyload alt="rodo2"></p>
+<br>
+
+<br>
+
+<br>
+
+<p><strong>一次 update语句 的事务处理过程：</strong></p>
+<br>
+
+<ul>
+<li>首先把数据从硬盘调到内存中  （ 因为默认使用<strong>innodb</strong>存储引擎有段区页的概念 ，不能只向内存调用修改的1行数据，而是把16kb的数据页调到内存中。）    带着原本A=1数据 ，在执行 update语句后 在内存中改成了被 A=2  。</li>
+<li>按照正常思路数据修改完就要从内存写回到硬盘，但是MySQL 觉着这样操作过于低效就研发了 redo日志 ，执行 update 语句的变化的同时记录 redo日志 。（redo 负责记录内存中数据页发生的变化）记录 A从1变成 2的过程日志。</li>
+<li>commit 命令 事务提交完成时把 redo 日志写入到磁盘中，并在内存占用到达一定阈值后刷写内存中的数据到硬盘。</li>
+</ul>
+<br>
+
+<br>
+
+<p><strong>把日志提交到磁盘</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-3.png" srcset="/img/loading.gif" lazyload alt="rodo1"></p>
+<br>
+
+<p><strong>(2) 提供快速的持久化功能(WAL)</strong></p>
+<br>
+
+<p>日志优先写机制，可以间接的保证已经提交过的事务不会在丢失。根据日志构造或重做出来（前滚）。</p>
+<br>
+
+<p>::: tip Redo 的工作理念</p>
+<p><strong>Redo log 最核心的功能</strong> 就是保证数据持久化时性能更高、更快速，只需要把 Redo log 写入磁盘就能保证事务不丢失。</p>
+<p><strong>前滚操作</strong>：服务器断电时内存数据丢失 ，会把硬盘数据重新调入到内存根据redo log重做一遍还原之前的内存中的数据</p>
+<p><strong>触发阈值</strong>：比如内存使用率达到75% 数据写入磁盘</p>
+<p>:::</p>
+<br>
+
+<p><strong>Redo log 缺陷</strong>：断电后数据库下次启动时如何知道 Redo log 是否是新的？</p>
+<br>
+
+<p><strong>A=1 —-&gt; A=2 101——&gt; 102</strong> </p>
+<p>在数据页 、redo日志、 内存数据 、redo buffer 均有LSN号码。例如：数据原始LSN号为101 ，带到内存中变化后LSN号码就变成102。  redo buffer 也是102  redo log 中LSN号也是102 。</p>
+<br>
+
+<br>
+
+<p><strong>(3) CSR过程中实现前滚的操作</strong> </p>
+<p>磁盘数据页和 redo日志 LSN 号要一致数据库服务才能启动，原始LSN号为101 ，带到内存中变化后LSN号码就变成102。  redo buffer 也是102  redo log 中LSN号也是102 。</p>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-4.png" srcset="/img/loading.gif" lazyload alt="CSR1"></p>
+<br>
+
+<p><strong>前滚操作：</strong></p>
+ <br>
+
+<ol>
+<li>重启发现 redo log LSN号比 数据 LSN号  不一样  ， redo 的 LSN 号较新</li>
+<li>这时原始数据 和 redo日志被加载到内存通过日志记录变化构造脏页</li>
+<li> InnoDB 存储引擎立即触发 CKPT 立即把内存中的数据写入到磁盘</li>
+<li>此时 两个LSN号就一样了可以正常启动</li>
+</ol>
+<p><strong>在启动时必须保证 redo日志文件和数据文件 LSN号 必须一致, 如果不一致就会触发 CSR最终保证一致。</strong></p>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-5.png" srcset="/img/loading.gif" lazyload alt="前滚操作示意图"></p>
+<br>
+
+<br>
+
+<h4 id="2-2-2-Redo-日志位置"><a href="#2-2-2-Redo-日志位置" class="headerlink" title="2.2.2 Redo 日志位置"></a>2.2.2 Redo 日志位置</h4><br>
+
+<p><strong>Redo的日志文件名</strong>：iblogfile0 iblogfile1… 可以设置多个文件轮询记录</p>
+<p><strong>Redo buffer</strong>: 数据页的变化信息+数据页当时的LSN号</p>
+<br>
+
+<br>
+
+<h4 id="2-2-3-Redo的刷写策略"><a href="#2-2-3-Redo的刷写策略" class="headerlink" title="2.2.3 Redo的刷写策略"></a>2.2.3 Redo的刷写策略</h4><br>
+
+<p>commit 提交事务后刷新当前事务的 redo buffer到磁盘</p>
+<p>还会顺便将一部分 redo buffer中没有提交的事务日志也刷新到磁盘</p>
+<p>MySQL 在启动时,必须保证redo日志文件和数据文件LSN必须一致, 如果不一致就会触发CSR,最终保证一致</p>
+<br>
+
+<br>
+
+<p><strong>情况一：</strong></p>
+<p>我们做了一个完整的事务过程 begin; update; commit。</p>
+<br>
+
+<ol>
+<li>在begin开始一个事务后 ,会立即分配一个TXID=tx_01</li>
+<li>update时,会将需要修改的数据页(dp_01,LSN=101),加载到data buffer中</li>
+<li>DBWR线程,会进行dp_01数据页修改更新,并更新LSN=102</li>
+<li>LOGBWR日志写线程,会将dp_01数据页的变化+LSN+TXID存储到redobuffer</li>
+<li>执行 commit时,LGWR日志写线程会将redobuffer信息写入redolog日志文件中,基于WAL原则,</li>
+<li>在日志完全写入磁盘后,commit命令才执行成功,(会将此日志打上commit标记)</li>
+<li>假如此时宕机,内存脏页没有来得及写入磁盘,内存数据全部丢失</li>
+<li>MySQL再次重启时,必须要redolog和磁盘数据页的LSN是一致的.但是,此时dp_01,TXID=tx_01磁盘是LSN=101,dp_01,TXID=tx_01,redolog中LSN=102</li>
+<li>MySQL此时无法正常启动,MySQL触发CSR.在内存追平LSN号,触发ckpt,将内存数据页更新到磁盘,从而保证磁盘数据页和redolog LSN一值.这时MySQL正长启动</li>
+</ol>
+<br>
+
+<p><strong>以上的工作过程,我们把它称之为基于 REDO 的”前滚操作”</strong></p>
+<br>
+
+<br>
+
+<h3 id="2-3-Undo-日志说明"><a href="#2-3-Undo-日志说明" class="headerlink" title="2.3 Undo 日志说明"></a>2.3 Undo 日志说明</h3><br>
+
+<p>Undo 回滚日志主要作用于<strong>事务在未提交时断电的情况</strong>。</p>
+<br>
+
+<h4 id="2-3-1-Undo-日志作用"><a href="#2-3-1-Undo-日志作用" class="headerlink" title="2.3.1 Undo 日志作用"></a><strong>2.3.1 Undo 日志作用</strong></h4><p>在 ACID特性中,主要保证A 原子性 的特性,同时对C一致性 I  隔离性 也有一定功效</p>
+<br>
+
+<p><strong>(1) 记录了数据修改之前的状态    在数据调用到内存中的同时。</strong><br><br><strong>(2) rollback 将内存的数据修改恢复到修改之前。</strong></p>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-6.png" srcset="/img/loading.gif" lazyload alt="回滚操作示意图"></p>
+<p><strong>(3) 在CSR中实现未提交数据的回滚操作</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-7.png" srcset="/img/loading.gif" lazyload alt="回滚操作示意图2"></p>
+<p><strong>(4) 实现一致性快照,配合隔离级别保证多版本并发控制 MVCC ,实现读和写的操作不会互相阻塞。</strong></p>
+<br>
+
+<br>
+
+<h4 id="2-3-2-回滚操作过程"><a href="#2-3-2-回滚操作过程" class="headerlink" title="2.3.2 回滚操作过程"></a>2.3.2 回滚操作过程</h4><p>硬盘数据调用到内存 同时 记录记录了数据修改之前的状态到undo log a=1 txid=t1 ，数据在内存中发生改变后记录到redo buffer。</p>
+<br>
+
+<p><strong>这时有两种情况</strong>：</p>
+<p><strong>第一种情况：</strong></p>
+<p>内存中发生了更改但是未提交 Redo log 还未写到硬盘就断电了</p>
+<p>此时，Redo log 的LSN号 为101 txid=t0</p>
+<p>数据库重启扫描到 Undo 日志LSN号却为 t1，这时直接丢掉 Undo 日志进行回滚，事务还原到未做更改之前。</p>
+<br>
+
+<p><strong>第二种情况</strong>：</p>
+<p>Redo log  被其他事务顺带写入磁盘中，此时 LSN号变为102 TXID=T1  但是事务标记未提交状态。</p>
+<p>数据库服务重启会对比 ibd文件和 redo 文件 构建脏页 进行前滚操作</p>
+<p>由于事务标记处于未提交状态 ，触发CSR 第二阶段</p>
+<p>Redo T1的事务编号找到 undo log 加载之前的状态，回滚恢复到事务未提交之前的状态 ，最终保证所有的LSN号都一样</p>
+<p>并丢失当前的变更。</p>
+<h3 id="2-4-锁"><a href="#2-4-锁" class="headerlink" title="2.4 锁"></a>2.4 锁</h3><br>
+
+<p>实现了事务之间的隔离功能, InnoDB存储引擎中实现的是行级锁。</p>
+<p>这里以厕所举例，InnoDB就相当于你去厕所只锁你蹲坑的那个门，而老版本 <strong>MyISAM</strong> 就相当于你去厕所把厕所大门给锁上了。</p>
+ <br>
+
+<p><strong>row-level lock</strong> 行级锁定，默认超时时间为50秒达到时间回滚事务，作用是控制同一行数据的操作等待事务提交后才能修改默认超时时间50秒。</p>
+ <br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/section5-3-8.png" srcset="/img/loading.gif" lazyload alt="锁"></p>
+ <br>
+
+<ul>
+<li><strong>GAP</strong>      间隙锁</li>
+<li><strong>Next-lock</strong> 下一级锁 锁定范围 防止幻读情况 隔离性</li>
+</ul>
+ <br>
+
+<h3 id="2-5-隔离级别"><a href="#2-5-隔离级别" class="headerlink" title="2.5 隔离级别"></a>2.5 隔离级别</h3> <br>
+
+<h4 id="2-5-1-四种隔离级别"><a href="#2-5-1-四种隔离级别" class="headerlink" title="2.5.1 四种隔离级别"></a>2.5.1 四种隔离级别</h4> <br>
+
+<p><strong>（1）RU  : 读未提交,可脏读,一般部议叙出现</strong></p>
+<p>没提交就被看见结果了 可脏读</p>
+ <br>
+
+<p><strong>RC  : 读已提交,可能出现幻读,可以防止脏读.</strong> </p>
+<p>每次读取的都是最新的数据，让人迷惑到底哪个结果是正确的  在金融类业务中是不允许的 幻读 ，银行在截止统计时间内的事务的结果不能是来回变动的。需要准确度极高 </p>
+<p> 例如：统计时间点截止23：59：59秒这个点进行统计 查询需要持续10分钟 ，在这查询的10分钟内 不能在查询过程中出现新的变化导致数值变化。</p>
+ <br>
+
+<p><strong>RR  : 可重复读</strong></p>
+<p>功能是防止”幻读”现象 ,利用的是undo的快照技术+GAP(间隙锁)+NextLock(下键锁)  使用  MVCC   —&gt;   undo 快照 </p>
+<p>使用  MVCC   —&gt;   undo 快照  读数据的时候 mysql窗口 打开的那一刻的数据，不管其他窗口改多少次也不会变，保证不会出现在截止时间点之后的数据</p>
+ <br>
+
+
+
+<p><strong>SR  :</strong> 可串行化,可以防止死锁,但是并发事务性能较差</p>
+ <br>
+
+<p><strong>补充</strong>: 在RC级别下,可以减轻GAP+NextLock锁的问题,但是会出现幻读现象,一般在为了读一致性会在正常select后添加for update语句.但是,请记住执行完一定要commit 否则容易出现所等待比较严重.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> @<span class="hljs-variable">@tx</span>_isolation; <span class="hljs-comment">--查当前隔离级别</span><br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>更改隔离级别：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#客户端配置</span><br>transaction_isolation=read-uncommitted<br>transaction_isolation=read-committed<br>transaction_isolation=REPEATABLE-READ<br>transaction_isolation=Serializable<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-9.png" srcset="/img/loading.gif" lazyload alt="隔离级别"></p>
+<p><strong>小结</strong>：</p>
+<ul>
+<li>RU 会出现脏读 , </li>
+<li>RC 会出现不可重复读每次读结果不一样 ,也会出现幻读. </li>
+<li>RR 通过MVCC基础解决了不可重复读,但是有可能会出现幻读现象，可以通过 锁GAP和NEXT-lock 进行避免</li>
+<li>在RR模式下,GAP和Next-lock进行避免幻读现象,必须索引支持</li>
+</ul>
+ <br>
+
+<p><strong>如何避免出现幻读 ?</strong></p>
+<p>RR级别 + 锁</p>
+<p>例如：在数据插入时限制大于2的范围锁定不允许插入 （GAP锁和Next-lock锁 不会锁定数据行  只会锁定那一列的索引键值）</p>
+<p>锁定5-8 的范围称之为 GAP锁又叫间隙锁。</p>
+<p>锁定 2-最大值的范围称之为  Next-lock   8 以后 9 10 ……  的数据都不能插入，称为下一级锁。</p>
+ <br>
+
+
+
+<p><strong>建立索引</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-9.png" srcset="/img/loading.gif" lazyload alt="锁级别"></p>
+ <br>
+
+<p><strong>正在更新数据</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-10.png" srcset="/img/loading.gif" lazyload alt="锁级别2"></p>
+ <br>
+
+<p><strong>这时另一终端插入数据，进行锁等待，只能在 第二个终端提交后才能插入</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section5-3-11.png" srcset="/img/loading.gif" lazyload alt="锁级别3"></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/15/dba05-3/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">InnoDB 核心参数介绍</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/15/dba04-2/">
+                        <span class="hidden-mobile">索引原理介绍创建与执行计划分析</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

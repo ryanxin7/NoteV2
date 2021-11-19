@@ -1,0 +1,871 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="MHA 高可用部署[[toc]] 1.搭建MHA  (1) 配置关键程序软连接 12ln -s &#x2F;data&#x2F;mysql&#x2F;bin&#x2F;mysqlbinlog    &#x2F;usr&#x2F;bin&#x2F;mysqlbinlogln -s &#x2F;data&#x2F;mysql&#x2F;bin&#x2F;mysql          &#x2F;usr&#x2F;bin&#x2F;mysql    因为MHA软件里面默认路径就是&#x2F;usr&#x2F;bin下。   (2) 配置互信 db01： 12">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MHA 高可用部署">
+<meta property="og:url" content="http://example.com/2020/07/22/dba09/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="MHA 高可用部署[[toc]] 1.搭建MHA  (1) 配置关键程序软连接 12ln -s &#x2F;data&#x2F;mysql&#x2F;bin&#x2F;mysqlbinlog    &#x2F;usr&#x2F;bin&#x2F;mysqlbinlogln -s &#x2F;data&#x2F;mysql&#x2F;bin&#x2F;mysql          &#x2F;usr&#x2F;bin&#x2F;mysql    因为MHA软件里面默认路径就是&#x2F;usr&#x2F;bin下。   (2) 配置互信 db01： 12">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-5.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-6.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-7.png">
+<meta property="article:published_time" content="2020-07-21T18:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.460Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta property="article:tag" content="MHA">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-1.png">
+  
+  <title>MHA 高可用部署 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="MHA 高可用部署">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-22 02:13" pubdate>
+        2020年7月22日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      8.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      27 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MHA 高可用部署</h1>
+            
+            <div class="markdown-body">
+              <hr>
+<h1 id="MHA-高可用部署"><a href="#MHA-高可用部署" class="headerlink" title="MHA 高可用部署"></a>MHA 高可用部署</h1><p>[[toc]]</p>
+<h2 id="1-搭建MHA"><a href="#1-搭建MHA" class="headerlink" title="1.搭建MHA"></a>1.搭建MHA</h2><br>
+
+<p>(1) <strong>配置关键程序软连接</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">ln -s /data/mysql/bin/mysqlbinlog    /usr/bin/mysqlbinlog<br>ln -s /data/mysql/bin/mysql          /usr/bin/mysql<br></code></pre></td></tr></table></figure>
+
+
+
+<p>因为MHA软件里面默认路径就是/usr/bin下。</p>
+<br>
+
+<p>(2) <strong>配置互信</strong></p>
+<p><strong>db01</strong>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh">rm -rf /root/.ssh <br>ssh-keygen<br><span class="hljs-built_in">cd</span> /root/.ssh <br>mv id_rsa.pub authorized_keys<br>scp  -r  /root/.ssh  10.0.0.52:/root <br>scp  -r  /root/.ssh  10.0.0.53:/root <br></code></pre></td></tr></table></figure>
+
+<p><strong>各节点验证</strong></p>
+<br>
+
+<p>db01:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">ssh 10.0.0.51 date<br>ssh 10.0.0.52 date<br>ssh 10.0.0.53 date<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>db02:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">ssh 10.0.0.51 date<br>ssh 10.0.0.52 date<br>ssh 10.0.0.53 date<br></code></pre></td></tr></table></figure>
+
+<p><br>db03:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">ssh 10.0.0.51 date<br>ssh 10.0.0.52 date<br>ssh 10.0.0.53 date<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>(3)安装软件包 (所有节点)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">yum install perl-DBD-MySQL -y<br>rpm -ivh mha4mysql-node-0.56-0.el6.noarch.rpm<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>(4) 在db01主库中创建mha需要的用户</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> privileges <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> mha@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;mha&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>(5) Manager 节点软件安装（db03）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">yum install <span class="hljs-operator">-</span>y perl<span class="hljs-operator">-</span>Config<span class="hljs-operator">-</span>Tiny epel<span class="hljs-operator">-</span><span class="hljs-keyword">release</span> perl<span class="hljs-operator">-</span>Log<span class="hljs-operator">-</span>Dispatch perl<span class="hljs-operator">-</span>Parallel<span class="hljs-operator">-</span>ForkManager perl<span class="hljs-operator">-</span><span class="hljs-type">Time</span><span class="hljs-operator">-</span>HiRes<br>rpm <span class="hljs-operator">-</span>ivh mha4mysql<span class="hljs-operator">-</span>manager<span class="hljs-number">-0.56</span><span class="hljs-number">-0.</span>el6.noarch.rpm<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>(6) 配置文件准备(db03)</p>
+<p>创建配置文件目录</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mkdir -p /etc/mha<br></code></pre></td></tr></table></figure>
+
+<p>创建日志目录</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mkdir -p /var/<span class="hljs-built_in">log</span>/mha/app1<br></code></pre></td></tr></table></figure>
+
+
+<p>​<br>编辑mha配置文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs sh">cat &gt; /etc/mha/app1.cnf &lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">[server default]</span><br><span class="hljs-string">manager_log=/var/log/mha/app1/manager        </span><br><span class="hljs-string">manager_workdir=/var/log/mha/app1            </span><br><span class="hljs-string">master_binlog_dir=/data/binlog       </span><br><span class="hljs-string">user=mha                                   </span><br><span class="hljs-string">password=mha                               </span><br><span class="hljs-string">ping_interval=2</span><br><span class="hljs-string">repl_password=123</span><br><span class="hljs-string">repl_user=repl</span><br><span class="hljs-string">ssh_user=root                               </span><br><span class="hljs-string">[server1]                                   </span><br><span class="hljs-string">hostname=10.0.0.51</span><br><span class="hljs-string">port=3306                                  </span><br><span class="hljs-string">[server2]            </span><br><span class="hljs-string">hostname=10.0.0.52</span><br><span class="hljs-string">port=3306</span><br><span class="hljs-string">[server3]</span><br><span class="hljs-string">hostname=10.0.0.53</span><br><span class="hljs-string">port=3306</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<p>(7)  状态检查(db03)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">masterha_check_ssh  --conf=/etc/mha/app1.cnf <br>masterha_check_repl  --conf=/etc/mha/app1.cnf <br></code></pre></td></tr></table></figure>
+
+<p>(8) 开启MHA(db03)：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">nohup masterha_manager --conf=/etc/mha/app1.cnf --remove_dead_master_conf --ignore_last_failover  &lt; /dev/null&gt; /var/<span class="hljs-built_in">log</span>/mha/app1/manager.log 2&gt;&amp;1 &amp;<br></code></pre></td></tr></table></figure>
+
+<p>(9)  查看MHA状态</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">masterha_check_status --conf=/etc/mha/app1.cnf<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h2 id="2-MHA-架构软件结构说明"><a href="#2-MHA-架构软件结构说明" class="headerlink" title="2. MHA 架构软件结构说明"></a>2. MHA 架构软件结构说明</h2><p><strong>节点规划</strong>:</p>
+<ul>
+<li><p><strong>manager端</strong>: db03</p>
+</li>
+<li><p><strong>node端</strong>: db01,db02,db03 装node软件</p>
+</li>
+<li><p>数据库节点, 必须至少是1主2从,独立数据库实例</p>
+</li>
+<li><p>MHA 管理节点，最好是独立一台机器</p>
+</li>
+</ul>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-1.png" srcset="/img/loading.gif" lazyload alt="MHA节点构架"></p>
+<p>MHA-Manager 管理节点 管理所有数据库节点：</p>
+<p>最终达到目的 管理节点对所有数据库节点进行检测，当主库宕机时</p>
+<br>
+
+<h2 id="3-MHA软件的构成-perl语言"><a href="#3-MHA软件的构成-perl语言" class="headerlink" title="3. MHA软件的构成(perl语言)"></a>3. MHA软件的构成(perl语言)</h2><br>
+
+
+
+<p><strong>Manager 工具包主要包括以下几个工具</strong>：</p>
+<p><code>mha4mysql-manager-0.56-0.el6.noarch.rpm</code></p>
+<p><strong>脚本</strong>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sh">masterha_manger             <span class="hljs-comment">#启动MHA </span><br>masterha_stop --conf=/etc/mha/app1.cnf <span class="hljs-comment">#关闭MHA</span><br>masterha_check_ssh          <span class="hljs-comment">#检查MHA的SSH配置状况 </span><br>masterha_check_repl         <span class="hljs-comment">#检查MySQL复制状况 </span><br>masterha_master_monitor     <span class="hljs-comment">#检测master是否宕机 </span><br>masterha_check_status       <span class="hljs-comment">#检测当前MHA运行状态 </span><br>masterha_master_switch  	<span class="hljs-comment">#控制故障转移（自动或者手动）</span><br>masterha_conf_host      	<span class="hljs-comment">#添加或删除配置的server信息</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>Node工具包主要包括以下几个工具</strong>：</p>
+<p><code>mha4mysql-node-0.56-0.el6.noarch.rpm</code></p>
+<p>这些工具通常由MHA Manager的脚本触发，无需人为操作</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">save_binary_logs            <span class="hljs-comment">#保存和复制master的二进制日志 </span><br>apply_diff_relay_logs       <span class="hljs-comment">#识别差异的中继日志事件并将其差异的事件应用于其他的</span><br>purge_relay_logs            <span class="hljs-comment">#清除中继日志（不会阻塞SQL线程）</span><br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<h2 id="4-MHA-配置过程细节说明"><a href="#4-MHA-配置过程细节说明" class="headerlink" title="4.MHA 配置过程细节说明"></a>4.MHA 配置过程细节说明</h2><h3 id="4-1-软连接"><a href="#4-1-软连接" class="headerlink" title="4.1  软连接"></a>4.1  软连接</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh">\rm -rf /usr/bin/mysqlbinlog<br>\rm -rf /usr/bin/mysql<br>ln -s /application/mysql/bin/mysqlbinlog    /usr/bin/mysqlbinlog<br>ln -s /application/mysql/bin/mysql          /usr/bin/mysql<br>ls -l /usr/bin/mysql<br>ls -l /usr/bin/mysqlbinlog <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="4-2-互信-多节点直接不需要用密码-："><a href="#4-2-互信-多节点直接不需要用密码-：" class="headerlink" title="4.2 互信 多节点直接不需要用密码 ："></a>4.2 互信 多节点直接不需要用密码 ：</h3><br>
+
+<p>实现脚本免交互</p>
+<p>db01：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh">rm -rf /root/.ssh <br>ssh-keygen<br><span class="hljs-built_in">cd</span> /root/.ssh <br>mv id_rsa.pub authorized_keys <span class="hljs-comment">#默认定义的公钥名字</span><br>scp  -r  /root/.ssh  10.0.0.52:/root <br>scp  -r  /root/.ssh  10.0.0.53:/root <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>更改公钥默认文件名:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">vim /etc/ssh/sshd_config <br>AuthorizedKeysFile  .ssh/authorized_key<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>各节点验证</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#db01:</span><br>ssh 10.0.0.51 date<br>ssh 10.0.0.52 date<br>ssh 10.0.0.53 date<br><br><span class="hljs-comment">#db02:</span><br>ssh 10.0.0.51 date<br>ssh 10.0.0.52 date<br>ssh 10.0.0.53 date<br><br><span class="hljs-comment">#db03:</span><br>ssh 10.0.0.51 date<br>ssh 10.0.0.52 date<br>ssh 10.0.0.53 date<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<h3 id="4-3-安装软件包-所有节点"><a href="#4-3-安装软件包-所有节点" class="headerlink" title="4.3 安装软件包(所有节点)"></a>4.3 安装软件包(所有节点)</h3><br>
+
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">yum</span> install perl-DBD-MySQL -y<br><span class="hljs-attribute">rpm</span> -ivh mha<span class="hljs-number">4</span>mysql-node-<span class="hljs-number">0</span>.<span class="hljs-number">56</span>-<span class="hljs-number">0</span>.el<span class="hljs-number">6</span>.noarch.rpm<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="4-4-在db01主库中创建mha需要的用户"><a href="#4-4-在db01主库中创建mha需要的用户" class="headerlink" title="4.4 在db01主库中创建mha需要的用户"></a>4.4 在db01主库中创建mha需要的用户</h3><br>
+
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">privileges</span> <span class="hljs-keyword">on</span> *.* <span class="hljs-keyword">to</span> mha@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;mha&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="4-5-Manager软件安装（db03）"><a href="#4-5-Manager软件安装（db03）" class="headerlink" title="4.5  Manager软件安装（db03）"></a>4.5  Manager软件安装（db03）</h3><br>
+
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">yum</span> install -y perl-Config-Tiny epel-release perl-Log-Dispatch perl-Parallel-ForkManager perl-Time-HiRes<br><span class="hljs-attribute">rpm</span> -ivh mha<span class="hljs-number">4</span>mysql-manager-<span class="hljs-number">0</span>.<span class="hljs-number">56</span>-<span class="hljs-number">0</span>.el<span class="hljs-number">6</span>.noarch.rpm<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="4-6-配置文件准备-db03"><a href="#4-6-配置文件准备-db03" class="headerlink" title="4.6 配置文件准备(db03)"></a>4.6 配置文件准备(db03)</h3><br>
+
+<p>– 创建配置文件目录</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">mkdir -p <span class="hljs-regexp">/etc/m</span>ha<br></code></pre></td></tr></table></figure>
+
+<p>– 创建日志目录</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs awk">mkdir -p <span class="hljs-regexp">/var/</span>log<span class="hljs-regexp">/mha/</span>app1<br></code></pre></td></tr></table></figure>
+
+
+<p>– 编辑mha配置文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs sh">cat &gt; /etc/mha/app1.cnf &lt;&lt;<span class="hljs-string">EOF #名字 目录随便定义</span><br><span class="hljs-string">[server default] #默认配置</span><br><span class="hljs-string">manager_log=/var/log/mha/app1/manager  #记录日志文件       核心日志</span><br><span class="hljs-string">manager_workdir=/var/log/mha/app1      #启动日志      </span><br><span class="hljs-string">master_binlog_dir=/data/binlog #主库binlog （所有节点都要打开二进制日志并且目录名要一样）   </span><br><span class="hljs-string">user=mha             #管理用户                     </span><br><span class="hljs-string">password=mha         #密码                   </span><br><span class="hljs-string">ping_interval=2      #探测心跳的间隔时间 一共给三次机会 也就是最多6秒无响应就算宕机</span><br><span class="hljs-string">repl_password=123    #构建主从时的用户密码</span><br><span class="hljs-string">repl_user=repl       #构建主从时的用户</span><br><span class="hljs-string">ssh_user=root        #各节点互信用户                            </span><br><span class="hljs-string"></span><br><span class="hljs-string">[server1]            #后端的三个节点（自动检测谁是主库）             </span><br><span class="hljs-string">hostname=10.0.0.51</span><br><span class="hljs-string">port=3306                                  </span><br><span class="hljs-string">[server2]            #如果无压力的状况下根据顺序选中新主</span><br><span class="hljs-string">hostname=10.0.0.52</span><br><span class="hljs-string">port=3306</span><br><span class="hljs-string">[server3]</span><br><span class="hljs-string">hostname=10.0.0.53</span><br><span class="hljs-string">port=3306</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+
+
+<p>一台 Manager 节点可以负责多个业务组，通过多个不同的配置文件区分如：</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-2.png" srcset="/img/loading.gif" lazyload alt="MHA节点构架2"></p>
+<br>
+
+<p>4.7 状态检查(db03)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">masterha_check_ssh  --conf=/etc/mha/app1.cnf <br>masterha_check_repl  --conf=/etc/mha/app1.cnf <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>4.8 开启MHA(db03)：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">nohup masterha_manager --conf=/etc/mha/app1.cnf --remove_dead_master_conf --ignore_last_failover  &lt; /dev/null&gt; /var/<span class="hljs-built_in">log</span>/mha/app1/manager.log 2&gt;&amp;1 &amp;<br><br>--remove_dead_master_conf  <span class="hljs-comment">#自动在配置文件中去掉宕机的节点</span><br>--ignore_last_failover   <span class="hljs-comment">#忽略上一次故障切换</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<h2 id="4-MHA-FailOver-过程详解"><a href="#4-MHA-FailOver-过程详解" class="headerlink" title="4.MHA FailOver 过程详解"></a>4.MHA FailOver 过程详解</h2><h3 id="4-1-什么是Failover"><a href="#4-1-什么是Failover" class="headerlink" title="4.1 什么是Failover?"></a>4.1 什么是Failover?</h3><p><strong>故障转移</strong><br></p>
+<p>主库宕机一直到业务恢复正常的处理过程(自动)</p>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-3.png" srcset="/img/loading.gif" lazyload alt="收到和执行了多少事务"></p>
+<p>收到和执行了多少事务对比。</p>
+<br>
+
+<br>
+
+<h3 id="4-2-MHA的Failover如何实现"><a href="#4-2-MHA的Failover如何实现" class="headerlink" title="4.2 MHA的Failover如何实现?"></a>4.2 MHA的Failover如何实现?</h3><p>从启动—&gt;故障—&gt;转移—&gt;业务恢复</p>
+<ol>
+<li><p>MHA通过<code>masterha_manger</code>脚本启动MHA的功能.</p>
+</li>
+<li><p>在manager启动之前,会自动检查ssh互信(<code>masterha_check_ssh</code>)和主从状态(<code>masterha_check_repl</code>)</p>
+</li>
+<li><p>MHA-manager 通过 <code>masterha_master_monitor</code>脚本(每隔<code>ping_interval</code>秒配置文件中)</p>
+</li>
+<li><p><code>masterha_master_monitor</code> 探测主库3次无心跳之后,就认为主库宕机了.</p>
+</li>
+<li><p>进行选主过程采用如下</p>
+<p>[^算法]: </p>
+<ul>
+<li>算法一:<br>读取配置文件中是否有强制选主的参数?<br><br><code>candidate_master=1</code> 优先竞选<br><br><code>check_repl_delay=0</code>  跳过检查差异<br><br>加在相应主机标签下面<br></li>
+<li>算法二:<br>自动判断所有从库的日志量.将最接近主库数据的从库作为新主.<br></li>
+<li>算法三:<br>按照配置文件先后顺序的进行选新主.<br></li>
+</ul>
+</li>
+<li><p>数据补偿，判断主库SSH的连通性在SSH能连的情况下调用 save_binary_logs脚本,立即保存缺失部分的binlog到各个从节点,恢复，针对主库缺失部分进行补全 GTID号判断。</p>
+<p>SSH无法连接调用 apply_diff_relay_logs 脚本,计算从库的relaylog的差异,恢复到2号从库，在其他从库 尽快能找到差异恢复一部分数据。</p>
+</li>
+<li><p>解除从库身份</p>
+</li>
+<li><p>剩余从库和新主库建立主从关系</p>
+</li>
+<li><p>应用透明</p>
+</li>
+<li><p>故障提醒</p>
+</li>
+</ol>
+<br>
+
+<br>
+
+<ul>
+<li>算法一:<br>读取配置文件中是否有强制选主的参数?<br><br><code>candidate_master=1</code> 优先竞选<br><br><code>check_repl_delay=0</code>  跳过检查差异<br><br>加在相应主机标签下面<br></li>
+<li>算法二:<br>自动判断所有从库的日志量.将最接近主库数据的从库作为新主.<br></li>
+<li>算法三:<br>按照配置文件先后顺序的进行选新主.<br></li>
+</ul>
+<p><strong>扩展一下</strong>: 强制选主应用场景<br><br><code>candidate_master=1</code> 应用场景?<br></p>
+<p>(1) MHA+KeepAlive VIP(早期MHA架构) <br><br>(2) 多地多中心 facebook架构 多节点在不同的机房<br></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-4.png" srcset="/img/loading.gif" lazyload alt="多数据中心"></p>
+<br>
+
+<br>
+
+
+
+<h2 id="5-应用透明"><a href="#5-应用透明" class="headerlink" title="5.应用透明"></a>5.应用透明</h2><br>
+
+<p><strong>db03:</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">cp /root/master_ip_failover.txt /usr/local/bin/master_ip_failover #vip切换脚本<br>vim /usr/local/bin/master_ip_failover<br>my $vip = &#x27;10.0.0.55/24&#x27;; #设定那个地址为VIP<br>my $key = &#x27;1&#x27;;<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p>这里的变量 key 是指 <code>ifconfig eth0:1 10.0.0.55/24</code> 的那个网卡别名</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">my <span class="hljs-variable">$ssh_start_vip</span> = <span class="hljs-string">&quot;/sbin/ifconfig eth0:<span class="hljs-variable">$key</span> <span class="hljs-variable">$vip</span>&quot;</span>;  <span class="hljs-comment">#生成地址 注意网卡名称</span><br><span class="hljs-comment">#等于 </span><br>ifconfig eth0:1 10.0.0.55/24<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">my <span class="hljs-variable">$ssh_stop_vip</span> = <span class="hljs-string">&quot;/sbin/ifconfig eth0:<span class="hljs-variable">$key</span> down&quot;</span>; <span class="hljs-comment">#注意网卡名称</span><br><span class="hljs-comment">#等于 </span><br>ifconfig eth0:1 down<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p>上下线地址</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh">yum install -y dos2unix<br>dos2unix /usr/<span class="hljs-built_in">local</span>/bin/master_ip_failover 转换掉中文字符<br>chmod +x /usr/<span class="hljs-built_in">local</span>/bin/master_ip_failover <br>vim /etc/mha/app1.cnf<br><span class="hljs-comment">#在[server default] 下面加 在主库宕机时才会掉用</span><br>master_ip_failover_script=/usr/<span class="hljs-built_in">local</span>/bin/master_ip_failover  <br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+<p><strong>db01主库:手工添加 vip</strong></p>
+<p><strong>查看是主库</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">masterha_check_status --conf=/etc/mha/wordpress.cnf<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#db01:添加VIP</span><br>ifconfig eth0:1 10.0.0.55/24<br> <br><span class="hljs-comment">#db03:重启MHA</span><br>masterha_stop --conf=/etc/mha/wordpress.cnf<br>nohup masterha_manager --conf=/etc/mha/app1.cnf --remove_dead_master_conf --ignore_last_failover &lt; /dev/null&gt; /var/<span class="hljs-built_in">log</span>/mha/app1/manager.log 2&gt;&amp;1 &amp;<br><span class="hljs-comment">#db03:检查</span><br>masterha_check_status --conf=/etc/mha/app1.cnf<br>app1 (pid:14410) is running(0:PING_OK), master:10.0.0.51<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+
+
+<h2 id="6-MHA-故障邮件提醒"><a href="#6-MHA-故障邮件提醒" class="headerlink" title="6.MHA 故障邮件提醒"></a>6.MHA 故障邮件提醒</h2><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs elixir">[root<span class="hljs-variable">@db03</span> ~]<span class="hljs-comment"># cp -a email/* /usr/local/bin/</span><br>[root<span class="hljs-variable">@db03</span> ~]<span class="hljs-comment"># cd /usr/local/bin/</span><br>[root<span class="hljs-variable">@db03</span> ]<span class="hljs-comment"># chmod +x *</span><br><br>[root<span class="hljs-variable">@db03</span> bin]<span class="hljs-comment"># vim /etc/mha/app1.cnf </span><br>report_script=<span class="hljs-regexp">/usr/local</span><span class="hljs-regexp">/bin/send</span><br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-5.png" srcset="/img/loading.gif" lazyload alt="故障提醒"></p>
+<p><strong>重启MHA</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">masterha_stop --conf=/etc/mha/app1.cnf<br>nohup masterha_manager --conf=/etc/mha/app1.cnf --remove_dead_master_conf --ignore_last_failover &lt; /dev/null&gt; /var/<span class="hljs-built_in">log</span>/mha/app1/manager.log 2&gt;&amp;1 &amp;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h2 id="7-额外的数据补偿服务器"><a href="#7-额外的数据补偿服务器" class="headerlink" title="7.额外的数据补偿服务器"></a>7.额外的数据补偿服务器</h2><p>(binlog_server) 节点用于在SSH无法连接到主库时做额外的数据补偿</p>
+<br>
+
+<p>找一台额外的机器，必须要有5.6以上的版本，支持gtid并开启，这里我们直接用的第二个slave（db03）</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">vim /etc/mha/app1.cnf <br>[binlog1]         <span class="hljs-comment">#添加新节点</span><br>no_master=1 <span class="hljs-comment">#不参与切换</span><br>hostname=10.0.0.53<br>master_binlog_dir=/data/mysql/binlog <span class="hljs-comment">#日志路径</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-6.png" srcset="/img/loading.gif" lazyload alt="数据补偿服务器"></p>
+<br>
+
+<p><strong>(2) 创建必要目录</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">mkdir -p /data/mysql/binlog<br>chown -R mysql.mysql /data/*<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>(3) 实时拉取主库binlog日志</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-built_in">cd</span> /data/mysql/binlog     <span class="hljs-comment">#必须进入到自己创建好的目录</span><br>mysqlbinlog  -R --host=10.0.0.51 --user=mha --password=mha --raw  --stop-never mysql-bin.000001 &amp; <span class="hljs-comment">#主库一单有变动就来取</span><br></code></pre></td></tr></table></figure>
+
+<p>在切换新日志时也会实时抓取</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section9-7.png" srcset="/img/loading.gif" lazyload alt="在切换新日志时也会实时抓取"></p>
+<br>
+
+<p><strong>注意</strong>：<br>拉取日志的起点,需要按照目前主库正在使用的binlog为起点.</p>
+<p><strong>(4) 重启MHA-manager</strong> </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#db03</span><br>masterha_stop --conf=/etc/mha/app1.cnf<br>nohup masterha_manager --conf=/etc/mha/app1.cnf --remove_dead_master_conf --ignore_last_failover  &lt; /dev/null&gt; /var/<span class="hljs-built_in">log</span>/mha/app1/manager.log 2&gt;&amp;1 &amp;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h2 id="8-故障模拟及故障处理"><a href="#8-故障模拟及故障处理" class="headerlink" title="8.故障模拟及故障处理"></a>8.故障模拟及故障处理</h2><br>
+
+<p>因为MHA故障转移是一次性的宕掉的节点不会自动添加回来，所有就需要实施监控并启动故障节点。</p>
+<br>
+
+<h3 id="8-1-宕掉-db01-数据库"><a href="#8-1-宕掉-db01-数据库" class="headerlink" title="8.1 宕掉 db01 数据库"></a>8.1 宕掉 db01 数据库</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#db01</span><br>/etc/init.d/mysqld stop<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="8-2-恢复故障"><a href="#8-2-恢复故障" class="headerlink" title="8.2 恢复故障"></a>8.2 恢复故障</h3><p><strong>(1) 启动故障节点</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#db01</span><br>/etc/init.d/mysqld start<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>(2) 恢复1主2从(db01)模式</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">grep <span class="hljs-string">&quot;CHANGE MASTER TO&quot;</span>  /var/<span class="hljs-built_in">log</span>/mha/app1/manager <span class="hljs-comment">#这时已经切到slave2节点</span><br>Thu Jul 18 18:31:54 2019 - [info]  All other slaves should start replication from here. Statement should be: CHANGE MASTER TO MASTER_HOST=<span class="hljs-string">&#x27;10.0.0.52&#x27;</span>, MASTER_PORT=3306, MASTER_AUTO_POSITION=1, MASTER_USER=<span class="hljs-string">&#x27;repl&#x27;</span>, MASTER_PASSWORD=<span class="hljs-string">&#x27;xxx&#x27;</span>;<br><span class="hljs-comment">#重新添加db01到Manager中</span><br>db01 [(none)]&gt;CHANGE MASTER TO MASTER_HOST=<span class="hljs-string">&#x27;10.0.0.52&#x27;</span>, MASTER_PORT=3306, MASTER_AUTO_POSITION=1, MASTER_USER=<span class="hljs-string">&#x27;repl&#x27;</span>, MASTER_PASSWORD=<span class="hljs-string">&#x27;123&#x27;</span>;<br>db01 [(none)]&gt;start slave; <span class="hljs-comment">#启动线程</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>(3) 恢复配置文件(db03)</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sh">[server1]<br>hostname=10.0.0.51<br>port=3306<br>[server2]<br>hostname=10.0.0.52<br>port=3306<br>[server3]<br>hostname=10.0.0.53<br>port=3306<br>report_script=/usr/<span class="hljs-built_in">local</span>/bin/send<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>(4) 启动MHA</strong> </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#db03</span><br>nohup masterha_manager --conf=/etc/mha/app1.cnf --remove_dead_master_conf --ignore_last_failover  &lt; /dev/null&gt; /var/<span class="hljs-built_in">log</span>/mha/app1/manager.log 2&gt;&amp;1 &amp;<br>[1] 16543<br><span class="hljs-comment">#db03</span><br>masterha_check_status --conf=/etc/mha/app1.cnf<br>app1 (pid:16543) is running(0:PING_OK), master:10.0.0.52<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>(5)恢复 binlogserver</strong> </p>
+<p>更换抓取目标</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-comment">#binlogserver</span><br><span class="hljs-built_in">cd</span> /data/mysql/binlog    <br>rm -rf /data/mysql/binlog/*<br>mysqlbinlog  -R --host=10.0.0.52 --user=mha --password=mha --raw  --stop-never mysql-bin.000001 &amp;<br></code></pre></td></tr></table></figure>
+
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                      <a class="hover-with-bg" href="/tags/MHA/">MHA</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/22/dba08-1/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">主从复制高级进阶</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/21/dba08/">
+                        <span class="hidden-mobile">高可用架构方案</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

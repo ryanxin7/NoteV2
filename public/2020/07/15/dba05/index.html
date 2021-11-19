@@ -1,0 +1,794 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="存储引擎介绍与企业案例[[toc]] 1. 前情回顾案例补充explain (desc) 使用场景 相关问题：  你做过哪些优化?  你用过什么优化工具? explain  你对索引这块怎么优化的?   题目意思: 我们公司业务慢,请你从数据库的角度分析原因  mysql出现性能问题,有两种情况:    第一种情况：应急性的慢：突然夯住  突然慢 应急情况:数据库卡了,资源耗尽 处理过程:  sh">
+<meta property="og:type" content="article">
+<meta property="og:title" content="存储引擎介绍与企业案例">
+<meta property="og:url" content="http://example.com/2020/07/15/dba05/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="存储引擎介绍与企业案例[[toc]] 1. 前情回顾案例补充explain (desc) 使用场景 相关问题：  你做过哪些优化?  你用过什么优化工具? explain  你对索引这块怎么优化的?   题目意思: 我们公司业务慢,请你从数据库的角度分析原因  mysql出现性能问题,有两种情况:    第一种情况：应急性的慢：突然夯住  突然慢 应急情况:数据库卡了,资源耗尽 处理过程:  sh">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-3.png">
+<meta property="article:published_time" content="2020-07-14T18:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.448Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-1.png">
+  
+  <title>存储引擎介绍与企业案例 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="存储引擎介绍与企业案例">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-15 02:13" pubdate>
+        2020年7月15日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3.1k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      10 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">存储引擎介绍与企业案例</h1>
+            
+            <div class="markdown-body">
+              <h1 id="存储引擎介绍与企业案例"><a href="#存储引擎介绍与企业案例" class="headerlink" title="存储引擎介绍与企业案例"></a>存储引擎介绍与企业案例</h1><p>[[toc]]</p>
+<h2 id="1-前情回顾案例补充"><a href="#1-前情回顾案例补充" class="headerlink" title="1. 前情回顾案例补充"></a>1. 前情回顾案例补充</h2><p><strong>explain (desc) 使用场景</strong></p>
+<p>相关问题：</p>
+<ul>
+<li><p>你做过哪些优化?</p>
+</li>
+<li><p>你用过什么优化工具? <strong>explain</strong></p>
+</li>
+<li><p>你对索引这块怎么优化的?</p>
+<br></li>
+</ul>
+<p><strong>题目意思: 我们公司业务慢,请你从数据库的角度分析原因</strong></p>
+<ul>
+<li><strong>mysql出现性能问题,有两种情况:</strong></li>
+</ul>
+<br>
+
+<p>第一种情况：应急性的慢：突然夯住  <strong>突然慢</strong></p>
+<p>应急情况:数据库卡了,资源耗尽</p>
+<p><strong>处理过程:</strong></p>
+<ol>
+<li><p><code>show processlist;</code> （把当前会话所做的操作列出来） 获取到导致数据库卡住的语句</p>
+</li>
+<li><p>使用 <code>explain</code> 分析SQL的执行计划,可能有没有走索引的,索引的类型情况。</p>
+</li>
+<li><p>建索引,改语句</p>
+</li>
+</ol>
+<p>第二种情况：一段时间慢(持续性的):<strong>每天都慢</strong> 9-11点</p>
+<p> <strong>处理过程:</strong></p>
+<ol>
+<li>记录慢日志 <code>slowlog</code>,分析<code>slowlog</code></li>
+<li>explain 分析SQL的执行计划,有没有走索引,索引的类型情况</li>
+<li>建索引,改语句</li>
+</ol>
+<br>
+
+<br>
+
+<h3 id="1-1-索引应用规范"><a href="#1-1-索引应用规范" class="headerlink" title="1.1 索引应用规范"></a>1.1 索引应用规范</h3><p>::: tip 建立索引的原则（DBA运维规范）</p>
+<ul>
+<li><p>建表必须要有主键,一般是无关列,自增长</p>
+</li>
+<li><p> 经常做为 <code>where</code> 条件列 <code>order by</code> <code>group by</code> <code>join on</code>, <code>distinct</code> 的条件</p>
+</li>
+<li><p> 最好使用唯一值多的列作为联合索引前导列,其他的按照联合索引优化细节来做</p>
+</li>
+<li><p>列值长度较长的索引列,我们建议使用前缀索引.</p>
+</li>
+<li><p>降低索引条目,一方面不要创建没用索引,不常使用的索引清理,<code>percona</code> <code>toolkit</code></p>
+</li>
+<li><p>索引维护要避开业务繁忙期</p>
+</li>
+<li><p>小表不建索引</p>
+</li>
+</ul>
+<p>:::</p>
+<br>
+
+<br>
+
+<p>使用 <strong>SQLyog</strong> 工具自动找出<strong>使用率不高的索引</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-1.png" srcset="/img/loading.gif" lazyload alt="dba05-1.png"></p>
+<br>
+
+<br>
+
+<p><br><br></p>
+<h3 id="1-2-不走索引的情况"><a href="#1-2-不走索引的情况" class="headerlink" title="1.2 不走索引的情况"></a><strong>1.2</strong> 不走索引的情况</h3><p> ::: tip  不走索引的情况（开发规范）</p>
+<ul>
+<li>没有查询条件，或者查询条件没有建立索引</li>
+</ul>
+<p><code>select * from city;</code></p>
+<p><code>select * from city where 1=1;</code></p>
+<ul>
+<li><p>查询结果集是原表中的大部分数据，应该是25％以上。</p>
+</li>
+<li><p>索引本身失效，统计数据不真实</p>
+</li>
+</ul>
+<p><strong>面试题: 同一个语句突然变慢?</strong></p>
+<p>可能是因为统计信息过旧,导致的索引失效。</p>
+<ul>
+<li> 查询条件使用函数在索引列上，或者对索引列进行运算，运算包括(<code>+，-，*，/，!</code> 等)</li>
+</ul>
+<p><code>mysql&gt; desc select * from city where id-99=1;</code></p>
+<ul>
+<li><p> 隐式转换导致索引失效.</p>
+</li>
+<li><p><code>! = ，not in</code> 不走索引（辅助索引）</p>
+</li>
+<li><p>like “%aa”` 百分号在最前面不走</p>
+</li>
+<li><p>联合索引</p>
+</li>
+</ul>
+<p> :::</p>
+<h2 id="2-存储引擎简介"><a href="#2-存储引擎简介" class="headerlink" title="2. 存储引擎简介"></a><strong>2. 存储引擎简介</strong></h2><br>
+
+<p>相当于Linux文件系统，只不过比文件系统强大</p>
+<br>
+
+<p><strong>存储引擎功能</strong></p>
+<ul>
+<li>数据读写</li>
+<li>数据安全和一致性</li>
+<li>提高性能</li>
+<li>热备份</li>
+<li>自动故障恢复</li>
+<li>高可用方面支持</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">show</span> engies; <span class="hljs-comment">--查看存储引擎支持种类</span><br>CSV        <br>MRG_MYISAM    <br>MyISAM      <br>BLACKHOLE     <br>PERFORMANCE_SCHEMA<br>MEMORY      <br>ARCHIVE      <br>InnoDB      <br>FEDERATED  <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-2.png" srcset="/img/loading.gif" lazyload alt="dba05-2.png"></p>
+<br>
+
+
+
+<p><strong>笔试题</strong>：<strong>例举你了解的存储引擎</strong></p>
+<p><strong>答：InnoDB（新版本） ,MyISAM（老版本） ,MEMORY, CSV</strong></p>
+ <br>
+
+<ul>
+<li><p><strong>Mysql 5.7 默认的存储引擎:InnoDB</strong></p>
+</li>
+<li><p> <strong>PerconaDB:默认是XtraDB</strong></p>
+</li>
+<li><p><strong>MariaDB:默认是InnoDB</strong></p>
+</li>
+</ul>
+ <br>
+
+
+
+<p><strong>插件式 第三方的存储引擎:</strong></p>
+<ul>
+<li> RocksDB </li>
+<li>MyRocks </li>
+<li>TokuDB</li>
+</ul>
+<p><strong>区别</strong>：压缩比较高,数据的插入性能高.其他功能和 InnoDB 没差。</p>
+<br>
+
+<br>
+
+<h3 id="2-1-存储引擎的查看"><a href="#2-1-存储引擎的查看" class="headerlink" title="2.1 存储引擎的查看"></a>2.1 存储引擎的查看</h3><br> 
+
+<p><strong>查看存储引擎设置</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"> <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> engines; <span class="hljs-comment">--查看支持的存储引擎</span><br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">SELECT</span> @<span class="hljs-variable">@default</span>_storage_engine;<br></code></pre></td></tr></table></figure>
+
+<p> <strong>修改默认存储引擎</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell"> <br>vim /etc/my.cnf   --修改配置文件<br>[mysqld]<br>default_storage_engine=InnoDB<br></code></pre></td></tr></table></figure>
+
+<p><strong>查看表存储引擎状态</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql"> <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> <span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1; <br> <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">TABLE</span> STATUS <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;CountryLanguage&#x27;</span>\G<br> <br>mysql<span class="hljs-operator">&gt;</span><span class="hljs-keyword">select</span> table_schema,table_name ,engine <span class="hljs-keyword">from</span> information_schema.tables <span class="hljs-keyword">where</span> table_schema <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> (<span class="hljs-string">&#x27;sys&#x27;</span>,<span class="hljs-string">&#x27;mysql&#x27;</span>,<span class="hljs-string">&#x27;information_schema&#x27;</span>,<span class="hljs-string">&#x27;performance_schema&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+<br>
+
+<h3 id="2-2-存储引擎的修改"><a href="#2-2-存储引擎的修改" class="headerlink" title="2.2 存储引擎的修改"></a><strong>2.2 存储引擎的修改</strong></h3><br>
+
+<p><strong>修改存储引擎为innodb</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"> <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">alter</span> <span class="hljs-keyword">table</span> t1<span class="hljs-operator">=</span> engine<span class="hljs-operator">=</span>innodb;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> <span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> t1; <br></code></pre></td></tr></table></figure>
+
+<p> <br><br></p>
+<p><strong>整理碎片</strong></p>
+<p>在执行删除操作后原来占用的空间不会被立即释放掉会产生碎片，就需要通过命令进行碎片整理。</p>
+<br>
+
+<p><strong>有两种方法：</strong></p>
+<ol>
+<li><code>mysql&gt; alter table t111 engine=innodb; innodb</code> 命令 再执行一遍更改存储引擎命令 对业务影响小。</li>
+<li>把原表导入 把表<code>drop</code>掉在重新导入回来 干净 但有风险。</li>
+</ol>
+ <br>
+
+<h3 id="2-3-企业真实碎片处理案例"><a href="#2-3-企业真实碎片处理案例" class="headerlink" title="2.3 企业真实碎片处理案例"></a><strong>2.3 企业真实碎片处理案例</strong></h3><p><br><strong>环境:</strong> centos7.4,MySQL 5.7.20,InnoDB存储引擎</p>
+<p><strong>业务特点</strong>：数据量级较大,经常需要按月删除历史数据.</p>
+<p><strong>问题:</strong> 磁盘空间占用很大,不释放</p>
+ <br>
+
+<p><strong>处理方法:</strong></p>
+<p><br><strong>以前:</strong> 将数据逻辑导出,手工 <code>truncate</code> 表,然后导入进去。</p>
+<br>
+
+<p><strong>现在:</strong></p>
+<p>对表进行按月进行分表(<strong>partition,中间件</strong>)。</p>
+<p>业务替换为 <strong>truncate</strong> 方式。</p>
+<p>定期进行碎片整理。</p>
+ <br>
+
+<br>
+
+<p><strong>批量替换 Zabbix 100 多张存储引擎 <code>innodb</code> 的表为 <code>tokudb</code>引擎</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"> <br><span class="hljs-keyword">alter</span> <span class="hljs-keyword">table</span> zabbix.a engine<span class="hljs-operator">=</span>tokudb; <span class="hljs-comment">-- 改一张表的命令</span><br><br><span class="hljs-keyword">select</span> concat(&quot;alter table &quot;,table_schema,&quot;.&quot;,table_name,&quot; engine=tokudb;&quot;) <span class="hljs-keyword">from</span> information_schema.tables <br><span class="hljs-keyword">where</span> table_schema<span class="hljs-operator">=</span><span class="hljs-string">&#x27;zabbix&#x27;</span>; <span class="hljs-comment">--使用拼接语句</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<br>
+
+<h2 id="3-企业真实案例更换存储引擎"><a href="#3-企业真实案例更换存储引擎" class="headerlink" title="3. 企业真实案例更换存储引擎"></a>3. 企业真实案例更换存储引擎</h2> <br>
+
+ <br>
+
+<h3 id="3-1-Zabbix-监控系统架构整改"><a href="#3-1-Zabbix-监控系统架构整改" class="headerlink" title="3.1   Zabbix  监控系统架构整改"></a>3.1   Zabbix  监控系统架构整改</h3><p><strong>环境:</strong> zabbix 3.2  mariaDB 5.5 centos 7.3</p>
+<p><strong>现象 :</strong> zabbix卡的要死 , 每隔3-4个月,都要重新搭建一遍 zabbix,存储空间经常爆满.</p>
+<br>
+
+<p><strong>分析得出问题 :</strong></p>
+<ul>
+<li><p>Zabbix 版本 </p>
+</li>
+<li><p><strong>数据库版本</strong></p>
+</li>
+<li><p>Zabbix数据库500G,全部存在一个文件里</p>
+</li>
+</ul>
+ <br>
+
+<br>
+
+<p><strong>优化建议:</strong></p>
+<p>1.数据库版本升级到mariaDB最新版本,Zabbix升级更高版本</p>
+<p>2.存储引擎改为 <strong>tokudb</strong></p>
+<p>3.监控数据按月份进行切割(二次开发Zabbix 数据保留机制功能重写,数据库分表)</p>
+<p>4.关闭binlog和双1</p>
+<p>5.参数调整</p>
+<br>
+
+
+
+<p><strong>优化结果</strong>: 解决卡顿问题，监控状态良好</p>
+ <br>
+
+<br>
+
+<p><strong>解决思路 ?</strong></p>
+<ol>
+<li><p>原生态支持 TokuDB,另外经过测试环境,<strong>10版本要比5.5 版本性能 高 2-3倍</strong></p>
+</li>
+<li><p><strong>TokuDB:insert 数据比 Innodb 快的多，数据压缩比要 Innodb 高</strong></p>
+</li>
+<li><p>监控数据按月份进行切割,为了能够truncate每个分区表,立即释放空间</p>
+</li>
+<li><p><strong>关闭 binlog  减少无关日志的记录。</strong></p>
+</li>
+<li><p>参数调整  安全性参数关闭,提高性能。</p>
+</li>
+</ol>
+<br>
+
+<br>
+
+
+
+<h3 id="3-2-存储引擎的替换"><a href="#3-2-存储引擎的替换" class="headerlink" title="3.2 存储引擎的替换"></a><strong>3.2 存储引擎的替换</strong></h3><p><strong>环境:</strong> centos 5.8 ,MySQL 5.0版本,MyISAM存储引擎,网站业务(LNMP),数据量50G左右</p>
+<p><strong>现象问题:</strong> 业务压力大的时候,非常卡;经历过宕机,会有部分数据丢失.</p>
+<p><strong>问题分析:</strong></p>
+<p>1.MyISAM存储引擎表级锁,在高并发时,会有很高锁等待</p>
+<p>2.MyISAM存储引擎不支持事务,在断电时,会有可能丢失数据</p>
+<p><strong>实际问题：</strong> </p>
+<p>1.监控锁的情况:有很多的表锁等待</p>
+<p>2.存储引擎查看:所有表默认是MyISAM</p>
+<p><strong>解决方案:</strong></p>
+<ol>
+<li><p>升级MySQL 5.6.10版本</p>
+</li>
+<li><p>迁移所有表到新环境</p>
+</li>
+<li><p>开启双1安全参数</p>
+</li>
+</ol>
+<h2 id="4-InnoDB-存储引擎核心特性说明"><a href="#4-InnoDB-存储引擎核心特性说明" class="headerlink" title="4. InnoDB 存储引擎核心特性说明"></a><strong>4. InnoDB 存储引擎核心特性说明</strong></h2><br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/dba05-3.png" srcset="/img/loading.gif" lazyload alt="dba05-3.png"></p>
+<ol>
+<li>支持事务</li>
+<li>行级锁定</li>
+<li>MVCC   并发控制</li>
+<li>外键</li>
+<li> ACSR自动故障恢复</li>
+<li>热备 复制方面提供 (多线程,GTID,MTS)</li>
+</ol>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/15/dba04/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">第三章回顾 补充元数据查询部分</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/14/dba03-2/">
+                        <span class="hidden-mobile">DQL 查询语句与元数据</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

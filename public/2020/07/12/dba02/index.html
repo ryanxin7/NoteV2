@@ -1,0 +1,935 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="体系结构及管理[[toc]] 1. MySQL C&#x2F;S结构介绍  两种连接方式： TCP&#x2F;IP：mysql -uroot -xin123 -h 10.0.0.51 -P3306 Socket：mysql -uroot -xin123 -S &#x2F;tmp&#x2F;mysql.sock     2. MySQL实例的构成  举例说明： 公司： 老板 + 经理 + 员工 + 办公区 实例： mysqld + mas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="体系结构及管理">
+<meta property="og:url" content="http://example.com/2020/07/12/dba02/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="体系结构及管理[[toc]] 1. MySQL C&#x2F;S结构介绍  两种连接方式： TCP&#x2F;IP：mysql -uroot -xin123 -h 10.0.0.51 -P3306 Socket：mysql -uroot -xin123 -S &#x2F;tmp&#x2F;mysql.sock     2. MySQL实例的构成  举例说明： 公司： 老板 + 经理 + 员工 + 办公区 实例： mysqld + mas">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-4.png">
+<meta property="article:published_time" content="2020-07-12T04:43:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.438Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-1.png">
+  
+  <title>体系结构及管理 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="体系结构及管理">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-12 12:43" pubdate>
+        2020年7月12日 下午
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      21 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">体系结构及管理</h1>
+            
+            <div class="markdown-body">
+              <h1 id="体系结构及管理"><a href="#体系结构及管理" class="headerlink" title="体系结构及管理"></a>体系结构及管理</h1><p>[[toc]]</p>
+<h2 id="1-MySQL-C-S结构介绍"><a href="#1-MySQL-C-S结构介绍" class="headerlink" title="1. MySQL C/S结构介绍"></a>1. MySQL C/S结构介绍</h2><br>
+
+<p><strong>两种连接方式：</strong></p>
+<p><strong>TCP/IP：</strong><code>mysql -uroot -xin123 -h 10.0.0.51 -P3306</code></p>
+<p><strong>Socket：</strong><code>mysql -uroot -xin123 -S /tmp/mysql.sock</code></p>
+<br>
+
+<br>
+
+<h2 id="2-MySQL实例的构成"><a href="#2-MySQL实例的构成" class="headerlink" title="2. MySQL实例的构成"></a>2. MySQL实例的构成</h2><br>
+
+<p><strong>举例说明：</strong></p>
+<p><strong>公司：</strong> 老板 + 经理 + 员工 + 办公区</p>
+<p><strong>实例：</strong> mysqld + master thread + 干活的Thread + 预分配的内存</p>
+<br>
+
+
+
+<h2 id="3-MySQL中-mysqld-进程结构"><a href="#3-MySQL中-mysqld-进程结构" class="headerlink" title="3. MySQL中 mysqld 进程结构"></a>3. MySQL中 mysqld 进程结构</h2><br>
+
+<h3 id="3-1-SQL语句引入"><a href="#3-1-SQL语句引入" class="headerlink" title="3.1 SQL语句引入"></a><strong>3.1 SQL语句引入</strong></h3><p><strong>结构化的查询语言:</strong></p>
+<ul>
+<li>DQL 数据查询语言</li>
+<li>DDL 数据定义语言</li>
+<li>DML 数据操作语言</li>
+<li>DCL 数据控制语言</li>
+</ul>
+<br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>,host <span class="hljs-keyword">from</span> mysql.user;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="3-2-连接层"><a href="#3-2-连接层" class="headerlink" title="3.2 连接层"></a><strong>3.2</strong> <strong>连接层</strong></h3><br>
+
+<ol>
+<li><strong>提供连接协议</strong> (两种方式)</li>
+</ol>
+<p>​      Socket</p>
+<p>​      TCPIP</p>
+<ol start="2">
+<li><p>验证用户名（<code>root@localhost</code>）密码合法性，进行匹配专门的授权表。</p>
+</li>
+<li><p>派生一个专用连接线程（接收SQL，返回结果）</p>
+</li>
+</ol>
+<p>​      使用命令  <code>mysql&gt; show processlist;</code> 查看</p>
+<br>
+
+<p><strong>思考：</strong></p>
+<p><strong>忘记密码的参数在哪做的手脚？</strong></p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ada"><span class="hljs-comment">--skip-grant-tables</span><br><span class="hljs-comment">--skip-networking</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="3-3-SQL层（在优化方面至关重要）"><a href="#3-3-SQL层（在优化方面至关重要）" class="headerlink" title="3.3 SQL层（在优化方面至关重要）"></a>3.3 SQL层（在优化方面至关重要）</h3><br>
+
+<ul>
+<li>验证SQL语法和SQL_MODE</li>
+<li>验证语义</li>
+<li>验证权限</li>
+<li>解析器进行语句解析，生成执行计划（解析树）</li>
+<li>优化器（各种算法，基于执行代价），根据算法，找到代价最低的执行计划。代价是指：CPU 磁盘 IO</li>
+<li>执行器按照优化器选择执行计划，执行SQL语句，得出获取数据的方法。</li>
+<li>提供query cache(默认不开)，一般不开，会用redis</li>
+<li>记录操作日志（binlog），默认没开</li>
+</ul>
+<br>
+
+<h3 id="3-4-存储引擎层"><a href="#3-4-存储引擎层" class="headerlink" title="3.4 存储引擎层"></a><strong>3.4</strong> <strong>存储引擎层</strong></h3><p><strong>真正和磁盘打交道的一个层次</strong></p>
+<p>根据SQL层提供的取数据的方法，拿到数据，返回给SQL，结构化成表，再又连接层线程返回给用户。</p>
+<br>
+
+<h3 id="3-5-MySQL逻辑存储结构"><a href="#3-5-MySQL逻辑存储结构" class="headerlink" title="3.5 MySQL逻辑存储结构"></a><strong>3.5 MySQL逻辑存储结构</strong></h3><br>
+
+<p>数据库逻辑结构与操作系统结构对照表：</p>
+<table>
+<thead>
+<tr>
+<th><img width=115/>数据库逻辑结构<img width=115/></th>
+<th align="center"><img width=115/>操作系统<img width=115/></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>库</td>
+<td align="center">Linux 目录</td>
+</tr>
+<tr>
+<td>create database wordpress charset utf8mb4;</td>
+<td align="center">mkdir /wordpress</td>
+</tr>
+<tr>
+<td>show databases;</td>
+<td align="center">ls /</td>
+</tr>
+<tr>
+<td>use wordpress;</td>
+<td align="center">cd /wordpress</td>
+</tr>
+<tr>
+<td>表</td>
+<td align="center">Linux 的文件</td>
+</tr>
+<tr>
+<td>列（字段）</td>
+<td align="center">无</td>
+</tr>
+<tr>
+<td>列属性</td>
+<td align="center">无</td>
+</tr>
+<tr>
+<td>数据行（记录）</td>
+<td align="center">Linux数据行</td>
+</tr>
+<tr>
+<td>表属性（元数据）</td>
+<td align="center">Linux 文件属性</td>
+</tr>
+</tbody></table>
+<br>
+
+<br>
+
+<h3 id="3-6-MySQL物理存储结构"><a href="#3-6-MySQL物理存储结构" class="headerlink" title="3.6 MySQL物理存储结构"></a><strong>3.6 MySQL物理存储结构</strong></h3><br>
+
+<br>
+
+<p><strong>库：</strong> 使用文件系统上的目录来表示</p>
+<br>
+
+<p><strong>表：</strong></p>
+<ul>
+<li><strong>MyISAM(类似ext2)</strong><br><br>user.frm ： 存储的表结构（列，列属性）<br><br>user.MYD : 存储的数据记录<br><br>user.MYI ： 存储索引<br></li>
+</ul>
+<br>
+
+<ul>
+<li><strong>InnoDB(类似XFS)<br></strong><br>time_zone.frm ： 存储的表结构（列，列属性）<br><br>time_zone.ibd ： 存储的数据记录和索引<br><br>ibdata1 : 数据字典信息<br></li>
+</ul>
+<br>
+
+<h3 id="3-7-innodb-段-区-页概念"><a href="#3-7-innodb-段-区-页概念" class="headerlink" title="3.7 innodb 段 区 页概念"></a><strong>3.7 innodb</strong> 段 区 页概念</h3><br>
+
+<ul>
+<li>一般情况下（非分区表）</li>
+<li>一个表就是一个段</li>
+<li>一个段由多个区构成</li>
+<li>一个区在（16k），64个连续的页，1M大小</li>
+</ul>
+<br>
+
+<h2 id="4-用户和权限管理"><a href="#4-用户和权限管理" class="headerlink" title="4. 用户和权限管理"></a>4. 用户和权限管理</h2><h3 id="4-1作用"><a href="#4-1作用" class="headerlink" title="4.1作用"></a>4.1作用</h3><br>
+
+<ul>
+<li><p>登录MySQL</p>
+</li>
+<li><p>管理MySQL</p>
+<br></li>
+</ul>
+<h3 id="4-2-用户的定义"><a href="#4-2-用户的定义" class="headerlink" title="4.2 用户的定义"></a><strong>4.2</strong> 用户的定义</h3><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--用户名@&#x27;白名单&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;%&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;localhost&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;127.0.0.1&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;10.0.0.5%&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;10.0.0.0/255.255.254.0&#x27;</span><br>wordpress@<span class="hljs-string">&#x27;10.0.%&#x27;</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="4-3-用户的操作"><a href="#4-3-用户的操作" class="headerlink" title="4.3 用户的操作"></a>4.3 用户的操作</h3><h4 id="4-3-1-创建用户"><a href="#4-3-1-创建用户" class="headerlink" title="4.3.1 创建用户"></a>4.3.1 创建用户</h4><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">create</span> <span class="hljs-keyword">user</span> oldboy@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123&#x27;</span>;<br>Query OK, <span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> affected (<span class="hljs-number">0.00</span> sec)<br></code></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<p>8.0以前，可以自动创建用户并授权</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> oldguo@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="4-3-2-查询用户"><a href="#4-3-2-查询用户" class="headerlink" title="4.3.2 查询用户"></a>4.3.2 查询用户</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>,host <span class="hljs-keyword">from</span> mysql.user;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="4-3-3-修改用户密码"><a href="#4-3-3-修改用户密码" class="headerlink" title="4.3.3 修改用户密码"></a>4.3.3 修改用户密码</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">alter</span> <span class="hljs-keyword">user</span> oldguo@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123456&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="4-3-4-删除用户"><a href="#4-3-4-删除用户" class="headerlink" title="4.3.4 删除用户"></a>4.3.4 删除用户</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">drop</span> <span class="hljs-keyword">user</span> oldguo@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> ;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<h3 id="4-4-权限管理"><a href="#4-4-权限管理" class="headerlink" title="4.4 权限管理"></a>4.4 权限管理</h3><h4 id="4-4-1-权限列表"><a href="#4-4-1-权限列表" class="headerlink" title="4.4.1 权限列表"></a>4.4.1 权限列表</h4><br>
+
+
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALL</span> <br><span class="hljs-keyword">SELECT</span>,<span class="hljs-keyword">INSERT</span>, UPDATE, <span class="hljs-keyword">DELETE</span>, <span class="hljs-keyword">CREATE</span>, <span class="hljs-keyword">DROP</span>, RELOAD, SHUTDOWN, PROCESS, FILE, <span class="hljs-keyword">REFERENCES</span>, INDEX, <span class="hljs-keyword">ALTER</span>, <span class="hljs-keyword">SHOW</span> DATABASES, SUPER, <span class="hljs-keyword">CREATE</span> TEMPORARY TABLES, LOCK TABLES, <span class="hljs-keyword">EXECUTE</span>, REPLICATION SLAVE, REPLICATION CLIENT, <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">VIEW</span>, <span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">VIEW</span>, <span class="hljs-keyword">CREATE</span> ROUTINE, <span class="hljs-keyword">ALTER</span> ROUTINE, <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">USER</span>, EVENT, <span class="hljs-keyword">TRIGGER</span>, <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span>SPACE<br><span class="hljs-keyword">with</span> <span class="hljs-keyword">grant</span> option <span class="hljs-comment">--授权管理权限</span><br></code></pre></td></tr></table></figure>
+
+<br> 
+
+<h4 id="4-4-2-授权命令"><a href="#4-4-2-授权命令" class="headerlink" title="4.4.2 授权命令"></a>4.4.2 授权命令</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> oldguo@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123&#x27;</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">grant</span> option;<br> <br><span class="hljs-keyword">grant</span> 权限 <span class="hljs-keyword">on</span> 作用目标 <span class="hljs-keyword">to</span> 用户 identified <span class="hljs-keyword">by</span> 密码 <span class="hljs-keyword">with</span> <span class="hljs-keyword">grant</span> option;<br> <br><span class="hljs-keyword">grant</span> <span class="hljs-keyword">SELECT</span>,<span class="hljs-keyword">INSERT</span>, UPDATE, <span class="hljs-keyword">DELETE</span>, <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">on</span> wordpress.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> <br> <br><span class="hljs-comment">-- 作用目标:</span><br><span class="hljs-operator">*</span>.<span class="hljs-operator">*</span><br>wordpress.<span class="hljs-operator">*</span> <br>worpress.t1 <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="4-4-3-授权需求"><a href="#4-4-3-授权需求" class="headerlink" title="4.4.3 授权需求"></a>4.4.3 授权需求</h4><br>
+
+<ol>
+<li>创建一个管理员用户root，可以通过10网段，管理数据库.</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> root@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123&#x27;</span> <span class="hljs-keyword">with</span> <span class="hljs-keyword">grant</span> option;<br></code></pre></td></tr></table></figure>
+
+
+
+<ol start="2">
+<li>创建一个应用用户wordpress，可以通过10网段，wordpress库下的所有表进行 <code>SELECT,INSERT, UPDATE, DELETE</code> 操作</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">grant</span> <span class="hljs-keyword">SELECT</span>,<span class="hljs-keyword">INSERT</span>, UPDATE, <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">on</span> wordpress.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> wordpress@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="4-4-4-回收权限"><a href="#4-4-4-回收权限" class="headerlink" title="4.4.4 回收权限"></a>4.4.4 回收权限</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">show</span> grants <span class="hljs-keyword">for</span> wordpress@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span>;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">revoke</span> <span class="hljs-keyword">delete</span> <span class="hljs-keyword">on</span> wordpress.<span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;wordpress&#x27;</span>@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span>;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> grants <span class="hljs-keyword">for</span> wordpress@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h4 id="4-4-5-关于生产中开用户"><a href="#4-4-5-关于生产中开用户" class="headerlink" title="4.4.5 关于生产中开用户"></a>4.4.5 关于生产中开用户</h4><br>
+
+<p><font color=red><strong>如何沟通开用户</strong></font></p>
+<ul>
+<li>是否有邮件批复</li>
+<li>对哪些库和表做操作</li>
+<li>做什么操作</li>
+<li>从什么地址来登录</li>
+</ul>
+<br>
+
+
+
+<p><strong><font color=red>开发人员找你要root用户密码？</font></strong></p>
+<ul>
+<li>走流程拒绝他</li>
+<li>如果是金融类的公司</li>
+</ul>
+<br>
+
+<br>
+
+
+
+<ul>
+<li><strong><font color=red>原则上是不允许任何非DBA人员持有或申请root</font></strong></li>
+<li><font color=red><strong>如果有人私下索要root密码，及时举报。</strong></font></li>
+</ul>
+<br>
+
+<br>
+
+<h2 id="5-MySQL的启动和关闭"><a href="#5-MySQL的启动和关闭" class="headerlink" title="5. MySQL的启动和关闭"></a>5. MySQL的启动和关闭</h2><br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-1.png" srcset="/img/loading.gif" lazyload alt="MySQL的启动和关闭"></p>
+<p><strong>把 mysql.server 拷贝到了 init.d下</strong></p>
+<br>
+
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-2.png" srcset="/img/loading.gif" lazyload alt="把 mysql.server 拷贝到了 init.d"></p>
+<br>
+
+
+
+<h3 id="5-1-日常启停"><a href="#5-1-日常启停" class="headerlink" title="5.1 日常启停"></a>5.1 日常启停</h3><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">sys <span class="hljs-operator">-</span>v 启动方式 mysql.server <span class="hljs-keyword">start</span> 脚本   启动过程：调用<span class="hljs-comment">---&gt; mysqld_safe ---&gt;启动实例 mysqld </span><br>mysql.service   <span class="hljs-comment">---&gt; mysqld 直接调用 mysqld 指定配置文件</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-3.png" srcset="/img/loading.gif" lazyload alt="调用mysqld&quot;"></p>
+<p>需要依赖于 <strong>/etc/my.cnf</strong></p>
+<br>
+
+
+<h3 id="5-2-维护性的任务方式启动"><a href="#5-2-维护性的任务方式启动" class="headerlink" title="5.2 维护性的任务方式启动"></a>5.2 维护性的任务方式启动</h3><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysqld_safe <span class="hljs-comment">--skip-grant-tables --skip-networking &amp;</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<ul>
+<li><p>启动时在命令行临时加入命令。</p>
+</li>
+<li><p>我们一般会将我们需要的参数临时加到命令行。也会读取<code>/etc/my.cnf</code> 的内容,但是如果冲突,命令行优先级最高。</p>
+<br></li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysqld_safe &amp;<br>mysqladmin -uroot -p123 shutdown <br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+<h3 id="5-3-初始化配置"><a href="#5-3-初始化配置" class="headerlink" title="5.3 初始化配置"></a>5.3 初始化配置</h3><br>
+
+<h4 id="5-3-1-作用"><a href="#5-3-1-作用" class="headerlink" title="5.3.1 作用"></a>5.3.1 作用</h4><ul>
+<li>影响数据库的启动</li>
+<li>影响到客户端的功能</li>
+</ul>
+<br>
+
+<h4 id="5-3-2-初始化配置的方法"><a href="#5-3-2-初始化配置的方法" class="headerlink" title="5.3.2 初始化配置的方法"></a>5.3.2 初始化配置的方法</h4><br>
+
+<ul>
+<li>初始化配置文件(例如<code>/etc/my.cnf</code>)</li>
+<li>启动命令行上进行设置(例如:<code>mysqld_safe mysqld</code>)</li>
+<li>预编译时设置(仅限于编译安装时设置)<br></li>
+</ul>
+<h4 id="5-2-3-初始化配置文件的书写格式"><a href="#5-2-3-初始化配置文件的书写格式" class="headerlink" title="5.2.3 初始化配置文件的书写格式"></a>5.2.3 初始化配置文件的书写格式</h4><br>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">[标签]<br>xxx=xxx<br>[标签]<br>xxx=xxx<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="5-2-4-配置文件标签的归类"><a href="#5-2-4-配置文件标签的归类" class="headerlink" title="5.2.4 配置文件标签的归类"></a>5.2.4 配置文件标签的归类</h4><br>
+
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-string">服务器端:</span><br>[<span class="hljs-string">mysqld</span>]<br>[<span class="hljs-string">mysqld_safe</span>]<br>[<span class="hljs-string">server</span>]<br> <br><span class="hljs-string">客户端:</span> <br>[<span class="hljs-string">mysql</span>]<br>[<span class="hljs-string">mysqladmin</span>]<br>[<span class="hljs-string">mysqldump</span>]<br>[<span class="hljs-string">client</span>]<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="5-2-5-配置文件设置样板（5-7版本"><a href="#5-2-5-配置文件设置样板（5-7版本" class="headerlink" title="5.2.5 配置文件设置样板（5.7版本)"></a>5.2.5 配置文件设置样板（5.7版本)</h4><br>
+
+<p><strong>服务器端配置</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs shell">[mysqld]<br><span class="hljs-meta">#</span><span class="bash">用户</span><br>user=mysql  <br><span class="hljs-meta">#</span><span class="bash">软件安装目录</span>        <br>basedir=/application/mysql <br><span class="hljs-meta">#</span><span class="bash">数据路径</span><br>datadir=/data/mysql/data <br><span class="hljs-meta">#</span><span class="bash">socket文件位置</span><br>socket=/tmp/mysql.sock<br><span class="hljs-meta">#</span><span class="bash">服务器id号 用于主备</span><br>server_id=6<br><span class="hljs-meta">#</span><span class="bash">端口号</span><br>port=3306<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>客户端配置</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">[mysql]<br><span class="hljs-comment">#socket文件位置</span><br>socket=/tmp/mysql.sock<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="5-4-配置文件读取顺序"><a href="#5-4-配置文件读取顺序" class="headerlink" title="5.4 配置文件读取顺序"></a>5.4 配置文件读取顺序</h3><br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysqld <span class="hljs-comment">--help --verbose |grep my.cnf</span><br><span class="hljs-operator">/</span>etc<span class="hljs-operator">/</span>my.cnf <span class="hljs-operator">/</span>etc<span class="hljs-operator">/</span>mysql<span class="hljs-operator">/</span>my.cnf <span class="hljs-operator">/</span>usr<span class="hljs-operator">/</span><span class="hljs-keyword">local</span><span class="hljs-operator">/</span>mysql<span class="hljs-operator">/</span>etc<span class="hljs-operator">/</span>my.cnf <span class="hljs-operator">~</span><span class="hljs-operator">/</span>.my.cnf <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>强制使用自定义配置文件</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--defautls-file </span><br>mysqld_safe <span class="hljs-comment">--defaults-file=/tmp/aa.txt &amp;</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="5-5-MySQL的连接管理"><a href="#5-5-MySQL的连接管理" class="headerlink" title="5.5 MySQL的连接管理"></a>5.5 MySQL的连接管理</h3><br>
+
+<h4 id="5-5-1-mysql-命令"><a href="#5-5-1-mysql-命令" class="headerlink" title="5.5.1 mysql 命令"></a>5.5.1 mysql 命令</h4><br>
+
+<p><strong>注意:提前应该将用户授权做好</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> root@<span class="hljs-string">&#x27;10.0.0.%&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;123&#x27;</span>;<br>TCPIP :<br>mysql <span class="hljs-operator">-</span>uroot <span class="hljs-operator">-</span>p <span class="hljs-operator">-</span>h <span class="hljs-number">10.0</span><span class="hljs-number">.0</span><span class="hljs-number">.51</span> <span class="hljs-operator">-</span>P3306 <br>Socket <br>mysql <span class="hljs-operator">-</span>uroot <span class="hljs-operator">-</span>p <span class="hljs-operator">-</span>S <span class="hljs-operator">/</span>tmp<span class="hljs-operator">/</span>mysql.sock<br><span class="hljs-keyword">show</span> processlist; 查看登录情况<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h4 id="5-5-2-客户端工具"><a href="#5-5-2-客户端工具" class="headerlink" title="5.5.2 客户端工具"></a>5.5.2 客户端工具</h4><ul>
+<li><strong>sqlyog</strong></li>
+<li><strong>navicat</strong></li>
+</ul>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section2-2-4.png" srcset="/img/loading.gif" lazyload alt="客户端工具"><br><br></p>
+<br>
+
+<h2 id="6-多实例管理"><a href="#6-多实例管理" class="headerlink" title="6. 多实例管理"></a>6. 多实例管理</h2><br>
+
+<h3 id="6-1-准备环境"><a href="#6-1-准备环境" class="headerlink" title="6.1 准备环境"></a>6.1 准备环境</h3><br>
+
+<p><strong>准备多个目录</strong></p>
+<br>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">mkdir -p /data/330&#123;7,8,9&#125;/data<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>准备多个配置文件</strong></p>
+<br>
+
+<p><strong><font color=#E74C3C>实例一配置文件</font></strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs php">cat &gt; /data/<span class="hljs-number">3307</span>/my.cnf &lt;&lt;EOF<br><br>[mysqld]<br><br>basedir=/application/mysql<br><br>datadir=/data/<span class="hljs-number">3307</span>/data<br><br>socket=/data/<span class="hljs-number">3307</span>/mysql.sock<br><br>log_error=/data/<span class="hljs-number">3307</span>/mysql.log<br><br>port=<span class="hljs-number">3307</span><br><br>server_id=<span class="hljs-number">7</span><br><br>log_bin=/data/<span class="hljs-number">3307</span>/mysql-bin<br><br>EOF<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong><font color=#3498DB>实例二配置文件</font></strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs php">cat &gt; /data/<span class="hljs-number">3308</span>/my.cnf &lt;&lt;EOF<br><br>[mysqld]<br><br>basedir=/application/mysql<br><br>datadir=/data/<span class="hljs-number">3308</span>/data<br><br>socket=/data/<span class="hljs-number">3308</span>/mysql.sock<br><br>log_error=/data/<span class="hljs-number">3308</span>/mysql.log<br><br>port=<span class="hljs-number">3308</span><br><br>server_id=<span class="hljs-number">8</span><br><br>log_bin=/data/<span class="hljs-number">3308</span>/mysql-bin<br><br>EOF<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><font color=#27AE60><strong>实例三配置文件</strong></font></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs php">实例三配置文件 <br><br>cat &gt; /data/<span class="hljs-number">3309</span>/my.cnf &lt;&lt;EOF<br><br>[mysqld]<br><br>basedir=/application/mysql<br><br>datadir=/data/<span class="hljs-number">3309</span>/data<br><br>socket=/data/<span class="hljs-number">3309</span>/mysql.sock<br><br>log_error=/data/<span class="hljs-number">3309</span>/mysql.log<br><br>port=<span class="hljs-number">3309</span><br><br>server_id=<span class="hljs-number">9</span><br><br>log_bin=/data/<span class="hljs-number">3309</span>/mysql-bin<br><br>EOF<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="6-2-初始化三套数据"><a href="#6-2-初始化三套数据" class="headerlink" title="6.2 初始化三套数据"></a>6.2 初始化三套数据</h3><br>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">mv /etc/my.cnf /etc/my.cnf.bak<br>mysqld --initialize-insecure --user=mysql --datadir=/data/3307/data --basedir=/application/mysql<br>mysqld --initialize-insecure --user=mysql --datadir=/data/3308/data --basedir=/application/mysql<br>mysqld --initialize-insecure --user=mysql --datadir=/data/3309/data --basedir=/application/mysql<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="6-3-Systemd-命令管理多实例"><a href="#6-3-Systemd-命令管理多实例" class="headerlink" title="6.3 Systemd 命令管理多实例"></a>6.3 Systemd 命令管理多实例</h3><br>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> /etc/systemd/system<br><br>cp mysqld.service mysqld3307.service<br><br>cp mysqld.service mysqld3308.service<br><br>cp mysqld.service mysqld3309.service<br><br> <br><br>vim mysqld3307.service<br><br><span class="hljs-comment"># 修改为:</span><br><br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/data/3307/my.cnf<br><br>vim mysqld3308.service<br><br><span class="hljs-comment"># 修改为:</span><br><br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/data/3308/my.cnf<br><br>vim mysqld3309.service<br><br><span class="hljs-comment"># 修改为:</span><br><br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/data/3309/my.cnf<br><br><br>[root@db01 system]<span class="hljs-comment"># grep &quot;ExecStart&quot; mysqld3309.service</span><br><br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/data/3309/my.cnf<br><br>[root@db01 system]<span class="hljs-comment"># grep &quot;ExecStart&quot; mysqld3308.service</span><br><br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/data/3308/my.cnf<br><br>[root@db01 system]<span class="hljs-comment"># grep &quot;ExecStart&quot; mysqld3307.service</span><br><br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/data/3307/my.cnf<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>对目录授权</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">chown -R mysql.mysql /data/<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="6-4-启动多实例"><a href="#6-4-启动多实例" class="headerlink" title="6.4 启动多实例"></a>6.4 启动多实例</h3><br>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">systemctl start mysqld3307.service<br>systemctl start mysqld3308.service<br>systemctl start mysqld3309.service<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>验证多实例</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">netstat -lnp|grep 330<br><br>mysql -S /data/3307/mysql.sock -e <span class="hljs-string">&quot;select @@server_id&quot;</span><br>mysql -S /data/3308/mysql.sock -e <span class="hljs-string">&quot;select @@server_id&quot;</span><br>mysql -S /data/3309/mysql.sock -e <span class="hljs-string">&quot;select @@server_id&quot;</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/13/dba03/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">SQL 基本概念引入</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/11/dba01/">
+                        <span class="hidden-mobile">数据库版本介绍与安装</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

@@ -1,0 +1,614 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="Logstash 能够动态地采集、转换和传输数据，不受格式或复杂度的影响。Logstash 采用可插拔框架，拥有 200 多个插件。您可以将不同的输入选择、过滤器和输出选择混合搭配、精心安排，让它们在管道中和谐地运行。利用 Grok 从非结构化数据中派生出结构，从 IP 地址解码出地理坐标，匿名化或排除敏感字段，并简化整体处理过程。Logstash 提供众多输出选择，您可以将数据发送到您要指定的地">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="Logstash 能够动态地采集、转换和传输数据，不受格式或复杂度的影响。Logstash 采用可插拔框架，拥有 200 多个插件。您可以将不同的输入选择、过滤器和输出选择混合搭配、精心安排，让它们在管道中和谐地运行。利用 Grok 从非结构化数据中派生出结构，从 IP 地址解码出地理坐标，匿名化或排除敏感字段，并简化整体处理过程。Logstash 提供众多输出选择，您可以将数据发送到您要指定的地">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK-Logstash">
+<meta property="og:url" content="http://example.com/2021/10/03/elk-logstash/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="Logstash 能够动态地采集、转换和传输数据，不受格式或复杂度的影响。Logstash 采用可插拔框架，拥有 200 多个插件。您可以将不同的输入选择、过滤器和输出选择混合搭配、精心安排，让它们在管道中和谐地运行。利用 Grok 从非结构化数据中派生出结构，从 IP 地址解码出地理坐标，匿名化或排除敏感字段，并简化整体处理过程。Logstash 提供众多输出选择，您可以将数据发送到您要指定的地">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linux/elks/ELK-logstash.jpg">
+<meta property="article:published_time" content="2021-10-03T13:15:34.000Z">
+<meta property="article:modified_time" content="2021-11-16T06:43:41.030Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="运维实战">
+<meta property="article:tag" content="日志收集">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linux/elks/ELK-logstash.jpg">
+  
+  <title>ELK-Logstash - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="ELK-Logstash">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-10-03 21:15" pubdate>
+        2021年10月3日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      9k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      28 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">ELK-Logstash</h1>
+            
+            <div class="markdown-body">
+              <p><strong>Logstash</strong> 能够动态地采集、转换和传输数据，不受格式或复杂度的影响。Logstash 采用可插拔框架，拥有 200 多个插件。您可以将不同的输入选择、过滤器和输出选择混合搭配、精心安排，让它们在管道中和谐地运行。利用 Grok 从非结构化数据中派生出结构，从 IP 地址解码出地理坐标，匿名化或排除敏感字段，并简化整体处理过程。Logstash 提供<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/current/output-plugins.html">众多输出选择</a>，您可以将数据发送到您要指定的地方，并且能够灵活地解锁众多下游用例。</p>
+<span id="more"></span>
+
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="功能简介"><a href="#功能简介" class="headerlink" title="功能简介"></a>功能简介</h3><p>logstash 就是借助于大量的功能插件，实现从数据源获取数据，然后将数据传输到elasticsearch。</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linux/elks/ELK-logstash.jpg" srcset="/img/loading.gif" lazyload alt="ELK-logstash"></p>
+<br>
+
+<p>在图中我们可以明显看到，logstash组件至少包含两个插件：input和output，这两个主要用于信息的接入和输出。</p>
+<p><strong>注意：</strong><br>logstash 软件本身无序安装，它仅仅是一个软件运行命令程序，但是该软件的运行依赖于java环境</p>
+<br>
+
+<p><strong>运行环境</strong></p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">安装<span class="hljs-keyword">java8环境</span><br><span class="hljs-keyword"></span>apt <span class="hljs-keyword">install </span>openjdk<span class="hljs-number">-8</span>-<span class="hljs-keyword">jdk</span><br><span class="hljs-keyword"></span>检查效果<br><span class="hljs-keyword">java </span>-version<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="软件安装"><a href="#软件安装" class="headerlink" title="软件安装"></a><strong>软件安装</strong></h3><p><strong>apt源码方式</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">获取软件源<br>wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add<br>-<br>apt install apt-transport-https<br>echo &quot;deb https://artifacts.elastic.co/packages/7.x/apt stable main&quot; | sudo tee –a /etc/apt/sources.list.d/elastic-7.x.list<br>apt update<br><br>安装软件<br>apt install logstash<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>软件包安装</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">wget https://artifacts.elastic.co/downloads/logstash/logstash-7.14.0-amd64.deb<br>wget https://artifacts.elastic.co/downloads/logstash/logstash-7.14.0-<br>amd64.deb.sha512<br>shasum -a 512 -c logstash-7.14.0-amd64.deb.sha512<br>dpkg -i logstash-7.14.0-amd64.deb<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>配置查看</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs bash">dpkg -L logstash<br>/.<br>/usr<br>/usr/share<br>/usr/share/logstash<br>...<br>/etc<br>/etc/logstash<br>/etc/logstash/conf.d<br>/etc/logstash/log4j2.properties<br>/etc/logstash/startup.options 服务启动环境变量文件<br>/etc/logstash/jvm.options jvm相关配置<br>/etc/logstash/logstash.yml 服务配置文件<br>/etc/logstash/logstash-sample.conf 应用配置文件模板<br>/etc/logstash/pipelines.yml<br>...<br>/usr/share/logstash/bin<br>/usr/share/logstash/bin/benchmark.bat<br>/usr/share/logstash/bin/benchmark.sh<br>/usr/share/logstash/bin/cpdump<br>/usr/share/logstash/bin/dependencies-report<br>/usr/share/logstash/bin/ingest-convert.bat<br>/usr/share/logstash/bin/ingest-convert.sh<br>/usr/share/logstash/bin/logstash<br>/usr/share/logstash/bin/logstash-keystore<br>/usr/share/logstash/bin/logstash-keystore.bat<br>/usr/share/logstash/bin/logstash-plugin<br>/usr/share/logstash/bin/logstash-plugin.bat<br>/usr/share/logstash/bin/logstash.bat<br>/usr/share/logstash/bin/logstash.lib.sh<br>/usr/share/logstash/bin/pqcheck<br>/usr/share/logstash/bin/pqcheck.bat<br>/usr/share/logstash/bin/pqrepair<br>/usr/share/logstash/bin/pqrepair.bat<br>/usr/share/logstash/bin/ruby<br>/usr/share/logstash/bin/setup.bat<br>/usr/share/logstash/bin/system-install 生成系统管理配置文件<br>...<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>定制环境变量</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;export PATH=/usr/share/logstash/bin:$PATH&#x27;</span> &gt; /etc/profile.d/logstash.sh<br><span class="hljs-built_in">source</span> /etc/profile.d/logstash.sh<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="简单实践"><a href="#简单实践" class="headerlink" title="简单实践"></a>简单实践</h3><p>命令格式</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs basic">logstash -e <span class="hljs-comment">&#x27;启动参数&#x27;</span><br>启动参数：<br><span class="hljs-keyword">input</span> &#123;<br>stdin &#123;&#125;<br>&#125;<br>output &#123;<br>stdout &#123;&#125;<br>&#125;<br><br>参数解析：<br><span class="hljs-keyword">input</span> &#123;&#125; 用于接受信息的输入<br>output &#123;&#125; 用于对内部的数据输出<br>stdin &#123;&#125; 表示屏幕上的标准输入<br>stdout &#123;&#125; 表示屏幕的标准输出<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>实践1 - 简单的输入输出测试</strong></p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs basic"># logstash -e <span class="hljs-comment">&#x27;input &#123; stdin &#123; &#125; &#125; output &#123; stdout &#123;&#125; &#125;&#x27;</span><br>...<br>[INFO ] <span class="hljs-number">2021</span>-<span class="hljs-number">08</span>-<span class="hljs-number">15</span> <span class="hljs-number">18</span>:<span class="hljs-number">03</span>:<span class="hljs-number">54.011</span> [Api Webserver] agent - Successfully started<br>Logstash API endpoint &#123;:port=&gt;<span class="hljs-number">9600</span>&#125;<br># 看到上面准备好的信息后，接下来我们在屏幕上随便输入一段信息<br><br>nihao logstash<br># 信息输入完毕后，他会自动格式化的输出一些内容<br><br>&#123;<br><span class="hljs-string">&quot;host&quot;</span> =&gt; <span class="hljs-string">&quot;ubuntu&quot;</span>, # 当前的主机信息<br><span class="hljs-string">&quot;@timestamp&quot;</span> =&gt; <span class="hljs-number">2021</span>-<span class="hljs-number">08</span>-<span class="hljs-number">15</span>T10:<span class="hljs-number">04</span>:<span class="hljs-number">32.873</span>Z, # 该条信息的时间戳<br><span class="hljs-string">&quot;message&quot;</span> =&gt; <span class="hljs-string">&quot;nihao logstash&quot;</span>, # 我们输入的内容<br><span class="hljs-string">&quot;@version&quot;</span> =&gt; <span class="hljs-string">&quot;1&quot;</span> # 版本信息<br>&#125;<br><br>结果展示：<br>信息展示出来的内容，其实包含两部分： index(搜索数据时候的索引)和value(具体的数据内容)<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>实践2 - 信息传递到es</strong></p>
+<figure class="highlight jboss-cli"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><code class="hljs jboss-cli">配置logstash将信息输出到es中<br><span class="hljs-comment"># logstash -e &#x27;input &#123; stdin&#123;&#125; &#125; output &#123; elasticsearch &#123; hosts =&gt;</span><br>[<span class="hljs-string">&quot;192.168.10.106:9200&quot;</span>] index =&gt; <span class="hljs-string">&quot;message&quot;</span> &#125; &#125;&#x27;<br><span class="hljs-string">...</span><br>[2021-08-15 18<span class="hljs-function">:07</span><span class="hljs-function">:51.678</span>][INFO ][logstash.agent ] Successfully started<br>Logstash API endpoint &#123;<span class="hljs-function">:port</span>=&gt;9600&#125;<br><span class="hljs-comment"># 看到上面准备好的信息后，接下来我们在屏幕上随便输入一段信息</span><br>hello elasticsearch<br><br><br>     结果展示：<br>           因为我们将信息输入到es中了，所以这里看不到信息输入<br><br><br><br>es检查查看效果<br><span class="hljs-comment"># curl 192.168.10.106:9200/_cat/indices</span><br>green open message x3JlhXwBQsmGYITwOnlWEw 1 1 1 0 10.8kb 5.3kb<br><br><br><span class="hljs-comment"># curl 192.168.10.106:9200/message?pretty</span><br>&#123;<br><br><span class="hljs-string">&quot;message&quot;</span> : &#123;<br><span class="hljs-string">...</span>,<br>        <span class="hljs-string">&quot;number_of_shards&quot;</span> : <span class="hljs-string">&quot;1&quot;</span>,<br>        <span class="hljs-string">&quot;provided_name&quot;</span> : <span class="hljs-string">&quot;message&quot;</span>,<br>        <span class="hljs-string">&quot;creation_date&quot;</span> : <span class="hljs-string">&quot;1629022162762&quot;</span>,<br>        <span class="hljs-string">&quot;number_of_replicas&quot;</span> : <span class="hljs-string">&quot;1&quot;</span>,<br>        <span class="hljs-string">&quot;uuid&quot;</span> : <span class="hljs-string">&quot;x3JlhXwBQsmGYITwOnlWEw&quot;</span>,<br>        <span class="hljs-string">&quot;version&quot;</span> : &#123;<br>        <span class="hljs-string">&quot;created&quot;</span> : <span class="hljs-string">&quot;7140099&quot;</span><br>          &#125;<br>        &#125;<br>      &#125;<br>   &#125;<br>&#125;<br><br>查看内容信息<br><span class="hljs-comment"># curl 192.168.10.106:9200/message/_search?pretty</span><br>&#123;<br><span class="hljs-string">&quot;took&quot;</span> : 88,<br><span class="hljs-string">&quot;timed_out&quot;</span> : <span class="hljs-literal">false</span>,<br><span class="hljs-string">&quot;_shards&quot;</span> : &#123;<br><span class="hljs-string">&quot;total&quot;</span> : 1,<br><span class="hljs-string">&quot;successful&quot;</span> : 1,<br><span class="hljs-string">&quot;skipped&quot;</span> : 0,<br><span class="hljs-string">&quot;failed&quot;</span> : 0<br>&#125;,<br><span class="hljs-string">&quot;hits&quot;</span> : &#123;<br><span class="hljs-string">&quot;total&quot;</span> : &#123;<br><span class="hljs-string">&quot;value&quot;</span> : 1,<br><span class="hljs-string">&quot;relation&quot;</span> : <span class="hljs-string">&quot;eq&quot;</span><br>&#125;,<br><span class="hljs-string">&quot;max_score&quot;</span> : 1.0,<br><span class="hljs-string">&quot;hits&quot;</span> : [<br>&#123;<br><span class="hljs-string">&quot;_index&quot;</span> : <span class="hljs-string">&quot;message&quot;</span>,<br><span class="hljs-string">&quot;_type&quot;</span> : <span class="hljs-string">&quot;_doc&quot;</span>,<br><span class="hljs-string">&quot;_id&quot;</span> : <span class="hljs-string">&quot;3UZJSXsBvfqpwa_-kJ8V&quot;</span>,<br><span class="hljs-string">&quot;_score&quot;</span> : 1.0,<br><span class="hljs-string">&quot;_source&quot;</span> : &#123;<br><span class="hljs-string">&quot;host&quot;</span> : <span class="hljs-string">&quot;python-auto&quot;</span>,<br><span class="hljs-string">&quot;@timestamp&quot;</span> : <span class="hljs-string">&quot;2021-08-15T10:09:22.359Z&quot;</span>,<br><span class="hljs-string">&quot;message&quot;</span> : <span class="hljs-string">&quot;hello elasticsearch&quot;</span>,<br><span class="hljs-string">&quot;@version&quot;</span> : <span class="hljs-string">&quot;1&quot;</span><br>              &#125;<br>             &#125;<br>           ]<br>         &#125;<br>       &#125;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>实践3 - 读取日志文件到es</strong></p>
+<figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs stata">模块简介<br>    logstash的信息采集模块支持<span class="hljs-keyword">file</span>模块，可以通过指定日志文件，直接从文件中读取相关信息。<br><br>参考资料：<br>    https:<span class="hljs-comment">//www.elastic.co/guide/en/logstash/7.14/plugins-inputs-file.html</span><br><br>基本属性：<br>    path 指定文件路径<br>    start_position 设定从文件的那个位置开始读取，可选值 -- beginning, end(默认)<br>    <span class="hljs-keyword">type</span> 传递信息的时候，增加一个额外的属性字段<br><br>配置示例：<br>    <span class="hljs-keyword">file</span> &#123;<br>       path =&gt; <span class="hljs-string">&quot;/var/log/syslog&quot;</span><br>       start_position =&gt; <span class="hljs-string">&quot;beginning&quot;</span><br>       <span class="hljs-keyword">type</span> =&gt; <span class="hljs-string">&quot;elasticsearch&quot;</span><br>&#125;<br><br>从系统日志文件中读取信息，输出到es中<br># logstash -<span class="hljs-keyword">e</span> &#x27;<span class="hljs-keyword">input</span> &#123; <span class="hljs-keyword">file</span>&#123;path =&gt; <span class="hljs-string">&quot;/var/log/syslog&quot;</span> start_position =&gt;<br><span class="hljs-string">&quot;beginning&quot;</span> <span class="hljs-keyword">type</span> =&gt; <span class="hljs-string">&quot;elasticsearch&quot;</span>&#125; &#125; output &#123; elasticsearch &#123; hosts =&gt;<br>[<span class="hljs-string">&quot;192.168.10.106&quot;</span>] index =&gt; <span class="hljs-string">&quot;message&quot;</span> &#125; &#125;&#x27;<br>...<br>[INFO ] 2021-08-15 18:32:50.789 [[main]-pipeline-manager] elasticsearch - New<br>Elasticsearch output &#123;:<span class="hljs-keyword">class</span>=&gt;<span class="hljs-string">&quot;LogStash::Outputs::ElasticSearch&quot;</span>, :hosts=&gt;<br>[<span class="hljs-string">&quot;//192.168.8.12:9200&quot;</span>]&#125;<br>...<br>[INFO ] 2021-08-15 18:32:54.992 [[main]-pipeline-manager] <span class="hljs-keyword">file</span> - <span class="hljs-keyword">No</span> sincedb_path<br><span class="hljs-keyword">set</span>, generating <span class="hljs-keyword">one</span> based <span class="hljs-keyword">on</span> the <span class="hljs-string">&quot;path&quot;</span> setting<br>&#123;:sincedb_path=&gt;&quot;/usr/share/logstash/data/plugins/inputs/<span class="hljs-keyword">file</span>/.sincedb_f5fdf6ea0<br>ea92860c6a6b2b354bfcbbc<span class="hljs-string">&quot;, :path=&gt;[&quot;</span>/<span class="hljs-keyword">var</span>/<span class="hljs-keyword">log</span>/syslog&quot;]&#125;<br><br><br>在head插件中查看日志效果<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<h3 id="服务文件方式"><a href="#服务文件方式" class="headerlink" title="服务文件方式"></a>服务文件方式</h3><p>  生成配置文件</p>
+<p>​    以命令行的方式来进行启动太繁琐，我们最好还是以配置文件的方式来进行服务的启动管理，对于<br>logstash来说，它提供好了一个专门用于生成配置文件的命令 <code>system-install</code>，我们只需要按照既定的<br>配置文件规则，定制应用配置，最后执行该命令，即可实现服务脚本的配置。</p>
+<br>
+
+<p><strong>服务启动参数</strong></p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs vim">进入应用目录<br><span class="hljs-keyword">cd</span> /etc/logstash<br>编辑启动参数文件<br><br># <span class="hljs-keyword">vim</span> startup.<span class="hljs-keyword">options</span><br>...<br># Arguments <span class="hljs-keyword">to</span> pass <span class="hljs-keyword">to</span> logstash<br>LS_OPTS=<span class="hljs-string">&quot;--path.settings $&#123;LS_SETTINGS_DIR&#125; -f /etc/logstash/conf.d&quot;</span><br>     注意： -<span class="hljs-keyword">f</span> 指定的是 logstash的应用配置文件(比如 logstash.<span class="hljs-keyword">conf</span>)存放到的目录<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>定制配置文件信息输入到es的配置文件</strong></p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs basic">生成配置文件<br>cp logstash-sample.conf conf.d/logstash.conf<br><br><br>修改配置文件 conf.d/logstash.conf<br># Sample Logstash configuration <span class="hljs-keyword">for</span> creating a simple<br># Beats -&gt; Logstash -&gt; Elasticsearch pipeline.<br><br><br>#输入部分<br><span class="hljs-keyword">input</span> &#123;<br># beats &#123;<br># port =&gt; <span class="hljs-number">5044</span><br># &#125;<br><br>#插件<br>file &#123;<br>path =&gt; [<span class="hljs-string">&quot;/var/log/syslog&quot;</span>]<br>start_position =&gt; <span class="hljs-string">&quot;beginning&quot;</span><br>type =&gt; <span class="hljs-string">&quot;elasticsearch&quot;</span><br>&#125;<br>&#125;<br><br>#输出部分<br>output &#123;<br>elasticsearch &#123;<br>hosts =&gt; [<span class="hljs-string">&quot;http://192.168.8.12:9200&quot;</span>]<br>index =&gt; <span class="hljs-string">&quot;logstash-test-%&#123;+YYYY.MM.dd&#125;&quot;</span><br>&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>生成配置文件</strong></p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs basic">以root用户执行下面的命令<br><span class="hljs-keyword">system</span>-install<br><br><br>查看生成的服务配置文件<br># ls /etc/systemd/<span class="hljs-keyword">system</span>/logstash.service<br>/etc/systemd/<span class="hljs-keyword">system</span>/logstash.service<br><br><br>查看服务配置文件内容<br># cat /etc/systemd/<span class="hljs-keyword">system</span>/logstash.service<br>[Unit]<br>Description=logstash<br>[Service]<br>Type=simple<br>User=logstash<br>Group=logstash<br># <span class="hljs-keyword">Load</span> env vars from /etc/default/ <span class="hljs-keyword">and</span> /etc/sysconfig/ <span class="hljs-keyword">if</span> they exist.<br># Prefixing the path with <span class="hljs-comment">&#x27;-&#x27; makes it try to load, but if the file doesn&#x27;t</span><br># exist, it continues onward.<br>EnvironmentFile=-/etc/default/logstash<br>EnvironmentFile=-/etc/sysconfig/logstash<br>ExecStart=/<span class="hljs-keyword">usr</span>/share/logstash/bin/logstash <span class="hljs-string">&quot;--path.settings&quot;</span> <span class="hljs-string">&quot;/etc/logstash&quot;</span> <span class="hljs-string">&quot;-</span><br><span class="hljs-string">f&quot;</span> <span class="hljs-string">&quot;/etc/logstash/conf.d&quot;</span><br>Restart=always<br>WorkingDirectory=/<br>Nice=<span class="hljs-number">19</span><br>LimitNOFILE=<span class="hljs-number">16384</span><br># When stopping, how long <span class="hljs-keyword">to</span> <span class="hljs-keyword">wait</span> before giving up <span class="hljs-keyword">and</span> sending SIGKILL?<br># Keep in mind that SIGKILL <span class="hljs-keyword">on</span> a process can cause <span class="hljs-keyword">data</span> loss.<br>TimeoutStopSec=infinity<br>[Install]<br>WantedBy=multi-user.target<br><br>注意：<br>由于服务启动的时候，用户名和用户组都是 logstash ，所以，我们采集数据的文件必须是具备查看的权限<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<p><strong>启动服务</strong></p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs basic">重载服务<br>systemctl daemon-reload<br><br><br>启动服务<br>systemctl start logstash.service<br>systemctl status logstash.service<br><br><br>查看效果<br># netstat -tnulp | egrep <span class="hljs-comment">&#x27;Add|java&#x27;</span><br>Proto Recv-Q Send-Q Local Address Foreign Address State PID/Program<br><span class="hljs-keyword">name</span><br>tcp6 <span class="hljs-number">0</span> <span class="hljs-number">0</span> <span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">9600</span> :::* LISTEN <span class="hljs-number">88794</span>/java<br>tcp6 <span class="hljs-number">0</span> <span class="hljs-number">0</span> :::<span class="hljs-number">9200</span> :::* LISTEN <span class="hljs-number">87210</span>/java<br>tcp6 <span class="hljs-number">0</span> <span class="hljs-number">0</span> :::<span class="hljs-number">9300</span> :::* LISTEN <span class="hljs-number">87210</span>/java<br><br><br>结果显示：<br>logstash的默认端口是 <span class="hljs-number">9600</span><br><br><br>查看日志<br>tail -f /var/<span class="hljs-keyword">log</span>/logstash/logstash-plain.<span class="hljs-keyword">log</span><br><br><br>可以看到默认报错：<br>[<span class="hljs-number">2021</span>-<span class="hljs-number">08</span>-<span class="hljs-number">15</span>T18:<span class="hljs-number">44</span>:<span class="hljs-number">08</span>,<span class="hljs-number">643</span>][WARN ]<br>[filewatch.tailmode.handlers.createinitial][main]<br>[cc34021140e2525e95d5755b6135b9801f3595239bcda82a1cca03a1d0f857d6] failed <span class="hljs-keyword">to</span><br><span class="hljs-keyword">open</span> file &#123;:path=&gt;<span class="hljs-string">&quot;/var/log/syslog&quot;</span>, :exception=&gt;Errno::EACCES,<br>:message=&gt;<span class="hljs-string">&quot;Permission denied - /var/log/syslog&quot;</span>&#125;<br><br><br>临时增加一个 logstash 允许访问的权限<br>chown logstash.logstash /var/<span class="hljs-keyword">log</span>/syslog<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>通过head插件查看数据传递效果</strong></p>
+<br>
+
+<hr>
+<p><strong>小结：</strong></p>
+<ul>
+<li>定位<pre><code>数据的采集和传递&lt;br&gt;
+</code></pre>
+</li>
+<li>组成：<pre><code>核心：input - filter - output&lt;br&gt;
+辅助：codec &lt;br&gt;
+</code></pre>
+</li>
+<li>特点：<pre><code>每个部分都有对应业务场景的插件来实现功能
+</code></pre>
+</li>
+</ul>
+<ul>
+<li><strong>守护进程方式运行logstash</strong><br><br>定制服务的启动参数<br><br>system-install 生成服务启动文件<br><br>应用服务启动文件<br></li>
+</ul>
+<ul>
+<li><strong>临时测试文件的方式</strong><br>logstash -f xxx.conf</li>
+</ul>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/ElasticStack/">ElasticStack</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Ubuntu/">Ubuntu</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E8%BF%90%E7%BB%B4%E5%AE%9E%E6%88%98/">运维实战</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/">日志收集</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/10/05/elk-Kibana/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">ELK-Kibana</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/10/02/elk-Elasticsearch/">
+                        <span class="hidden-mobile">ELK-Elasticsearch</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

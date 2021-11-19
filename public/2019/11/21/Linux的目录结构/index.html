@@ -1,0 +1,622 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="Linux的目录结构特点  目录结构特点   一切从根root 开始  Linux中每个设备可以挂在任何目录上面  Linux下面设备没有挂载无法使用  linux中一切皆文件     什么是挂载？ 把苹果挂载到树上 &#96;mount&#96; 给磁盘分区 开了一个入口 进入到光盘中 入口&#x3D;挂载点&#x3D;目录  举例：在 linux 系统下面使用光盘  把光盘放入光驱中  查看光盘 ll  &#x2F;dev&#x2F;cdrom">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux的目录结构特点">
+<meta property="og:url" content="http://example.com/2019/11/21/Linux%E7%9A%84%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="Linux的目录结构特点  目录结构特点   一切从根root 开始  Linux中每个设备可以挂在任何目录上面  Linux下面设备没有挂载无法使用  linux中一切皆文件     什么是挂载？ 把苹果挂载到树上 &#96;mount&#96; 给磁盘分区 开了一个入口 进入到光盘中 入口&#x3D;挂载点&#x3D;目录  举例：在 linux 系统下面使用光盘  把光盘放入光驱中  查看光盘 ll  &#x2F;dev&#x2F;cdrom">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-21T15:45:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.467Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="Linux 学习之旅">
+<meta name="twitter:card" content="summary_large_image">
+  
+  <title>Linux的目录结构特点 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Linux的目录结构特点">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-11-21 23:45" pubdate>
+        2019年11月21日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      918 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      3 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Linux的目录结构特点</h1>
+            
+            <div class="markdown-body">
+              <h1 id="Linux的目录结构特点"><a href="#Linux的目录结构特点" class="headerlink" title="Linux的目录结构特点"></a>Linux的目录结构特点</h1><br>
+
+<h2 id="目录结构特点"><a href="#目录结构特点" class="headerlink" title="目录结构特点"></a>目录结构特点</h2><br>
+
+<ul>
+<li><p>一切从根root 开始</p>
+</li>
+<li><p>Linux中每个设备可以挂在任何目录上面</p>
+</li>
+<li><p>Linux下面设备没有挂载无法使用</p>
+</li>
+<li><p>linux中一切皆文件</p>
+</li>
+</ul>
+<br>
+
+<h2 id="什么是挂载？"><a href="#什么是挂载？" class="headerlink" title="什么是挂载？"></a>什么是挂载？</h2><br>
+把苹果挂载到树上 `mount`
+给磁盘分区 开了一个入口 进入到光盘中 入口=挂载点=目录<br>
+
+<p><strong>举例：在 linux 系统下面使用光盘</strong><br><br><br><br></p>
+<ol>
+<li><p>把光盘放入光驱中</p>
+</li>
+<li><p>查看光盘 <code>ll  /dev/cdrom</code></p>
+</li>
+<li><p>使用光盘  <code>cat</code> 乱码</p>
+</li>
+<li><p>把光盘挂载  <code>mount /dev/cdrom /mnt/  read-only</code>  只读 <code>df-h</code> 查看系统空间谁挂载路径</p>
+</li>
+<li><p>进入目录使用</p>
+</li>
+<li><p><code>cd /mnt</code> 实际上进入了光盘 可以看到光盘内容 </p>
+</li>
+</ol>
+<br>
+
+<p>如果硬盘设备不挂载是没有访问入口的,就像房子没有大门，挂载就像给设备找了一个入口。</p>
+<br>
+
+<p><code>mount /dev/cdrom /mnt</code>  </p>
+<p>设备                   <strong>挂载点(mount point)</strong></p>
+<br>
+Linux下面设备(磁盘)不挂载是看不到入口的，没有窗户门的屋子，如果要设备被访问就必须有一个入口<br>，这个入口就是挂载点挂载点实质就是目录。
+
+<br>
+<br>
+
+<h2 id="Linux-目录结构详解"><a href="#Linux-目录结构详解" class="headerlink" title="Linux 目录结构详解"></a>Linux 目录结构详解</h2><br>
+
+<table>
+<thead>
+<tr>
+<th>目录名称</th>
+<th>目录介绍</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>/etc</td>
+<td>配置文件</td>
+</tr>
+<tr>
+<td>/home</td>
+<td>用户的家目录，每一个用户的家目录通常默认为/home/USERNAME</td>
+</tr>
+<tr>
+<td>/root</td>
+<td>管理员的家目录</td>
+</tr>
+<tr>
+<td>/lib</td>
+<td>库文件 静态库：单在程序中的库，其他程序不能使用该库文件动态库：在内存中，任何用到该库的程序都可以使用</td>
+</tr>
+<tr>
+<td>/lib/modules</td>
+<td>内核模块文件</td>
+</tr>
+<tr>
+<td>/media</td>
+<td>挂载点目录，移动设备。在windows中，插入一张光盘，系统会自动读取光盘，用户可以直接执行，但在linux中，插入光盘后需要在挂载点挂载这个设备之后才可以使用这个设备</td>
+</tr>
+<tr>
+<td>/mnt</td>
+<td>挂载点目录，额外的临时文件系统</td>
+</tr>
+<tr>
+<td>/opt</td>
+<td>可选目录，第三方程序的安装目录</td>
+</tr>
+<tr>
+<td>/proc</td>
+<td>伪文件系统，内核映射文件</td>
+</tr>
+<tr>
+<td>/sys</td>
+<td>伪文件系统，跟硬件设备相关的属性映射文件</td>
+</tr>
+<tr>
+<td>/tmp</td>
+<td>临时文件</td>
+</tr>
+<tr>
+<td>/var</td>
+<td>可变化的文件，经常发生变化的文件</td>
+</tr>
+<tr>
+<td>/bin</td>
+<td>可执行文件，用户命令；其中用到的库文件可能在/lib，配置文件可能在/etc</td>
+</tr>
+<tr>
+<td>/sbin</td>
+<td>可执行文件，管理命令；其中用到的库文件可能在/lib，配置文件可能在/etc</td>
+</tr>
+<tr>
+<td>/usr</td>
+<td>只读文件，shared read-only</td>
+</tr>
+<tr>
+<td>/usr/local</td>
+<td>第三方软件</td>
+</tr>
+<tr>
+<td>/boot</td>
+<td>系统启动相关的文件，如内核、initrd，以及grub（BootLoader）</td>
+</tr>
+</tbody></table>
+<p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/forlive/p/8081515.html">详细原文</a></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/11/22/webserver/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">HTTP 协议与网站原理介绍</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/11/21/lnmp/">
+                        <span class="hidden-mobile">LNMP网站架构实战</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

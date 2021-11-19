@@ -1,0 +1,682 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="SQL 基本概念引入[[toc]] 1. MySQL数据库的内置功能    1.1 连接数据库参数介绍 -u  &amp;emsp;&amp;emsp;指定登录用户 -p  &amp;emsp; &amp;emsp;指定密码 -S  &amp;emsp;&amp;emsp;使用Socket文件方式登录 -h  &amp;emsp;&amp;emsp;指定远程主机登录地址 -P  &amp;emsp;&amp;emsp;指定连接数据库的端口 -e  &amp;emsp;&amp;emsp;免交">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL 基本概念引入">
+<meta property="og:url" content="http://example.com/2020/07/13/dba03/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="SQL 基本概念引入[[toc]] 1. MySQL数据库的内置功能    1.1 连接数据库参数介绍 -u  &amp;emsp;&amp;emsp;指定登录用户 -p  &amp;emsp; &amp;emsp;指定密码 -S  &amp;emsp;&amp;emsp;使用Socket文件方式登录 -h  &amp;emsp;&amp;emsp;指定远程主机登录地址 -P  &amp;emsp;&amp;emsp;指定连接数据库的端口 -e  &amp;emsp;&amp;emsp;免交">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-1-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-1-2.png">
+<meta property="article:published_time" content="2020-07-12T18:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.441Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-1-1.png">
+  
+  <title>SQL 基本概念引入 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="SQL 基本概念引入">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-13 02:13" pubdate>
+        2020年7月13日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      5 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">SQL 基本概念引入</h1>
+            
+            <div class="markdown-body">
+              <h1 id="SQL-基本概念引入"><a href="#SQL-基本概念引入" class="headerlink" title="SQL 基本概念引入"></a>SQL 基本概念引入</h1><p>[[toc]]</p>
+<h2 id="1-MySQL数据库的内置功能"><a href="#1-MySQL数据库的内置功能" class="headerlink" title="1. MySQL数据库的内置功能"></a>1. MySQL数据库的内置功能</h2><br>
+
+<br>
+
+<h3 id="1-1-连接数据库"><a href="#1-1-连接数据库" class="headerlink" title="1.1 连接数据库"></a>1.1 连接数据库</h3><p><strong>参数介绍</strong></p>
+<p><strong>-u</strong>  &emsp;&emsp;指定登录用户</p>
+<p><strong>-p</strong>  &emsp; &emsp;指定密码</p>
+<p><strong>-S</strong>  &emsp;&emsp;使用Socket文件方式登录</p>
+<p><strong>-h</strong>  &emsp;&emsp;指定远程主机登录地址</p>
+<p><strong>-P</strong>  &emsp;&emsp;指定连接数据库的端口</p>
+<p><strong>-e</strong>  &emsp;&emsp;免交互执行SQL语句</p>
+<p><strong>&lt;</strong>  &emsp;&emsp; 恢复数据  后面加要导入的数据库数据</p>
+<br>
+
+<p><strong>例子:</strong></p>
+<ol>
+<li><p><code>mysql -uroot -p -S /tmp/mysql.sock</code></p>
+</li>
+<li><p><code>mysql -uroot -p -h10.0.0.51 -P3306</code></p>
+</li>
+<li><p><code>mysql -uroot -p -e &quot;show databases;&quot;</code> <strong>-e</strong> 参数  免交互执行sql语句</p>
+</li>
+<li><p><code>mysql -uroot -p123     &lt;  /root/world.sql</code>      <strong>恢复数据</strong>  后面加要导入的数据库数据</p>
+</li>
+</ol>
+<br>
+
+
+
+<h3 id="1-2-数据库内置命令"><a href="#1-2-数据库内置命令" class="headerlink" title="1.2 数据库内置命令"></a>1.2 数据库内置命令</h3><br>
+
+
+
+<p><strong>help</strong>                    &emsp; &emsp; &emsp;     打印mysql帮助</p>
+<p><strong>\c</strong>                &emsp;&emsp;&emsp;                ctrl+c    结束上个命令运行</p>
+<p><strong>\q</strong>                  &emsp;&emsp;&emsp;              quit; exit;   ctrl+d   退出mysql</p>
+<p><strong>\G</strong>                     &emsp;&emsp;&emsp;           将数据竖起来显示</p>
+<p><strong>source</strong>          &emsp;&emsp;&emsp;              恢复备份文件    </p>
+<br>
+
+<br>
+
+ 
+
+<h2 id="2-SQL基础应用"><a href="#2-SQL基础应用" class="headerlink" title="2.  SQL基础应用"></a>2.  SQL基础应用</h2><br>
+
+<h3 id="2-1-SQL介绍"><a href="#2-1-SQL介绍" class="headerlink" title="2.1 SQL介绍"></a>2.1 SQL介绍</h3><p>结构化的查询语言</p>
+<p>关系型数据库通用的命令</p>
+<p>遵循SQL92的标准(SQL_MODE)</p>
+<br>
+
+<h3 id="2-2-SQL常用种类"><a href="#2-2-SQL常用种类" class="headerlink" title="2.2 SQL常用种类"></a>2.2 SQL常用种类</h3><br>
+
+<p><strong>DDL</strong> 数据定义语言</p>
+<p><strong>DCL</strong> 数据控制语言</p>
+<p><strong>DML</strong> 数据操作语言</p>
+<p><strong>DQL</strong> 数据查询语言</p>
+ <br>
+
+<h2 id="3-SQL引入-数据库的逻辑结构"><a href="#3-SQL引入-数据库的逻辑结构" class="headerlink" title="3. SQL引入-数据库的逻辑结构"></a>3. SQL引入-数据库的逻辑结构</h2><br>
+
+<ul>
+<li><strong>库的逻辑结构</strong></li>
+</ul>
+<p>库名字</p>
+<p>库属性:字符集,排序规则</p>
+ <br>
+
+<br>
+
+<ul>
+<li><strong>表的逻辑结构</strong></li>
+</ul>
+<p>表名</p>
+<p>表属性:存储引擎类型,字符集,排序规则</p>
+<p>列名</p>
+<p>列属性:数据类型,约束,其他属性</p>
+<p>数据行</p>
+  <br>
+
+<br>
+
+<h2 id="4-字符集-charset"><a href="#4-字符集-charset" class="headerlink" title="4. 字符集 (charset)"></a>4. 字符集 (charset)</h2>  <br>
+
+ 
+
+<p><strong>Charset</strong>   &emsp; 字符集</p>
+<p><strong>字符集</strong>相当于MySQL数据库的密码本(编码表) 负责把SQL英文语句，转换成<strong>16进制存储</strong>。</p>
+  <br>
+
+<p><strong>常用的字符集：</strong> </p>
+<p><code>show charset;</code> 查询字符集</p>
+<p><strong>utf8</strong>         : 占用3个字节</p>
+<p><strong>utf8mb4</strong>  (:triangular_flag_on_post:建议) : 占用 4个字节,支持emoji和一些特殊字符。 </p>
+   <br>
+
+  <br>
+
+<h2 id="5-排序规则"><a href="#5-排序规则" class="headerlink" title="5. 排序规则"></a>5. 排序规则</h2>  <br>
+
+<p><strong>collation</strong>   &emsp; 排序规则  :baby_chick:</p>
+<p>查看数据库支持的排序规则。</p>
+<p><code>mysql&gt; show collation;</code>  </p>
+<p>每一种字符集对应多个排序规则</p>
+   <br>
+
+<p><strong>utf8mb4 常见的字符规则：</strong></p>
+<p>用于需求 对于英文字符串的,大小写的敏感的数据库  wW ü</p>
+<p><strong>utf8mb4_general_ci</strong>             大小写不敏感</p>
+<p><strong>utf8mb4_bin</strong>                 大小写敏感(存拼音,日文)</p>
+<p>​    <br></p>
+  <br>
+
+<h2 id="6-数据类型介绍"><a href="#6-数据类型介绍" class="headerlink" title="6. 数据类型介绍"></a>6. 数据类型介绍</h2>   <br>
+
+<h3 id="6-1-数字类型"><a href="#6-1-数字类型" class="headerlink" title="6.1 数字类型"></a>6.1 数字类型</h3><p>常用整数类型，如 <strong>TINYINT,INT</strong> 浮点数不太常用。</p>
+<br>
+
+<p> <img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-1-1.png" srcset="/img/loading.gif" lazyload alt="数据类型介绍"></p>
+<p>​    <br></p>
+  <br>
+
+<h3 id="6-2-字符串类型"><a href="#6-2-字符串类型" class="headerlink" title="6.2 字符串类型"></a>6.2 字符串类型</h3><ul>
+<li><p><strong>char</strong>(100)       </p>
+</li>
+<li><p>最多存储 <strong>255</strong> 个字符长度</p>
+ <br></li>
+</ul>
+<p>定长字符串类型,不管字符串长度多长,都<strong>立即分配</strong>100个字符长度的存储空间,未占满的空间使用”空格”填充</p>
+   <br>
+
+<ul>
+<li><p><strong>varchar</strong>(100)  </p>
+</li>
+<li><p>最多存储 <strong>65535</strong> 个字符长度</p>
+ <br></li>
+</ul>
+<p>变长字符串类型,每次存储数据之前,都要<strong>先判断</strong>一下长度,<strong>按需分配</strong>此盘空间.</p>
+<p>会单独申请一个字符长度的空间存储字符长度 (:star:少于255,如果超过255以上,会占用两个存储空间):</p>
+   <br>
+
+<p><strong>如何选择这两个数据类型?</strong></p>
+   <br>
+
+<ul>
+<li><p>少于255个字符串长度,定长的列值,选择 <strong>char</strong></p>
+</li>
+<li><p>多于255字符长度,变长的字符串,可以选择 <strong>varchar</strong></p>
+ <br>
+
+<br></li>
+</ul>
+<p><strong>Enum</strong> <strong>枚举数据类型</strong></p>
+<p><strong>作用：将某一列可能的字符串定义枚举，进行下标</strong></p>
+ <br>
+
+<p><strong>例如：</strong> address enum(‘sz’,’sh’,’bj’…..)</p>
+<p>下标成 1  2  3  顺序依次排列下去。</p>
+<p><strong>悬念: 以上数据类型可能会影响到索引的性能​ :question:</strong></p>
+   <br>
+
+  <br>
+
+<h3 id="6-3-时间类型"><a href="#6-3-时间类型" class="headerlink" title="6.3 时间类型"></a>6.3 时间类型</h3> <br>
+
+<ul>
+<li><strong>datetime</strong> </li>
+</ul>
+<p>范围为从 1000-01-01 00:00:00.000000 至 9999-12-31 23:59:59.999999。</p>
+<ul>
+<li><strong>timestamp</strong></li>
+</ul>
+<p>范围为从 1970-01-01 00:00:00.000000 至 2038-01-19 03:14:07.999999。</p>
+   <br>
+
+<p><strong>timestamp</strong> 时区功能跟着时区自动变更时间</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-1-2.png" srcset="/img/loading.gif" lazyload alt="时间类型介绍"></p>
+<h3 id="6-4-二进制类型"><a href="#6-4-二进制类型" class="headerlink" title="6.4 二进制类型"></a><strong>6.4 二进制类型</strong></h3><br>
+
+<p>关系型数据库不太擅长存储二进制类型数据。如：图片 、视频 、音频、文件。</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/13/dba03-1/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">DDL 语句的应用</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/12/dba02/">
+                        <span class="hidden-mobile">体系结构及管理</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

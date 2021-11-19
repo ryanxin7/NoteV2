@@ -1,0 +1,827 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="MySQL Replication[[toc]] #高可用架构方案  负载均衡：有一个定的高可用性  ​       LVS  Nginx  主备系统：有高可用性，但是需要别换，是单活的构架  ​       KA ， MHA ,MMM  真正的高可用（多活系统）  ​       NDB Cluster Oracle RAC Sysbase cluster ，InnoDB Cluster （M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高可用架构方案">
+<meta property="og:url" content="http://example.com/2020/07/21/dba08/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="MySQL Replication[[toc]] #高可用架构方案  负载均衡：有一个定的高可用性  ​       LVS  Nginx  主备系统：有高可用性，但是需要别换，是单活的构架  ​       KA ， MHA ,MMM  真正的高可用（多活系统）  ​       NDB Cluster Oracle RAC Sysbase cluster ，InnoDB Cluster （M">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1-3.png">
+<meta property="article:published_time" content="2020-07-20T18:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.457Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="高可用">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1.png">
+  
+  <title>高可用架构方案 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="高可用架构方案">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-21 02:13" pubdate>
+        2020年7月21日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      6.8k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      21 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">高可用架构方案</h1>
+            
+            <div class="markdown-body">
+              <hr>
+<h1 id="MySQL-Replication"><a href="#MySQL-Replication" class="headerlink" title="MySQL Replication"></a>MySQL Replication</h1><p>[[toc]]</p>
+<p>#高可用架构方案</p>
+<ul>
+<li>负载均衡：有一个定的高可用性</li>
+</ul>
+<p>​       LVS  Nginx</p>
+<ul>
+<li>主备系统：有高可用性，但是需要别换，是单活的构架</li>
+</ul>
+<p>​       KA ， MHA ,MMM</p>
+<ul>
+<li>真正的高可用（多活系统）</li>
+</ul>
+<p>​       NDB Cluster Oracle RAC Sysbase cluster ，InnoDB Cluster （MGR） ，PXC , MGC</p>
+<br>
+
+<h2 id="1-职责介绍"><a href="#1-职责介绍" class="headerlink" title="1. 职责介绍"></a>1. 职责介绍</h2><ul>
+<li>搭建主从复制   </li>
+<li>主从原理熟悉   </li>
+<li>主从的故障处理 </li>
+<li>主从延时     </li>
+<li>主从的特殊架构的配置使用 </li>
+<li>主从架构的演变 </li>
+</ul>
+<br>
+
+<br>
+
+<h2 id="2-主从复制介绍"><a href="#2-主从复制介绍" class="headerlink" title="2. 主从复制介绍"></a>2. 主从复制介绍</h2><p>(1) 主从复制基于binlog来实现的<br>(2) 主库发生新的操作,都会记录binlog<br>(3) 从库取得主库的binlog进行回放<br>(4) 主从复制的过程是异步</p>
+<br>
+
+<br>
+
+<h2 id="3-主从复制的前提-搭建主从复制"><a href="#3-主从复制的前提-搭建主从复制" class="headerlink" title="3. 主从复制的前提 (搭建主从复制)"></a>3. 主从复制的前提 (搭建主从复制)</h2><p>(1) 2个或以上的数据库实例<br>(2) 主库需要开启二进制日志<br>(3) server_id要不同,区分不同的节点<br>(4) 主库需要建立专用的复制用户 (replication slave)<br>(5) 从库应该通过备份主库,恢复的方法进行”补课”<br>(6) 人为告诉从库一些复制信息(ip port user pass,二进制日志起点)<br>(7) 从库应该开启专门的复制线程</p>
+<br>
+
+<br>
+
+<h2 id="4-主从复制搭建过程-生产"><a href="#4-主从复制搭建过程-生产" class="headerlink" title="4.主从复制搭建过程(生产)"></a>4.主从复制搭建过程(生产)</h2><h3 id="4-1-准备多实例"><a href="#4-1-准备多实例" class="headerlink" title="4.1 准备多实例"></a>4.1 准备多实例</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell">pkill mysqld <br>systemctl start mysqld3307<br>\rm -rf /data/3308/data/*<br>\rm -rf /data/3308/mysql-bin.*<br>mysqld --initialize-insecure --user=mysql --basedir=/application/mysql --datadir=/data/3308/data 初始化数据库<br>systemctl start mysqld3308<br>mysql -S /data/3308/mysql.sock -e &quot;select @@port&quot;   查看端口<br>mysql -uroot -p123 -S /data/3307/mysql.sock -e &quot;select @@port&quot;; <br><br>3307主库 3308从库<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="4-2-检查配置文件"><a href="#4-2-检查配置文件" class="headerlink" title="4.2 检查配置文件"></a>4.2 检查配置文件</h3><p><strong>主库</strong>: 二进制日志是否开启</p>
+<p>两个节点: <code>server_id</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat /data/3308/my.cnf <br>[mysqld]<br>basedir=/application/mysql<br>datadir=/data/3308/data<br>socket=/data/3308/mysql.sock<br>log_error=/data/3308/mysql.log<br>port=3308<br>server_id=8<br>log_bin=/data/3308/mysql-bin<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat /data/3307/my.cnf <br>[mysqld]<br>basedir=/application/mysql<br>datadir=/data/3307/data<br>socket=/data/3307/mysql.sock<br>log_error=/data/3307/mysql.log<br>port=3307<br>server_id=7  主库要小些<br>log_bin=/data/3307/mysql-bin<br>[root@db01 data]# <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+
+
+<h3 id="4-3-主库创建复制用户"><a href="#4-3-主库创建复制用户" class="headerlink" title="4.3 主库创建复制用户"></a>4.3 主库创建复制用户</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysql -uroot -p123 -S /data/3307/mysql.sock -e &quot;grant replication slave on *.* to repl@&#x27;10.0.0.%&#x27; identified by &#x27;123&#x27;&quot;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+
+
+<h3 id="4-4-补课"><a href="#4-4-补课" class="headerlink" title="4.4 补课"></a>4.4 补课</h3><p>主库数据做备份恢复到从库</p>
+<p><strong>主</strong>: </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysqldump -uroot -p123 -S /data/3307/mysql.sock -A --master-data=2 --single-transaction -R -E --triggers &gt;/tmp/full.sql<br></code></pre></td></tr></table></figure>
+
+<p><strong>从</strong>:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysql -S /data/3308/mysql.sock <br><span class="hljs-meta">mysql&gt;</span><span class="bash"> <span class="hljs-built_in">set</span> sql_log_bin=0;</span><br><span class="hljs-meta">mysql&gt;</span><span class="bash"> <span class="hljs-built_in">source</span> /tmp/full.sql</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+
+
+<h3 id="4-5-告诉从库信息"><a href="#4-5-告诉从库信息" class="headerlink" title="4.5 告诉从库信息"></a>4.5 告诉从库信息</h3><p>从库：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs shell">help change master to<br>mysql -S /data/3308/mysql.sock <br><br>CHANGE MASTER TO <br>MASTER_HOST=&#x27;10.0.0.51&#x27;, 地址或域名<br>MASTER_USER=&#x27;repl&#x27;, 用户名<br>MASTER_PASSWORD=&#x27;123&#x27;,  密码<br>MASTER_PORT=3307,  端口号<br>MASTER_LOG_FILE=&#x27;mysql-bin.000004&#x27;, 二进制日志<br>MASTER_LOG_POS=444,<br>MASTER_CONNECT_RETRY=10; 自动重连次数<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /tmp/full.sql 查看日志提取备份记录点<br>-- CHANGE MASTER TO MASTER_LOG_FILE=&#x27;mysql-bin.000004&#x27;, MASTER_LOG_POS=444;<br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<br>
+
+
+
+
+
+<h3 id="4-6-从库开启复制线程-IO-SQL"><a href="#4-6-从库开启复制线程-IO-SQL" class="headerlink" title="4.6 从库开启复制线程(IO,SQL)"></a>4.6 从库开启复制线程(IO,SQL)</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysql -S /data/3308/mysql.sock <br><span class="hljs-meta">mysql&gt;</span><span class="bash"> start slave;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-7-检查主从复制状态"><a href="#4-7-检查主从复制状态" class="headerlink" title="4.7 检查主从复制状态"></a>4.7 检查主从复制状态</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysql -S /data/3308/mysql.sock <br><span class="hljs-meta">mysql&gt;</span><span class="bash"> show slave status \G</span><br>            Slave_IO_Running: Yes<br>            Slave_SQL_Running: Yes<br></code></pre></td></tr></table></figure>
+
+<p>主库:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysql -uroot -p123 -S /data/3307/mysql.sock -e &quot;create database alexsb&quot;<br></code></pre></td></tr></table></figure>
+
+<p>从库:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">mysql -S /data/3308/mysql.sock -e &quot;show databases&quot;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<br>
+
+<br>
+
+
+
+
+
+<h2 id="5-主从复制原理"><a href="#5-主从复制原理" class="headerlink" title="5.主从复制原理"></a>5.主从复制原理</h2><br>
+
+
+
+<h3 id="5-1-主从复制中涉及的文件"><a href="#5-1-主从复制中涉及的文件" class="headerlink" title="5.1 主从复制中涉及的文件"></a>5.1 主从复制中涉及的文件</h3><br>
+
+
+
+<p><strong>主库</strong>:<br>    <code>binlog</code> </p>
+<p><strong>从库</strong>:<br>    <code>relaylog</code>  中继日志<br>    <code>master.info</code>  主库信息文件<br>    <code>relaylog.info relaylog</code>   从库应用的信息</p>
+<h3 id="5-2-主从复制中涉及的线程"><a href="#5-2-主从复制中涉及的线程" class="headerlink" title="5.2 主从复制中涉及的线程"></a>5.2 主从复制中涉及的线程</h3><p><strong>主库</strong>:<br>    <code>Binlog_Dump Thread : DUMP_T</code></p>
+<p><strong>从库</strong>:<br>    <code>SLAVE_IO_THREAD     : IO_T</code><br>    <code>SLAVE_SQL_THREAD    : SQL_T</code></p>
+<br>
+
+
+
+<br>
+
+
+
+<h3 id="5-3-主从复制工作-过程-原理"><a href="#5-3-主从复制工作-过程-原理" class="headerlink" title="5.3 主从复制工作(过程)原理"></a>5.3 主从复制工作(过程)原理</h3><br>
+
+
+
+<ol>
+<li>从库执行change master to 命令(主库的连接信息+复制的起点)</li>
+<li>从库会将以上信息,记录到master.info文件</li>
+<li>从库执行 start slave 命令,立即开启IO_T和SQL_T</li>
+<li>从库 IO_T,读取master.info文件中的信息获取到IP,PORT,User,Pass,binlog的位置信息</li>
+<li>从库IO_T请求连接主库,主库专门提供一个DUMP_T,负责和IO_T交互</li>
+<li>IO_T根据binlog的位置信息(mysql-bin.000004 , 444),请求主库新的binlog</li>
+<li>主库通过DUMP_T将最新的binlog,通过网络TP给从库的IO_T</li>
+<li>IO_T接收到新的binlog日志,存储到TCP/IP缓存,立即返回ACK给主库,并更新master.info</li>
+<li>IO_T将TCP/IP缓存中数据,转储到磁盘relaylog中.</li>
+<li>SQL_T读取relay.info中的信息,获取到上次已经应用过的relaylog的位置信息</li>
+<li>SQL_T会按照上次的位置点回放最新的relaylog,再次更新relay.info信息</li>
+<li>从库会自动purge应用过relay进行定期清理</li>
+</ol>
+<br>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1.png" srcset="/img/loading.gif" lazyload alt="主从搭建原理"></p>
+<br>
+
+<p><strong>补充说明</strong>:</p>
+<p>一旦主从复制构建成功,主库当中发生了新的变化,都会通过dump_T发送信号给IO_T,增强了主从复制的实时性.</p>
+<h3 id="5-4-主从复制监控"><a href="#5-4-主从复制监控" class="headerlink" title="5.4 主从复制监控"></a>5.4 主从复制监控</h3><br>
+
+<p>命令:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">show</span> slave status \G 从库执行<br><br>主库有关的信息(master.info):<br>Master_Host: <span class="hljs-number">10.0</span><span class="hljs-number">.0</span><span class="hljs-number">.51</span><br>Master_User: repl<br>Master_Port: <span class="hljs-number">3307</span><br>Connect_Retry: <span class="hljs-number">10</span><br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><br>Master_Log_File: mysql<span class="hljs-operator">-</span>bin<span class="hljs-number">.000004</span><br>Read_Master_Log_Pos: <span class="hljs-number">609</span><br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1-1.png" srcset="/img/loading.gif" lazyload alt="主从状态监控"></p>
+<br>
+
+<br>
+
+<p><strong>从库relay应用信息有关的</strong>(<code>relay.info</code>):</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">Relay_Log_File: db01-relay-bin.000002<br>Relay_Log_Pos: 320  #上次已经运行到320<br>Relay_Master_Log_File: mysql-bin.000004 #对应主库binlog文件<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>从库线程运行状态(排错)</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">Slave_IO_Running: Yes<br>Slave_SQL_Running: Yes<br>Last_IO_Errno: 0<br>Last_IO_Error: <br>Last_SQL_Errno: 0<br>Last_SQL_Error: 	<br></code></pre></td></tr></table></figure>
+
+<p>​        <br></p>
+<br>            
+**过滤复制有关的信息**:            
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">Replicate_Do_DB: <br>Replicate_Ignore_DB: <br>Replicate_Do_Table: <br>Replicate_Ignore_Table: <br>Replicate_Wild_Do_Table: <br>Replicate_Wild_Ignore_Table: <br></code></pre></td></tr></table></figure>
+
+<br>
+**从库延时主库的时间(秒)**:  
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">Seconds_Behind_Master: 0<br></code></pre></td></tr></table></figure>
+
+<br>                
+
+<p><strong>延时从库</strong>:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">SQL_Delay: 0<br>SQL_Remaining_Delay: NULL<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>GTID复制有关的状态信息</strong>          </p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">Retrieved_Gtid_Set: <br>Executed_Gtid_Set: <br>Auto_Position: 0<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="5-5-主从复制故障"><a href="#5-5-主从复制故障" class="headerlink" title="5.5 主从复制故障"></a>5.5 主从复制故障</h3><br>
+
+<h4 id="5-5-1-IO-线程故障"><a href="#5-5-1-IO-线程故障" class="headerlink" title="5.5.1 IO 线程故障"></a>5.5.1 IO 线程故障</h4><p>(1) 连接主库: connecting</p>
+<p>网络,连接信息错误或变更了,防火墙,连接数上线</p>
+<p><strong>排查思路</strong>:</p>
+<ol>
+<li>使用复制用户手工登录</li>
+</ol>
+  <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysql -urepl -p12321321 -h 10.0.0.51 -P 3307<br>mysql: [Warning] Using a password on the <span class="hljs-built_in">command</span> line interface can be insecure.<br>ERROR 1045 (28000): Access denied <span class="hljs-keyword">for</span> user <span class="hljs-string">&#x27;repl&#x27;</span>@<span class="hljs-string">&#x27;db01&#x27;</span> (using password: YES)<br></code></pre></td></tr></table></figure>
+
+<p>密码错误</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysql -urep -p123 -h 10.0.0.51 -P 3307<br>mysql: [Warning] Using a password on the <span class="hljs-built_in">command</span> line interface can be insecure.<br>ERROR 1045 (28000): Access denied <span class="hljs-keyword">for</span> user <span class="hljs-string">&#x27;rep&#x27;</span>@<span class="hljs-string">&#x27;db01&#x27;</span> (using password: YES)<br></code></pre></td></tr></table></figure>
+
+<p>用户名错误</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysql -urepl -p123 -h 10.0.0.52 -P 3307<br>mysql: [Warning] Using a password on the <span class="hljs-built_in">command</span> line interface can be insecure.<br>ERROR 2003 (HY000): Can<span class="hljs-string">&#x27;t connect to MySQL server on &#x27;</span>10.0.0.52<span class="hljs-string">&#x27; (113)</span><br></code></pre></td></tr></table></figure>
+
+<p>ip地址错误</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sh">mysql -urepl -p123 -h 10.0.0.51 -P 3309<br>mysql: [Warning] Using a password on the <span class="hljs-built_in">command</span> line interface can be insecure.<br>ERROR 2003 (HY000): Can<span class="hljs-string">&#x27;t connect to MySQL server on &#x27;</span>10.0.0.51<span class="hljs-string">&#x27; (111)</span><br><span class="hljs-string">[root@db01 data]# </span><br></code></pre></td></tr></table></figure>
+
+
+<p>端口错误</p>
+<p>解决: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">stop slave <br>reset slave <span class="hljs-keyword">all</span>; 清空 master.info信息<br>change master <span class="hljs-keyword">to</span> <br><span class="hljs-keyword">start</span> slave<br></code></pre></td></tr></table></figure>
+
+
+
+<p>(2) 请求Binlog</p>
+<p>binlog 没开<br>binlog 损坏,不存在，不完整</p>
+<p>主库 reset master 处理: （清理binlog日志）<br>从库 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql">stop slave ;<br>reset slave <span class="hljs-keyword">all</span>; <br>CHANGE MASTER <span class="hljs-keyword">TO</span> <br>MASTER_HOST<span class="hljs-operator">=</span><span class="hljs-string">&#x27;10.0.0.51&#x27;</span>,<br>MASTER_USER<span class="hljs-operator">=</span><span class="hljs-string">&#x27;repl&#x27;</span>,<br>MASTER_PASSWORD<span class="hljs-operator">=</span><span class="hljs-string">&#x27;123&#x27;</span>,<br>MASTER_PORT<span class="hljs-operator">=</span><span class="hljs-number">3307</span>,<br>MASTER_LOG_FILE<span class="hljs-operator">=</span><span class="hljs-string">&#x27;mysql-bin.000001&#x27;</span>,<br>MASTER_LOG_POS<span class="hljs-operator">=</span><span class="hljs-number">154</span>,<br>MASTER_CONNECT_RETRY<span class="hljs-operator">=</span><span class="hljs-number">10</span>;<br><span class="hljs-keyword">start</span> slave;<br></code></pre></td></tr></table></figure>
+
+<p>(3) 存储binlog到relaylog</p>
+<br>
+
+<h4 id="5-5-2-SQL线程故障"><a href="#5-5-2-SQL线程故障" class="headerlink" title="5.5.2 SQL线程故障"></a>5.5.2 SQL线程故障</h4><ul>
+<li>relay-log 损坏</li>
+<li>回放 relaylog</li>
+</ul>
+<p><strong>实际上就是 研究一条SQL语句为什么执行失败</strong>?</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">insert</span> <span class="hljs-keyword">delete</span>  update     <span class="hljs-comment">---&gt; t1 表 不存在</span><br><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span>  xin     <span class="hljs-comment">---&gt;  xin 已存在</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>约束冲突(主键,唯一键,非空..)</strong></p>
+<p><strong>合理处理方法</strong>:<br>把握一个原则,一切以主库为准进行解决.<br>如果出现问题,尽量进行反操作<br>最直接稳妥办法,重新构建主从</p>
+<p><strong>暴力的解决方法</strong><br>方法一：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">stop slave; <br>set global sql_slave_skip_counter = 1;<br>start slave;<br></code></pre></td></tr></table></figure>
+
+<p>#将同步指针向下移动一个，如果多次不同步，可以重复操作。<br>start slave;</p>
+<p>方法二： 直接写在配置文件里面 跳过以下错误</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sh">/etc/my.cnf<br>slave-skip-errors = 1032,1062,1007<br><br><span class="hljs-comment">#常见错误代码:</span><br>1007:对象已存在<br>1032:无法执行DML<br>1062:主键冲突,或约束冲突<br></code></pre></td></tr></table></figure>
+
+<p>但是，以上操作有时是有<strong>风险</strong>的，最安全的做法就是重新构建主从。把握一个原则,一切以主库为主.</p>
+<br>
+
+<p><strong>对于主键冲突问题</strong>：</p>
+<p>错误的在从库插入的已有数据行的主键值重复导致主从不同步</p>
+<p><strong>解决方法</strong>：找到主从两个数据库手动改为一致后 跳过</p>
+<br>
+
+<br>
+
+
+
+<p><strong>为了很大程度的避免SQL线程故障</strong></p>
+<p>(1) 从库只读</p>
+<p><strong>read_only</strong><br><strong>super_read_only</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1-2.png" srcset="/img/loading.gif" lazyload alt="从库只读"></p>
+<p>(2) 使用读写分离中间件</p>
+<ul>
+<li>atlas </li>
+<li>mycat</li>
+<li>ProxySQL </li>
+<li>MaxScale</li>
+</ul>
+<p>写得数据发往主库，读的操作发往从库</p>
+<h2 id="6-主从延时监控及原因"><a href="#6-主从延时监控及原因" class="headerlink" title="6. 主从延时监控及原因"></a>6. 主从延时监控及原因</h2><h3 id="6-1-主库方面原因"><a href="#6-1-主库方面原因" class="headerlink" title="6.1 主库方面原因"></a>6.1 主库方面原因</h3><p>(1) binlog写入不及时</p>
+<p><code>sync_binlog=1</code> 直接刷写到磁盘</p>
+<p>(2) 默认情况下dump_t 是串行传输 binlog<br>在并发事务量大时或者大事务,由于dump_t 是串型工作的,导致传送日志较慢</p>
+<p>由于串行工作大事务导致阻塞会越堆越多</p>
+<p><strong>如何解决问题</strong>?<br>必须GTID,使用<strong>Group commit</strong>方式.可以支持DUMP_T并行</p>
+<p>(3) 主库极其繁忙<br>慢语句<br>锁等待<br>从库个数<br>网络延时</p>
+<h3 id="6-2-从库方面原因"><a href="#6-2-从库方面原因" class="headerlink" title="6.2 从库方面原因"></a>6.2 从库方面原因</h3><p>(1) 传统复制(Classic)中</p>
+<p>主库并发事务，但是从库SQL还是单线程。</p>
+<p>如果主库并发事务量很大,或者出现大事务<br>由于从库是单SQL线程,导致,不管传的日志有多少,只能一次执行一个事务.<br>5.6 版本,有了GTID,可以实现多SQL线程,但是只能基于不同库的事务进行并发回放.(database)  （不能保证同一库内事务无法保证顺序按一定逻辑顺序执行）</p>
+<p>所以在 5.7 版本中,有了增强的GTID,增加了seq_no（通线程下的序列号码）标记,增加了新型的并发SQL线程模式(logical_clock),MTS技术   逻辑时钟</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section8-1-3.png" srcset="/img/loading.gif" lazyload alt="从库的SQL工作线程"></p>
+<p>从库的SQL工作线程</p>
+<p>(2) 主从硬件差异太大<br>(3) 主从的参数配置<br>(4) 从库和主库的索引不一致<br>(5) 版本有差异</p>
+<br>
+
+
+<h2 id="7-主从延时的监控"><a href="#7-主从延时的监控" class="headerlink" title="7. 主从延时的监控"></a>7. 主从延时的监控</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">show</span> slave  status\G<br>Seconds_Behind_Master: <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>主库方面原因的监控</strong></p>
+<p><strong>主库</strong>: 传输了这些</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">mysql&gt; show <span class="hljs-keyword">master</span> <span class="hljs-title">status</span> ;<br>File: mysql-bin.<span class="hljs-number">000001</span><br>Position: <span class="hljs-number">1373</span><br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>从库</strong>: 接收了这些</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">Master_Log_File: mysql<span class="hljs-operator">-</span>bin<span class="hljs-number">.000001</span><br>Read_Master_Log_Pos: <span class="hljs-number">1373</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>主库对应从库的Position 号是否一致</strong></p>
+<p><strong>从库方面原因监控</strong>:</p>
+<p>拿了多少:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Master_Log_File</span>: mysql-bin.<span class="hljs-number">000001</span><br><span class="hljs-attribute">Read_Master_Log_Pos</span>: <span class="hljs-number">691688</span><br></code></pre></td></tr></table></figure>
+
+<p>看的是binlaog  从库对应的Relay_log 号 找对应关系</p>
+<p>执行了多少:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">Relay_Log_File</span>: db<span class="hljs-number">01</span>-relay-bin.<span class="hljs-number">000004</span><br><span class="hljs-attribute">Relay_Log_Pos</span>: <span class="hljs-number">690635</span><br><span class="hljs-attribute">Exec_Master_Log_Pos</span>: <span class="hljs-number">691688</span><br><span class="hljs-attribute">Relay_Log_Space</span>: <span class="hljs-number">690635</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/">高可用</a>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/22/dba09/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MHA 高可用部署</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/20/dba07/">
+                        <span class="hidden-mobile">逻辑备份与恢复</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

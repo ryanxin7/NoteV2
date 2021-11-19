@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="Rsync 数据镜像备份工具  Rsync 是一款实现全量及增量复制同步的软件 具有开源，快速，多功能，全量及增量本地同步和多平台的特性 增量本地同步以 delta-transfer 算法闻名可减少内网带宽。（具体实现方法见下文）    什么是增量同步？  ​    假如一个存储服务器要备份的目录大小为10G，第一次备份到备份服务器使用全量备份及所有数据全部备份到备份服务器中。 这时由于用户使用存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rsync 数据镜像备份工具">
+<meta property="og:url" content="http://example.com/2019/11/19/Rsync%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%E4%B8%8E%E9%83%A8%E7%BD%B2/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="Rsync 数据镜像备份工具  Rsync 是一款实现全量及增量复制同步的软件 具有开源，快速，多功能，全量及增量本地同步和多平台的特性 增量本地同步以 delta-transfer 算法闻名可减少内网带宽。（具体实现方法见下文）    什么是增量同步？  ​    假如一个存储服务器要备份的目录大小为10G，第一次备份到备份服务器使用全量备份及所有数据全部备份到备份服务器中。 这时由于用户使用存">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linuxlinux-04-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linuxlinux-04-1.png">
+<meta property="article:published_time" content="2019-11-19T15:45:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.468Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="Linux 服务">
+<meta property="article:tag" content="课程实战">
+<meta property="article:tag" content="Rsync">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linuxlinux-04-2.png">
+  
+  <title>Rsync 数据镜像备份工具 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Rsync 数据镜像备份工具">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-11-19 23:45" pubdate>
+        2019年11月19日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      5.7k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      18 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Rsync 数据镜像备份工具</h1>
+            
+            <div class="markdown-body">
+              <h1 id="Rsync-数据镜像备份工具"><a href="#Rsync-数据镜像备份工具" class="headerlink" title="Rsync 数据镜像备份工具"></a>Rsync 数据镜像备份工具</h1><br>
+
+<p><strong><a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/centos/7.8.2003/os/x86_64/Packages/rsync-3.1.2-10.el7.x86_64.rpm?spm=a2c6h.13651111.0.0.5b472f70CV6308&file=rsync-3.1.2-10.el7.x86_64.rpm">Rsync</a> 是一款实现全量及增量复制同步的软件</strong></p>
+<p>具有开源，快速，多功能，全量及增量本地同步和多平台的特性</p>
+<p><strong>增量本地同步以 delta-transfer 算法闻名可减少内网带宽。（具体实现方法见下文）</strong></p>
+<br>
+<br>
+
+<h2 id="什么是增量同步？"><a href="#什么是增量同步？" class="headerlink" title="什么是增量同步？"></a>什么是增量同步？</h2><br>
+
+<p>​    假如一个存储服务器要备份的目录大小为10G，第一次备份到备份服务器使用<strong>全量备份</strong>及所有数据全部备份到备份服务器中。</p>
+<p>这时由于用户使用存储服务器目录大小增至15G，普通备份软件还是默认采用全量备份方式，效率较低浪费内网带宽。而使用 Rsync 备份采用<strong>增量传输</strong>方式，只传输增加的5G数据效率上大大提高。 </p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linuxlinux-04-2.png" srcset="/img/loading.gif" lazyload alt="linux-04-2"></p>
+<br>
+
+<h2 id="服务命令简单应用"><a href="#服务命令简单应用" class="headerlink" title="服务命令简单应用"></a>服务命令简单应用</h2><br>
+
+<p><strong>Rsync 一个命令可以替换4个命令的应用效果</strong><br><br></p>
+<p><strong>1.rsync = cp 效果</strong><br><br></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs shell">rsync -a = cp -a<br>cp -a /etc/hosts /tmp/<br><br>[root@backup ~]# cp -a /etc/hosts /tmp/<br>[root@backup ~]# ll /tmp/<br><br>-rw-r--r--. 1 root root 352 Jan 17 21:25 hosts<br><br>[root@backup ~]# rsync -a /etc/sysconfig/network /tmp/<br>ll /tmp/<br><br>-rw-r--r--. 1 root root 352 Jan 27 01:15 hosts<br></code></pre></td></tr></table></figure>
+
+<p><strong>2.rsync = scp</strong><br><br></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@backup ~]# scp -rp /tmp/ 172.16.1.31:/tmp/<br>-r 表示数据目录递归 -p 表示保持属性<br>[root@backup ~]# rsync -rp /tmp/ 172.16.1.31:/tmp/<br></code></pre></td></tr></table></figure>
+
+
+
+
+<br>
+
+<p><strong>说明：</strong></p>
+<p>同步数据时，<code>/tmp/</code>目录后有<code>/</code>，表示将目录下面的数据内容进行备份同步。<br><br>同步数据时，<code>/tmp</code>目录后没有<code>/</code>，表示将目录及目录下面的数据内容进行备份同步。</p>
+<br>
+<br>
+
+<p><strong>3.rsync = rm</strong><br><br></p>
+<p><strong>说明：</strong></p>
+<p>rsync实现删除目录中数据内容过程，就将一个空目录和一个有数据的目录进行同步<br>最终，会将有数据的目录中的文件进行清空。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">rsync -r --delete /null/ /tmp/<br></code></pre></td></tr></table></figure>
+
+<p><strong>3.rsync == ls</strong></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">ls -l <span class="hljs-regexp">/etc/</span>hosts<br>rsync <span class="hljs-regexp">/etc/</span>hosts<br></code></pre></td></tr></table></figure>
+<br>
+
+<h2 id="七大特性总结"><a href="#七大特性总结" class="headerlink" title="七大特性总结"></a>七大特性总结</h2><br>
+
+<p>:::tip 特性总结</p>
+<ol>
+<li><p>支持拷贝普通文件与特殊文件如链接文件、设备文件等。</p>
+</li>
+<li><p>支持排除指定文件目录，排除功能类似于tar打包命令中的排除。</p>
+</li>
+<li><p>支持保持源文件或目录属性信息不变。</p>
+</li>
+<li><p>支持增量同步，即只同步变化的数据，提升数据传输效率。</p>
+</li>
+<li><p>支持使用rcp、rsh、ssh等方式来配合进行隧道加密传输文件。</p>
+</li>
+<li><p>支持使用通过socket （守护进程方式）传输文件或目录数据信息。</p>
+</li>
+<li><p>支持用户认证方式传输数据提升数据同步安全性。</p>
+<p>::: </p>
+<br></li>
+</ol>
+<h2 id="数据同步原理"><a href="#数据同步原理" class="headerlink" title="数据同步原理"></a>数据同步原理</h2><br>
+
+<p>​    <strong>Quick check</strong> 算法是根据文件或目录的权限、修改时间、发生变化的目录或文件、所有者、所有组等属性的变化进行的增量同步。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs sh">rsync 的参数说明<br><br>-v        详细模式输出，传输时显示信息<br>-z        传输时进行压缩，提高效率<br>-a        表示以递归方式传输文件，又包含了 rtopgDl参数<br>-r        递归<br>-t        保持文件时间信息<br>-o        保持文件属主信息<br>-p        保持文件权限<br>-g        保持文件属组信息<br>-D        设备文件信息<br>-l        保留软链接<br>-P        显示传输的进度信息        <br>-e        指定用什么隧道<br></code></pre></td></tr></table></figure>
+
+<p>隧道模式传输：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">rsync -avz -e &quot;ssh -p 22&quot; /etc/hosts 172.16.1.31:/backup<br><br>--exclude               指定排除不需要的传输文件信息<br>--exclude-from=文件      文件所在的目录文件，即可实现排除多个文件<br>--bwlimit=速率           设置速率<br>--delete                无差异同步<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<br>
+
+<p>指定相应的参数，可以实现只同步一个文件里有变化的内容部分。</p>
+<p><strong>根据特定文件属性状态差异进行对比差异增量同步</strong> </p>
+<br>
+<br>
+<br>
+<br>
+
+<h2 id="工作方式"><a href="#工作方式" class="headerlink" title="工作方式"></a>工作方式</h2><br>
+
+<p><strong>本地数据同步（类似与cp）</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sql">格式:  rsync [OPTION...] SRC... [DEST]<br><br>rsync            <span class="hljs-comment">-- 数据同步命令</span><br><br>[OPTION...]      <span class="hljs-comment">-- 命令参数信息</span><br><br>SRC              <span class="hljs-comment">-- 要同步的数据信息（文件或目录）</span><br><br>[DEST]           <span class="hljs-comment">-- 将数据传输到什么位置（目标）</span><br></code></pre></td></tr></table></figure>
+<br>
+
+<p><strong>实际操作演示</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell"><br>[root@backup ~]# rsync /etc/hosts /tmp/&lt;br&gt;<br><br>[root@backup ~]# ls /tmp/hosts &lt;br&gt;<br><br>/tmp/hosts<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>远程数据同步方式（类似scp）</strong><br><br></p>
+<p><strong>此类型又叫做隧道传输</strong></p>
+<p>又分为拉和推两种方式</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs sql">Pull: rsync [OPTION...] [<span class="hljs-keyword">USER</span>@]HOST:SRC... [DEST]<br><br>Pull（拉）:<br>[<span class="hljs-keyword">USER</span>@]      <span class="hljs-comment">-- 表示以什么用户身份传输数据信息</span><br>HOST:        <span class="hljs-comment">-- 远程主机信息（IP地址信息 主机名称信息）</span><br>SRC...       <span class="hljs-comment">-- 表示远端要拉过来的数据信息</span><br>[DEST]       <span class="hljs-comment">-- 拉到本地什么位置</span><br>Push: rsync [OPTION...] SRC... [<span class="hljs-keyword">USER</span>@]HOST:DEST<br><br>Push（推）:<br>SRC...          <span class="hljs-comment">-- 本地要推过去的数据信息</span><br>[DEST]        <span class="hljs-comment">-- 推到什么位置</span><br>[<span class="hljs-keyword">USER</span>@]             <span class="hljs-comment">-- 表示以什么用户身份传输数据信息</span><br>HOST:        <span class="hljs-comment">-- 远程主机信息（IP地址信息 主机名称信息）</span><br></code></pre></td></tr></table></figure>
+<br>
+
+<p><strong>实际操作演示</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell"><br>rsync  /tmp/ root@10.0.0.1:/test 推<br><br>把本地的 /tmp/ 目录中的文件复制到10.0.0.1 的 /test 目录下<br><br><br>rsync  root@10.0.0.2:/tmp/ /test  拉<br><br>把10.0.0.2 的 /tmp/ 目录文件复制到本地的 /test目录中<br><br></code></pre></td></tr></table></figure>
+<br>
+
+<h2 id="守护进程部署——服务端"><a href="#守护进程部署——服务端" class="headerlink" title="守护进程部署——服务端"></a>守护进程部署——服务端</h2><br>
+
+<ol>
+<li>确认软件安装 &nbsp;<code>rpm -qa rsyan</code> 或 <code>rpm -qa | grep rsyn*</code></li>
+<li>配置文件编写 &nbsp;<code>vim /etc/rsyncd.conf</code></li>
+<li>创建用户     &nbsp;<code>useradd -s /sbin/nologin -M rsync</code> </li>
+<li>创建备份目录 &nbsp;<code>mkdir /backup -p &amp;&amp; chown -R rsync.rsync /backup/</code></li>
+<li>创建认证文件 &nbsp;<code>echo &quot;rsync_backup:123456&quot; &gt;/etc/rsync.password &amp;&amp; chmod 600 /etc/rsync.password</code></li>
+<li>启动rsync服务&nbsp;命令：&nbsp;<code>rsync --daemon</code> 查看进程&nbsp;&nbsp;<code>ps -ef | grep rsync</code></li>
+</ol>
+<br>
+
+<br>
+
+<h2 id="守护进程配置文件信息说明"><a href="#守护进程配置文件信息说明" class="headerlink" title="守护进程配置文件信息说明"></a>守护进程配置文件信息说明</h2><br>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-Linuxlinux-04-1.png" srcset="/img/loading.gif" lazyload alt="linux-04-1"></p>
+<h2 id="守护进程部署——客户端"><a href="#守护进程部署——客户端" class="headerlink" title="守护进程部署——客户端"></a>守护进程部署——客户端</h2><br>
+
+
+<p>1.确认软件安装   &nbsp;<code>rpm -qa rsyan</code> &nbsp;或&nbsp; <code>rpm -qa | grep rsyn*</code> <br><br>2.创建认证密码文件  &nbsp;<code>echo &quot;123456&quot; &gt;&gt;/etc/rsync.password</code> &nbsp;&amp;&amp;&nbsp; <code>chmod 600 /etc/rsync.password</code>&nbsp;<br><br>3.进行数据备份测试<br><br><br></p>
+<p><strong>客户端采取守护进程推送的方式来传输数据：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">rsync -avz /etc/hosts rsync_backup@10.0.0.2::backup --password-file=/etc/rsync.password<br></code></pre></td></tr></table></figure>
+
+
+<br>
+<br>
+
+<h2 id="备份服务常见错误总结"><a href="#备份服务常见错误总结" class="headerlink" title="备份服务常见错误总结"></a>备份服务常见错误总结</h2><br>
+<br>
+
+<p><strong>1.开启了 iptables防火墙 ：</strong><code>No route to host （113）</code></p>
+<p><strong>2.执行命令错误：</strong> <code>The remote path must start with a module</code> 模块名称错误</p>
+<p><strong>3.认证用户失败：</strong> <code>auth failed no module user</code></p>
+<p>①密码或用户名错误<br>②密码文件名不一致<br>③rsync_backup:123456&nbsp;不要有空格<br>④认证文件权限不是600<br>⑤客户端认证文件不用输入用户名</p>
+<br>
+
+<p><strong>4.权限阻止问题： <code>Permisson denied </code></strong><br><br></p>
+<p>①属主、属组不是rsync<br>②备份目录权限不是755</p>
+<br>
+
+<p><strong>5.rsync服务位置模块错误</strong></p>
+<p>【客户端的错误】</p>
+<p><code>Unknown module &#39;backup&#39; </code> </p>
+<p>【错误演示过程】</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@nfs01 tmp]# rsync -avz /etc/hosts rsync_backup@172.16.1.41::backup<br>@ERROR: Unknown module &#x27;backup&#x27;<br>rsync error: error starting client-server protocol (code 5) at main.c(1503) [sender=3.0.6] <br></code></pre></td></tr></table></figure>
+
+
+<p>【异常问题解决】</p>
+<p><code> /etc/rsyncd.conf</code>&nbsp;配置文件模块名称书写错误 </p>
+<br>
+
+<br>
+
+<p><strong>6.rsync服务备份目录异常</strong></p>
+<p>【客户端的错误】</p>
+<p><code> chdir failed</code>    </p>
+<p>【错误演示过程】 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@nfs01 tmp]# rsync -avz /etc/hosts rsync_backup@172.16.1.41::backup<br>Password: <br>@ERROR: chdir failed<br>rsync error: error starting client-server protocol (code 5) at main.c(1503) [sender=3.0.6]<br></code></pre></td></tr></table></figure>
+
+<p>【异常问题解决】</p>
+<p>①备份存储目录没有建立<br>②建立的备份存储目录和配置文件定义不一致</p>
+<br>
+<br>
+
+<p><strong>7.客户端执行慢</strong></p>
+<p>连接慢问题&nbsp;&nbsp; IP   ===  域名    反向DNS解析</p>
+<p>【错误日志信息】 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-number">2017</span><span class="hljs-operator">/</span><span class="hljs-number">03</span><span class="hljs-operator">/</span><span class="hljs-number">08</span> <span class="hljs-number">20</span>:<span class="hljs-number">14</span>:<span class="hljs-number">43</span> [<span class="hljs-number">3422</span>] name lookup failed <span class="hljs-keyword">for</span> <span class="hljs-number">172.16</span><span class="hljs-number">.1</span><span class="hljs-number">.31</span>: Name <span class="hljs-keyword">or</span> service <span class="hljs-keyword">not</span> known<br><span class="hljs-number">2017</span><span class="hljs-operator">/</span><span class="hljs-number">03</span><span class="hljs-operator">/</span><span class="hljs-number">08</span> <span class="hljs-number">20</span>:<span class="hljs-number">14</span>:<span class="hljs-number">43</span> [<span class="hljs-number">3422</span>] <span class="hljs-keyword">connect</span> <span class="hljs-keyword">from</span> <span class="hljs-literal">UNKNOWN</span> (<span class="hljs-number">172.16</span><span class="hljs-number">.1</span><span class="hljs-number">.31</span>)<br></code></pre></td></tr></table></figure>
+
+
+<p>【异常问题解决】</p>
+<p>在服务端 hosts文件中加入host主机地址与域名解析</p>
+<br>
+
+
+<h2 id="备份扩展功能实践"><a href="#备份扩展功能实践" class="headerlink" title="备份扩展功能实践"></a>备份扩展功能实践</h2><br>
+<br>
+
+
+
+
+<p><strong>① 守护进程多模块功能配置</strong></p>
+<p>第一步：修改配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/rsyncd.conf<br>[backup01]<br>comment = &quot;backup dir by ryanxin&quot;<br>path = /backup<br>[backup02]<br>comment = &quot;backup dir by ryanxin&quot;<br>path = /backup02<br></code></pre></td></tr></table></figure>
+
+<p>第二步：创建多模块目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">mkdir /backup02<br>chown -R rsync.rsync /backup02<br></code></pre></td></tr></table></figure>
+
+<p>第三步：重启服务程序</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">killall rsync<br>rsync --daemon<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+<p>第四步：进行测试检查</p>
+<br>
+
+<p><strong>② 守护进程的排除功能</strong></p>
+<br>
+
+<p><strong>数据备份排除方式：<code>--exclude</code></strong></p>
+<br>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sh">rsync -avz /text_dir/ --exclude=b --exclude=d rsync_backup@10.0.0.1::back01 <br>--password-file=/etc/rsync.password<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>也可以写成  <code>--exclude =&#123;b,d&#125;</code> 或者连续表示  <code>--exclude = &#123;b..d&#125;</code></p>
+<br>
+
+<p><strong>多个文件大量信息排除</strong></p>
+<br>
+
+<p>在要排除大量文件的时候你不可能一个一个排除就需要使用 <code>--exclude-from=file</code> </p>
+<p>指定一个文件在文件然后在文件里面写入你要排除的文件</p>
+<br>
+
+<p><strong>注意：要写相对路径！</strong></p>
+<br>
+
+<p><strong>例如：我想排除 a 和 b 文件</strong></p>
+<p><code>a</code>   每一行写一个文件的名字<br></p>
+<p><code>b</code>   一个文件名字</p>
+<p>文件名字为：<code>exclude_file.txt</code></p>
+<p><strong>命令如下：</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sh">rsync -avz /test_dir/ --exclude-from=./exclude_file.txt rsync_backup@172.16.1.41::backup01 --password-file=/etc/rsync.password<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<p><strong>③守护进程创建备份目录</strong></p>
+<br>
+
+<p>在配置文件模块后面加入/dba 目录 就可实现不同的目录机构</p>
+<p><code>backup01/dba</code></p>
+<br>
+
+<p><strong>命令如下：</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sh">rsync -avz /etc/hosts --exclude-from=./exclude_file.txt rsync_backup@172.16.1.41::backup01/sa/ --password-file=/etc/rsync.password<br><br>rsync -avz /etc/hosts --exclude-from=./exclude_file.txt rsync_backup@172.16.1.41::backup01/dev/ --password-file=/etc/rsync.password<br><br>rsync -avz /etc/hosts --exclude-from=./exclude_file.txt rsync_backup@172.16.1.41::backup01/dba/ --password-file=/etc/rsync.password<br></code></pre></td></tr></table></figure>
+
+
+
+
+<br>
+
+
+
+<p><strong>④ 守护进程的访问控制配置</strong></p>
+<br>
+
+<p><strong>三种情况：</strong></p>
+<ol>
+<li><p>只有白名单，白名单网段或主机信息允许。其余阻止</p>
+</li>
+<li><p>只有黑名单，黑名单网段或主机信息阻止，其余允许</p>
+</li>
+<li><p>有黑名单也要白名单，白名单网段或主机信息允许，黑名单网段或主机信息阻止，其余允许</p>
+<br></li>
+</ol>
+<p><strong>建议只选择前两种方式配置</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sh">hosts allow = 172.16.1.0/24<br><br>hosts deny = 0.0.0./32<br></code></pre></td></tr></table></figure>
+
+<br>
+<br>
+
+<p> <strong>⑤ 守护进程无差异同步配置</strong></p>
+<br>
+
+<p> <strong>我有的，你也有；我没有的，你也不能有</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">rsync -avz /test_dir/ --delete rsync_backup@172.16.1.41::backup01 <br>--password-file=/etc/rsync.password<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p> <strong>说明：一定要谨慎使用，否则可能会清空备份目录；<br>  如果要快速清空目录数据，也可以使用无差异同步清空</strong></p>
+<br>
+
+
+
+<p><strong>⑥ 守护进程的列表功能配置</strong></p>
+<p><code>list = false</code></p>
+<p><strong>说明：表示是否列表显示rsync服务端所有模块信息</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@nfs01 test_dir]# rsync rsync_backup@172.16.1.41::<br>backup01       	&quot;backup dir by oldboy&quot;<br>backup02       	&quot;backup dir by oldboy&quot;<br>会降低服务端安全性不建议开启<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p><strong>文章来源：</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.luffycity.com/">路飞学城</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dadonggg/p/8608612.html">西门大官人</a></p>
+<p>::: warning 申明<br>本页资源来源于互联网及公开渠道，仅供学习参考，版权归原创者所有! 如侵犯到您的权益，请及时通知我们！我们将在第一时间内删除。<br>:::</p>
+ <br>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E8%AF%BE%E7%A8%8B%E5%AE%9E%E6%88%98/">课程实战</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Rsync/">Rsync</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/11/20/%E9%9B%86%E7%BE%A4%E4%B8%BB%E6%9C%BA%E5%90%8DIP%E5%9C%B0%E5%9D%80%E8%A7%84%E5%88%92/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">集群伺服器地址規劃一覽表</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/11/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B9%8B%E4%B8%80/">
+                        <span class="hidden-mobile">伺服器集群架構之一</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

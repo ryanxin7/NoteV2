@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="第三章回顾 补充元数据查询部分[[toc]] 1.上节回顾1.1 group by name  分组   排序 对比 去重 1.2 关于group by 的sql_mode:::tip 说明 only_full_group_by  参数  在5.7版本中MySQL sql_mode参数中自带，5.6和8.0都没有 在带有group by 字句的select中，select 后的条件列（非主键列），">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第三章回顾 补充元数据查询部分">
+<meta property="og:url" content="http://example.com/2020/07/15/dba04/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="第三章回顾 补充元数据查询部分[[toc]] 1.上节回顾1.1 group by name  分组   排序 对比 去重 1.2 关于group by 的sql_mode:::tip 说明 only_full_group_by  参数  在5.7版本中MySQL sql_mode参数中自带，5.6和8.0都没有 在带有group by 字句的select中，select 后的条件列（非主键列），">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-5.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-6.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-7.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-8.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-9.png">
+<meta property="article:published_time" content="2020-07-14T19:13:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.444Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-1.png">
+  
+  <title>第三章回顾 补充元数据查询部分 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="第三章回顾 补充元数据查询部分">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-15 03:13" pubdate>
+        2020年7月15日 凌晨
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      3.3k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      10 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">第三章回顾 补充元数据查询部分</h1>
+            
+            <div class="markdown-body">
+              <h1 id="第三章回顾-补充元数据查询部分"><a href="#第三章回顾-补充元数据查询部分" class="headerlink" title="第三章回顾 补充元数据查询部分"></a>第三章回顾 补充元数据查询部分</h1><p>[[toc]]</p>
+<h2 id="1-上节回顾"><a href="#1-上节回顾" class="headerlink" title="1.上节回顾"></a>1.上节回顾</h2><h3 id="1-1-group-by-name-分组-排序-对比-去重"><a href="#1-1-group-by-name-分组-排序-对比-去重" class="headerlink" title="1.1 group by name  分组   排序 对比 去重"></a>1.1 group by name  分组   排序 对比 去重</h3><p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-1.png" srcset="/img/loading.gif" lazyload alt="day04-1.png"></p>
+<h3 id="1-2-关于group-by-的sql-mode"><a href="#1-2-关于group-by-的sql-mode" class="headerlink" title="1.2 关于group by 的sql_mode"></a>1.2 关于group by 的sql_mode</h3><p>:::tip 说明</p>
+<p><code>only_full_group_by </code> 参数</p>
+<ul>
+<li>在5.7版本中MySQL sql_mode参数中自带，5.6和8.0都没有</li>
+<li>在带有group by 字句的select中，select 后的条件列（非主键列），</li>
+<li>要么是group by后的列，要么需要在函数中包裹</li>
+</ul>
+<p>:::</p>
+<p><strong>关掉限制：</strong> 编辑配置文件时去掉 <code>ONLY_FULL_GROUP_BY</code></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-2.png" srcset="/img/loading.gif" lazyload alt="day04-2.png"></p>
+<h3 id="1-3-group-concat-多列-转为一行"><a href="#1-3-group-concat-多列-转为一行" class="headerlink" title="1.3 group_concat 多列 转为一行"></a>1.3 group_concat 多列 转为一行</h3><br>
+
+<p><strong>列转行聚合函数</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plsql">mysql&gt; select user,group_concat(host) from mysql.user group by user;<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-3.png" srcset="/img/loading.gif" lazyload alt="day04-3.png"></p>
+<br>
+
+
+
+<h3 id="1-4-concat-拼接语句-列值拼接"><a href="#1-4-concat-拼接语句-列值拼接" class="headerlink" title="1.4 concat  拼接语句 列值拼接"></a><strong>1.4 concat</strong>  <strong>拼接语句</strong> 列值拼接</h3><br>
+
+<p><strong>做列值拼接</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> concat(<span class="hljs-keyword">user</span>,&quot;@&quot;,host) <span class="hljs-keyword">from</span> mysql.user;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-4.png" srcset="/img/loading.gif" lazyload alt="day04-4.png"></p>
+<h3 id="1-5-关于多表连接语法规则"><a href="#1-5-关于多表连接语法规则" class="headerlink" title="1.5 关于多表连接语法规则"></a><strong>1.5</strong> 关于多表连接语法规则</h3><p>:::tip 多表连接语法规则</p>
+<ul>
+<li><p>1.首先找涉及到的所有表</p>
+</li>
+<li><p>2.找到表和表之间的关联列</p>
+</li>
+<li><p>3.关联条件写在 <code>on</code> 后面 <code>A join B on</code> 关联列</p>
+</li>
+<li><p>4.所有需要查询的信息放在select后 </p>
+</li>
+<li><p>5.其他的过滤条件 <code>where group by having order by limit</code> 往最后放</p>
+</li>
+<li><p>注意：对多表连接中，驱动表选择数据行少的表。后续所有表的关联列尽量是主键或唯一键（表设计），至少建立一个索引。</p>
+</li>
+</ul>
+<p> :::</p>
+<p>:::warning 注意 ❗</p>
+<p>数据行较少的放在左边（驱动表） 因为他要拿整表的数据和右边的表进行关联</p>
+<p>:::</p>
+<h3 id="1-6-创建别名"><a href="#1-6-创建别名" class="headerlink" title="1.6 创建别名"></a><strong>1.6</strong> 创建别名</h3><p><strong>表别名</strong></p>
+<p><strong>列别名</strong></p>
+<p>count</p>
+<p>oldguo  linux  a,b,c,d </p>
+<p>oldguo  python x，y,z </p>
+<p>oldboy  linux  10 </p>
+<p>hsw   python 11</p>
+<h3 id="1-7-distinct-去重复"><a href="#1-7-distinct-去重复" class="headerlink" title="1.7 distinct 去重复"></a><strong>1.7 distinct</strong> <strong>去重复</strong></h3><br>
+
+
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-built_in">count</span>(<span class="hljs-keyword">distinct</span> countrycode) <span class="hljs-keyword">from</span> city; <br><span class="hljs-operator">/</span><span class="hljs-operator">/</span>在城市表中 查看所有国家代号 去重复<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="1-8-select-执行顺序"><a href="#1-8-select-执行顺序" class="headerlink" title="1.8 select 执行顺序"></a><strong>1.8 select</strong> <strong>执行顺序</strong></h3><br>
+
+<br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> ,<span class="hljs-built_in">count</span>(name) <span class="hljs-keyword">from</span> 表  <span class="hljs-keyword">where</span> 列  <span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">having</span> 列  <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> 列 ;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>:::tip 查询语句执行顺序</p>
+<p>没有索引的情况下会把整表数据加载到内存中，进行过滤过滤后在内存中只留下满足条件的数据。 针对满足条件的数据进行分组 （group by ），在根据select 的条件列取列产生新的结果集，having会对结果集再进行一次过滤。order by 对列数据进行比较大小排列顺序 最后显示。</p>
+<p>:::</p>
+<br>
+
+<h2 id="2-扩展类内容-元数据获取"><a href="#2-扩展类内容-元数据获取" class="headerlink" title="2. 扩展类内容 元数据获取"></a><strong>2.</strong> 扩展类内容 元数据获取</h2><br>
+
+<h3 id="2-1-元数据介绍及获取介绍"><a href="#2-1-元数据介绍及获取介绍" class="headerlink" title="2.1 元数据介绍及获取介绍"></a><strong>2.1</strong> <strong>元数据介绍及获取介绍</strong></h3><br>
+
+<p>::: tip 元数据</p>
+<p>元数据是存储在”基表”中。</p>
+<p>通过专用的DDL语句，DCL语句进行修改</p>
+<p>通过专用视图和命令进行元数据的查询</p>
+<p><code>information_schema</code>中保存了大量元数据查询的试图</p>
+<p><code>show</code>  命令是封装好功能，提供元数据查询基础功能</p>
+<p>:::</p>
+<br>
+
+
+
+<p><strong>创建视图：</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-5.png" srcset="/img/loading.gif" lazyload alt="day04-5.png"></p>
+<br>
+
+<br>
+
+<p><strong>查询视图：</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-6.png" srcset="/img/loading.gif" lazyload alt="day04-6.png"></p>
+<p><strong>2.1 information_schema 的基本应用</strong></p>
+<p><strong>tables 视图的应用:</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> use information_schema;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">desc</span> tables;<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-7.png" srcset="/img/loading.gif" lazyload alt="day04-7.png"></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-8.png" srcset="/img/loading.gif" lazyload alt="day04-8.png"></p>
+<br>
+
+
+<p><strong>TABLES 和表有关的元数据</strong></p>
+<br>
+
+<table>
+<thead>
+<tr>
+<th><img width=100/>TABLE_SCHEMA<img width=100/></th>
+<th align="center"><img width=100/>表所在的库名<img width=100/></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TABLE_NAME</td>
+<td align="center">表名</td>
+</tr>
+<tr>
+<td>ENGINE</td>
+<td align="center">存储引擎</td>
+</tr>
+<tr>
+<td>TABLE_ROWS</td>
+<td align="center">数据行</td>
+</tr>
+<tr>
+<td>AVG_ROW_LENGTH</td>
+<td align="center">平均行长度</td>
+</tr>
+<tr>
+<td>INDEX_LENGTH</td>
+<td align="center">索引长度</td>
+</tr>
+</tbody></table>
+<p><strong>举例说明：</strong></p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf">USE information_schema<span class="hljs-comment">; </span><br>DESC TABLES<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><strong>显示所有的库和表的信息</strong></li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> table_schema,table_name <span class="hljs-keyword">FROM</span> information_schema.tables;<br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><strong>显示所有的库和表的信息（结果集多行转成一行）</strong>  </li>
+</ul>
+<p>world 库下  <code>city,country,country,language</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> table_schema,GROUP_CONCAT(table_name) <br><span class="hljs-keyword">FROM</span> information_schema.tables<br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> table_schema;<br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>查询所有<strong>innodb</strong>引擎的表</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> table_schema,table_name ,ENGINE<br><span class="hljs-keyword">FROM</span> information_schema.tables <br><span class="hljs-keyword">WHERE</span> ENGINE<span class="hljs-operator">=</span><span class="hljs-string">&#x27;innodb&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><strong>统计world下的city表占用空间大小</strong></li>
+</ul>
+<p>$$<br>公式：表的数据量=平均行长度*行数+索引长度<br>$$</p>
+<p> <code>AVG_ROW_LENGTH*TABLE_ROWS+INDEX_LENGTH</code>  统计整个city 表的真实数据量大小</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> table_name,(AVG_ROW_LENGTH<span class="hljs-operator">*</span>TABLE_ROWS<span class="hljs-operator">+</span>INDEX_LENGTH)<span class="hljs-operator">/</span><span class="hljs-number">1024</span> <span class="hljs-operator">/</span><span class="hljs-operator">/</span>kb显示<br><span class="hljs-keyword">FROM</span> information_schema.TABLES<br><span class="hljs-keyword">WHERE</span> table_schema<span class="hljs-operator">=</span><span class="hljs-string">&#x27;world&#x27;</span> <span class="hljs-keyword">AND</span> table_name<span class="hljs-operator">=</span><span class="hljs-string">&#x27;city&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>统计每个库的数据量大小，并按数据量从大到小排序</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> table_schema,<span class="hljs-built_in">SUM</span>((AVG_ROW_LENGTH<span class="hljs-operator">*</span>TABLE_ROWS<span class="hljs-operator">+</span>INDEX_LENGTH))<span class="hljs-operator">/</span><span class="hljs-number">1024</span> <span class="hljs-keyword">AS</span> total_KB    ( 库中有多个表 所以需要加一起 使用 SUM 函数)<br><span class="hljs-keyword">FROM</span> information_schema.TABLES<br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> table_schema 库名排队<br><span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">AS</span> total_KB <span class="hljs-keyword">DESC</span> ; 排序<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="2-2-配合concat-函数拼接语句或命令"><a href="#2-2-配合concat-函数拼接语句或命令" class="headerlink" title="2.2. 配合concat( )函数拼接语句或命令"></a><strong>2.2.</strong> <strong>配合concat( )函数拼接语句或命令</strong></h3><p><strong>举例说明：</strong></p>
+<ul>
+<li>模仿以下语句,进行数据库的分库分表备份。</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysqldump <span class="hljs-operator">-</span>uroot <span class="hljs-operator">-</span>p123 world city <span class="hljs-operator">&gt;</span><span class="hljs-operator">/</span>bak<span class="hljs-operator">/</span>world_city.sql  <span class="hljs-operator">/</span><span class="hljs-operator">/</span>分库分表备份<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>拼接语句：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span><br>CONCAT(&quot;mysqldump -uroot -p123 &quot;,table_schema,&quot; &quot;,table_name<br>,&quot; &gt;/bak/&quot;,table_schema,&quot;_&quot;,table_name,&quot;.sql&quot;)<br><span class="hljs-keyword">FROM</span> information_schema.tables;<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day04-9.png" srcset="/img/loading.gif" lazyload alt="day04-9.png"></p>
+<ul>
+<li><strong>模仿以下语句,进行批量生成对world库下所有表进行操作</strong></li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> world.city DISCARD TABLESPACE;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>拼接语句：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <br>CONCAT(&quot;ALTER TABLE &quot;,table_schema,&quot;.&quot;,table_name,&quot; DISCARD TABLESPACE;&quot;)<br><span class="hljs-keyword">FROM</span> information_schema.tables<br><span class="hljs-keyword">WHERE</span> table_schema<span class="hljs-operator">=</span><span class="hljs-string">&#x27;world&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-3-show-常用命令介绍"><a href="#2-3-show-常用命令介绍" class="headerlink" title="2.3 show 常用命令介绍"></a><strong>2.3 show 常用命令介绍</strong></h3><table>
+<thead>
+<tr>
+<th align="left"><img width=136/>主要命令<img width=136/></th>
+<th><img width=136/>作用说明<img width=136/></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">show databases;</td>
+<td>查看数据库名</td>
+</tr>
+<tr>
+<td align="left">show tables;</td>
+<td>查看表名</td>
+</tr>
+<tr>
+<td align="left">show create database xx;</td>
+<td>查看建库语句</td>
+</tr>
+<tr>
+<td align="left">show create table xx;</td>
+<td>查看建表语句</td>
+</tr>
+<tr>
+<td align="left">show processlist;</td>
+<td>查看所有用户连接情况</td>
+</tr>
+<tr>
+<td align="left">show charset;</td>
+<td>查看支持的字符集</td>
+</tr>
+<tr>
+<td align="left">show collation;</td>
+<td>查看所有支持的校对规则</td>
+</tr>
+<tr>
+<td align="left">show grants for xx;</td>
+<td>查看用户的权限信息</td>
+</tr>
+<tr>
+<td align="left">show variables like ‘%xx%’</td>
+<td>查看参数信息</td>
+</tr>
+<tr>
+<td align="left">show engines;</td>
+<td>查看所有支持的存储引擎类型</td>
+</tr>
+<tr>
+<td align="left">show index from xxx</td>
+<td>查看表的索引信息</td>
+</tr>
+<tr>
+<td align="left">show engine innodb status\G</td>
+<td>查看innoDB引擎详细状态信息</td>
+</tr>
+<tr>
+<td align="left">show binary logs</td>
+<td>查看二进制日志的列表信息</td>
+</tr>
+<tr>
+<td align="left">show binlog events in ‘二进制文件名’</td>
+<td>查看二进制日志的事件信息</td>
+</tr>
+<tr>
+<td align="left">show master status ;</td>
+<td>查看mysql当前使用二进制日志信息</td>
+</tr>
+<tr>
+<td align="left">show slave status\G</td>
+<td>查看从库状态信息</td>
+</tr>
+<tr>
+<td align="left">show status like ‘’</td>
+<td>查看数据库整体状态信息</td>
+</tr>
+<tr>
+<td align="left">help show ;</td>
+<td>查看更多</td>
+</tr>
+<tr>
+<td align="left">show relaylog events in ‘’</td>
+<td>查看中继日志的事件信息</td>
+</tr>
+</tbody></table>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/15/dba04-2/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">索引原理介绍创建与执行计划分析</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/15/dba05/">
+                        <span class="hidden-mobile">存储引擎介绍与企业案例</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

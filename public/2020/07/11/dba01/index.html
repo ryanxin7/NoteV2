@@ -1,0 +1,704 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content=":::tip
+   数据库是数据管理的有效技术，是由一批数据构成的有序集合，这些数据被存放在结构化的数据表里。数据表之间相互关联，反映客观事物间的本质联系。数据库能有效地帮助一个组织或企业科学地管理各类信息资源。数据是数据库中存储的基本对象，是按一定顺序排列组合的物理符号。
+   数据有多种表现形式，可以是数字、文字、图像，甚至是音频或视频，它们都可以经过数字化后存入计算机。数据库是数据的集合，具">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content=":::tip    数据库是数据管理的有效技术，是由一批数据构成的有序集合，这些数据被存放在结构化的数据表里。数据表之间相互关联，反映客观事物间的本质联系。数据库能有效地帮助一个组织或企业科学地管理各类信息资源。数据是数据库中存储的基本对象，是按一定顺序排列组合的物理符号。    数据有多种表现形式，可以是数字、文字、图像，甚至是音频或视频，它们都可以经过数字化后存入计算机。数据库是数据的集合，具">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库版本介绍与安装">
+<meta property="og:url" content="http://example.com/2020/07/11/dba01/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content=":::tip    数据库是数据管理的有效技术，是由一批数据构成的有序集合，这些数据被存放在结构化的数据表里。数据表之间相互关联，反映客观事物间的本质联系。数据库能有效地帮助一个组织或企业科学地管理各类信息资源。数据是数据库中存储的基本对象，是按一定顺序排列组合的物理符号。    数据有多种表现形式，可以是数字、文字、图像，甚至是音频或视频，它们都可以经过数字化后存入计算机。数据库是数据的集合，具">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-2.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-3.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-4.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-5.png">
+<meta property="article:published_time" content="2020-07-11T14:43:01.000Z">
+<meta property="article:modified_time" content="2021-11-16T01:43:55.036Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-1.png">
+  
+  <title>数据库版本介绍与安装 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="数据库版本介绍与安装">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-11 22:43" pubdate>
+        2020年7月11日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.6k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      14 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">数据库版本介绍与安装</h1>
+            
+            <div class="markdown-body">
+              <p>:::tip</p>
+<p>   数据库是数据管理的有效技术，是由一批数据构成的有序集合，这些数据被存放在结构化的数据表里。数据表之间相互关联，反映客观事物间的本质联系。数据库能有效地帮助一个组织或企业科学地管理各类信息资源。数据是数据库中存储的基本对象，是按一定顺序排列组合的物理符号。</p>
+<p>   数据有多种表现形式，可以是数字、文字、图像，甚至是音频或视频，它们都可以经过数字化后存入计算机。数据库是数据的集合，具有统一的结构形式并存放于统一的存储介质内，是多种应用数据的集成，并可被各个应用程序所共享。<br>:::</p>
+<span id="more"></span>
+
+<h2 id="1-DBA-职业素养"><a href="#1-DBA-职业素养" class="headerlink" title="1. DBA 职业素养"></a>1. DBA 职业素养</h2><p>::: tip   职业素养</p>
+<p><strong>人品</strong>:  权利越大责任越大，要禁得住诱惑，严禁私自偷卖企业数据或向他人泄露秘钥信息。</p>
+<p><strong>严谨</strong>:  操作数据库执行修改、删除类的命令时再三考虑，同事安排工作落实到笔头上，要有理论或者实践的支撑没测试过的参数绝对不能上生产环境。</p>
+<p><strong>细心</strong>：请收起好奇心，做到敏感内容不听、不看、不问学会保护自己，把最简单的事情做的最漂亮，最专业。</p>
+<p><strong>心态</strong>：在压力较大环境下做到不慌不乱，别惹事，出事别怕事。操作失误第一时间上报领导，不要自作主张操作。</p>
+<p>:::</p>
+<br>
+
+<h3 id="1-1-职业技能"><a href="#1-1-职业技能" class="headerlink" title="1.1 职业技能"></a><strong>1.1 职业技能</strong></h3><ul>
+<li>熟悉操作系统</li>
+<li>熟悉公司业务</li>
+<li>产品的功能</li>
+<li>用户的行为(热功能,热数据）</li>
+</ul>
+<h3 id="1-2-熟悉行业"><a href="#1-2-熟悉行业" class="headerlink" title="1.2 熟悉行业"></a><strong>1.2 熟悉行业</strong></h3><ul>
+<li>熟悉行业发展趋势</li>
+<li>了解版本新特性及使用率</li>
+<li>数据库产品类型</li>
+<li>定期参加 <a target="_blank" rel="noopener" href="https://db-engines.com/en/ranking">数据库大会</a></li>
+</ul>
+<br>
+
+<p><strong>喜欢数据库</strong>：体验很重要 </p>
+<br>
+
+<p><strong>其实成功的门槛并不拥挤，因为大部分人在路上就放弃了。</strong>—— <a target="_blank" rel="noopener" href="https://www.jianshu.com/u/44068ed972c7">Oldguo</a> </p>
+<br>
+
+<br>
+
+<h2 id="2-数据库产品"><a href="#2-数据库产品" class="headerlink" title="2. 数据库产品"></a>2. 数据库产品</h2><p>4.1 什么是数据？</p>
+<p>4.2 DBMS 数据库管理系统</p>
+<p>RDBMS ： Oracle ，MySQL ，PG，MSSQL</p>
+<p>NoSQL ： MongoDB ，Redis ，ES</p>
+<p>NEWSQL （分布式）： TiDB，Spanner ，AliSQL(RDS+DRDS) ，OB ，PolarDB</p>
+<h3 id="2-1-MySQL-版本选择"><a href="#2-1-MySQL-版本选择" class="headerlink" title="2.1 MySQL 版本选择"></a>2.1 MySQL 版本选择</h3><table>
+<thead>
+<tr>
+<th>现阶段企业生产主要版本</th>
+<th>更新版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>5.6</td>
+<td>5.6.34 ， 5.6.36 ，<strong>5.6.38</strong>（2017913） ，5.6.40</td>
+</tr>
+<tr>
+<td>5.7</td>
+<td>5.7.18 ，<strong>5.7.20</strong>（2017913） ，5.7.24 ，<strong>5.7.26</strong></td>
+</tr>
+<tr>
+<td>8.0</td>
+<td>8.0.14， 8.0.15 ，<strong>8.0.16</strong></td>
+</tr>
+</tbody></table>
+<p><a target="_blank" rel="noopener" href="https://downloads.mysql.com/archives/community/">官网下载地址</a></p>
+<br>
+
+<br>
+
+<h3 id="2-2-MySQL安装方式"><a href="#2-2-MySQL安装方式" class="headerlink" title="2.2 MySQL安装方式"></a><strong>2.2 MySQL安装方式</strong></h3><ol>
+<li><strong>二进制文件安装：</strong> 💗 <code>较多使用</code></li>
+</ol>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-1.png" srcset="/img/loading.gif" lazyload alt="二进制文件安装"></p>
+<ol>
+<li><strong>RHEL RPM 包安装：</strong> </li>
+</ol>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-2.png" srcset="/img/loading.gif" lazyload alt="二进制文件安装"></p>
+<ol>
+<li><strong>源代码编译</strong></li>
+</ol>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-3.png" srcset="/img/loading.gif" lazyload alt="源代码编译"><br><br></p>
+<br>
+
+<h2 id="3-MySQL-二进制版本安装"><a href="#3-MySQL-二进制版本安装" class="headerlink" title="3. MySQL 二进制版本安装"></a>3. MySQL 二进制版本安装</h2><br>
+
+<h3 id="3-1-下载并上传软件至目录"><a href="#3-1-下载并上传软件至目录" class="headerlink" title="3.1 下载并上传软件至目录"></a>3.1 <strong>下载并上传软件至目录</strong></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@m01 ~]<span class="hljs-comment"># mkdir -p /server/tools</span><br><br>[root@m01 ~]<span class="hljs-comment"># cd /server/tools/</span><br><br>[root@m01 /server/tools]<span class="hljs-comment"># yum install -y lrzsz</span><br><br>[root@m01 /server/tools]<span class="hljs-comment"># ls</span><br><br>mysql-5.7.26-linux-glibc2.12-x86_64.tar.gz<br></code></pre></td></tr></table></figure>
+
+
+<p><strong>解压软件移动软件目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">[root@m01 /server/tools]<span class="hljs-comment"># tar xf mysql-5.7.26-linux-glibc2.12-x86_64.tar.gz </span><br><br>[root@m01 ~]<span class="hljs-comment"># mkdir /application</span><br><br>[root@m01 /server/tools]<span class="hljs-comment"># mv mysql-5.7.26-linux-glibc2.12-x86_64 /application/mysql</span><br></code></pre></td></tr></table></figure>
+
+
+<p><strong>用户的创建处理原始环境</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@m01 ~]# yum remove mariadb-libs-5.5.64-1.el7.x86_64  #卸载mariadb软件包<br><br>[root@m01 ~]# rpm -qa |grep mariadb<br><br>[root@m01 ~]# useradd -s /sbin/nologin mysql<br></code></pre></td></tr></table></figure>
+
+
+<p><strong>数据和软件部分独立开 (贴近生产)</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-4.png" srcset="/img/loading.gif" lazyload alt="数据和软件部分独立开"></p>
+<h3 id="3-2-设置环境变量"><a href="#3-2-设置环境变量" class="headerlink" title="3.2 设置环境变量"></a><strong>3.2 设置环境变量</strong></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/profile<br>export PATH=/application/mysql/bin:$PATH<br><br>[root@m01 ~]# source /etc/profile<br>[root@m01 ~]# mysql -V   #测试安装成功<br>mysql Ver 14.14 Distrib 5.7.26, for linux-glibc2.12 (x86_64) using EditLine wrapper<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="3-3-创建数据路径并授权"><a href="#3-3-创建数据路径并授权" class="headerlink" title="3.3 创建数据路径并授权"></a><strong>3.3 创建数据路径并授权</strong></h3><p><strong>添加一块新磁盘模拟数据盘，格式化并挂载磁盘。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@m01 ~]# mkfs.xfs /dev/sdc<br>[root@m01 ~]# mkdir /data<br>[root@m01 ~]# blkid  #查看硬盘UUID<br>[root@m01 ~]# vim /etc/fstab <br>[root@m01 ~]# UUID=&quot;b7fde522-aa37-412a-9584-8313a673c5cc&quot; /data xfs defaults 0 0<br>[root@m01 ~]# mount -a<br>[root@m01 ~]# df -h<br></code></pre></td></tr></table></figure>
+
+
+<p><strong>对目录授权</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">chown -R mysql.mysql /application/*<br>chown -R mysql.mysql /data<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-4-初始化数据（创建系统数据）"><a href="#3-4-初始化数据（创建系统数据）" class="headerlink" title="3.4 初始化数据（创建系统数据）"></a><strong>3.4 初始化数据（创建系统数据）</strong></h3><p>5.6 版本 数据库初始化命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">/application/mysql/scripts/mysql_install_db <br></code></pre></td></tr></table></figure>
+
+
+<p>5.7 版本及之后版本数据库初始化命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@m01 ~]# mkdir /data/mysql/data -p <br>[root@m01 ~]# chown -R mysql.mysql /data<br>[root@m01 ~]# mysqld --initialize --user=mysql --basedir=/application/mysql --datadir=/data/mysql/data <br></code></pre></td></tr></table></figure>
+
+<br>
+
+<p>:::tip 5.7 版本说明</p>
+<p><strong>–initialize 参数：</strong> <strong>做了什么？</strong></p>
+<p><strong>对于密码复杂度进行定制：12位，4种</strong> </p>
+<p><strong>密码过期时间：180天</strong></p>
+<p><strong>给root@localhost用户设置临时密码</strong></p>
+<p>:::</p>
+<br>
+
+<br>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs shell">报错:mysqld: error while loading shared libraries: libaio.so.1: cannot open shared object file: No such file or directory<br><br>解决：[root@m01 ~]# yum install -y libaio-devel<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@m01 ~]# mysqld --initialize --user=mysql --basedir=/application/mysql --datadir=/data/mysql/data<br>2020-02-13T05:22:37.726244Z 1 [Note] A temporary password is generated for root@localhost: =srV_)56)s4s<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<p><strong>无临时密码方式 初始化方式</strong>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@m01 /data/mysql/data]# \rm -rf /data/mysql/data/*<br>[root@m01 ~]# mysqld --initialize-insecure --user=mysql --basedir=/application/mysql --datadir=/data/mysql/data<br></code></pre></td></tr></table></figure>
+
+
+<p> <strong>数据库配置文件的编写</strong></p>
+<br>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell">vim /etc/my.cnf <br>[mysqld]<br>user=mysql<br>basedir=/application/mysql<br>datadir=/data/mysql/data<br>socket=/tmp/mysql.sock<br>server_id=6 <br>port=3306<br>[mysql]<br>socket=/tmp/mysql.sock<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<h3 id="3-5-启动数据库："><a href="#3-5-启动数据库：" class="headerlink" title="3.5 启动数据库："></a><strong>3.5 启动数据库</strong>：</h3><p>两种方式启动：</p>
+<p><strong>1. sys-v</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@db01 /etc/init.d]# cp /application/mysql/support-files/mysql.server /etc/init.d/mysqld <br>[root@db01 /etc/init.d]# service mysqld restart<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>2. systemd</strong> </p>
+<p>注意： sysv方式启动过的话，需要先提前关闭，才能以下方式登录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs shell">cat &gt;/etc/systemd/system/mysqld.service &lt;&lt;EOF<br>[Unit]<br>Description=MySQL Server<br>Documentation=man:mysqld(8)<br>Documentation=http://dev.mysql.com/doc/refman/en/using-systemd.html<br>After=network.target<br>After=syslog.target<br>[Install]<br>WantedBy=multi-user.target<br>[Service]<br>User=mysql<br>Group=mysql<br>ExecStart=/application/mysql/bin/mysqld --defaults-file=/etc/my.cnf<br>LimitNOFILE = 5000<br>EOF<br></code></pre></td></tr></table></figure>
+
+<br>
+
+<br>
+
+<h3 id="3-6-如何分析处理无法启动问题"><a href="#3-6-如何分析处理无法启动问题" class="headerlink" title="3.6 如何分析处理无法启动问题"></a><strong>3.6 如何分析处理无法启动问题</strong></h3><p>without updating PID 类似错误 </p>
+<p><strong>查看日志：</strong></p>
+<p><code>/data/mysql/data/主机名.err</code> </p>
+<p><strong>[ERROR] 上下文</strong></p>
+<p><strong>可能情况：</strong></p>
+<p><code>/etc/my.cnf</code>  路径不对等</p>
+<p><code>/tmp/mysql.sock </code>文件修改过 或 删除过 </p>
+<p>数据目录权限不是 mysql</p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/day01-5.png" srcset="/img/loading.gif" lazyload alt="数据目录权限不是 mysql"></p>
+<p><strong>第二种排错方法：</strong></p>
+<p>数据库启动不了直接使用命令行启动 ，会把启动过程打印到屏幕</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">/application/mysql/bin/mysql --defaults-file=/etc/my.cnf<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-7-本地管理员密码的设定"><a href="#3-7-本地管理员密码的设定" class="headerlink" title="3.7 本地管理员密码的设定"></a><strong>3.7 本地管理员密码的设定</strong></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@db01 ~]# mysqladmin -uroot -p password xin123<br>Enter password: <br></code></pre></td></tr></table></figure>
+
+<p><strong>管理员用户密码忘记了？</strong></p>
+<p>临时性方法</p>
+<p><code>--skip-grant-tables 跳过授权表</code></p>
+<p><code>--skip-networking  跳过远程登录</code></p>
+<p><strong>关闭数据库</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs shell">[root@db01 ~]# /etc/init.d/mysqld stop<br>Shutting down MySQL.. SUCCESS! <br></code></pre></td></tr></table></figure>
+
+<p><strong>启动数据库到维护模式</strong></p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs autoit">[root<span class="hljs-symbol">@db01</span> ~]<span class="hljs-meta"># mysqld_safe --skip-grant-tables --skip-networking &amp;</span><br></code></pre></td></tr></table></figure>
+
+
+<p><strong>登录数据库内并修改密码</strong></p>
+<p><strong>第一种方法</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>,host,authentication_string <span class="hljs-keyword">from</span> mysql.user；<br>mysql.userflush privileges;<br><span class="hljs-keyword">grant</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">to</span> root@<span class="hljs-string">&#x27;localhost&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;1&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p><strong>第二种方法：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">alter</span> <span class="hljs-keyword">user</span> root@<span class="hljs-string">&#x27;localhost&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;1&#x27;</span>;<br>ERROR <span class="hljs-number">1290</span> (HY000): The MySQL server <span class="hljs-keyword">is</span> <span class="hljs-keyword">running</span> <span class="hljs-keyword">with</span> the <span class="hljs-comment">--skip-grant-tables option so it cannot execute this statement</span><br>mysql<span class="hljs-operator">&gt;</span> flush privileges;<br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">alter</span> <span class="hljs-keyword">user</span> root@<span class="hljs-string">&#x27;localhost&#x27;</span> identified <span class="hljs-keyword">by</span> <span class="hljs-string">&#x27;1&#x27;</span>;<br><br>Query OK, <span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> affected (<span class="hljs-number">0.01</span> sec)<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<br>
+
+<p><strong>关闭数据库，正常启动验证</strong></p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/12/dba02/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">体系结构及管理</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/11/22/webserver/">
+                        <span class="hidden-mobile">HTTP 协议与网站原理介绍</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

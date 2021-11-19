@@ -1,0 +1,594 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="Keepalived 高可用服务部署 Keepalived 软件最早是配合 LVS 负载均衡软件而设计的，     用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了VRRP 协议可以实现高可用的功能。   Keepalived软件主要是通过 VRRP 协议实现高可用功能的。VRRP 是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写，V">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Keepalived 高可用服务部署">
+<meta property="og:url" content="http://example.com/2019/11/20/Keepalived%20%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="Keepalived 高可用服务部署 Keepalived 软件最早是配合 LVS 负载均衡软件而设计的，     用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了VRRP 协议可以实现高可用的功能。   Keepalived软件主要是通过 VRRP 协议实现高可用功能的。VRRP 是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写，V">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-11-20T15:45:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.466Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="Linux 学习之旅">
+<meta property="article:tag" content="高可用">
+<meta property="article:tag" content="Linux 服务">
+<meta name="twitter:card" content="summary_large_image">
+  
+  <title>Keepalived 高可用服务部署 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Keepalived 高可用服务部署">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2019-11-20 23:45" pubdate>
+        2019年11月20日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.6k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      15 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Keepalived 高可用服务部署</h1>
+            
+            <div class="markdown-body">
+              <h2 id="Keepalived-高可用服务部署"><a href="#Keepalived-高可用服务部署" class="headerlink" title="Keepalived 高可用服务部署"></a>Keepalived 高可用服务部署</h2><br>
+Keepalived 软件最早是配合 LVS 负载均衡软件而设计的，
+    用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了VRRP 协议可以实现高可用的功能。
+<p style="overflow-wrap: break-word;margin-top: 1.5em;margin-bottom: 1.5em;line-height: 2em;"><span style="color: rgb(51, 51, 51); font-family: &quot;pingfang SC&quot;, &quot;helvetica neue&quot;, arial, &quot;hiragino sans gb&quot;, &quot;microsoft yahei ui&quot;, &quot;microsoft yahei&quot;, simsun, sans-serif; white-space: pre-wrap;">  Keepalived软件主要是通过 VRRP 协议实现高可用功能的。VRRP 是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写，VRRP出现的目的就是为了解决静态路由单点故障问题的，它能够保证当个别节点宕机时，整个网络可以不间断地运行
+  <br>
+
+
+<h2 id="Keepalived-软件工作原理"><a href="#Keepalived-软件工作原理" class="headerlink" title="Keepalived 软件工作原理"></a>Keepalived 软件工作原理</h2><br>
+        期初 VRRP 的出现是为了解决静态路由的单点故障。
+    VRRP 是用过IP多播的方式实现高可用对之间通信的。
+    工作时主服务器节点发包，备服务器节点接包，当备服务器节点接收不到主服务器节点发的数据包的时候，
+    就启动接管程序接管主服务器节点的资源。备服务器节点可以有多个，通过优先级竞选。优先级数值越大优先级越大。
+
+<br>
+
+ 
+
+
+<br>
+
+
+<h2 id="Keepalived-高可用服务部署-1"><a href="#Keepalived-高可用服务部署-1" class="headerlink" title="Keepalived 高可用服务部署"></a>Keepalived 高可用服务部署</h2><p>  第一步：确认反向代理服务是否工作正常<br>  在kl1和kl02服务器上测试web服务器是否可以正常<br>  （最好有3台反向代理功能的Web服务器）</p>
+  <figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs stylus">curl -H host:www<span class="hljs-selector-class">.rxinxin</span><span class="hljs-selector-class">.org</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">10.10</span>/webserver<span class="hljs-selector-class">.html</span><br>curl -H host:www<span class="hljs-selector-class">.rxinxin</span><span class="hljs-selector-class">.org</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">10.11</span>/webserver<span class="hljs-selector-class">.html</span><br>curl -H host:www<span class="hljs-selector-class">.rxinxin</span><span class="hljs-selector-class">.org</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">10.11</span>/webserver<span class="hljs-selector-class">.html</span><br>systemctl enable mariadb<br></code></pre></td></tr></table></figure>
+
+<p>  第二步：在浏览器上测试访问kl1和kl2 域名</p>
+<p>解析hosts文件，将域名解析为192.168.10.20，进行测试访问<br>解析hosts文件，将域名解析为192.168.10.30，进行测试访问</p>
+  <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">测试前同步kl1和kl2的 Nginx 配置文件<br>scp -rp <span class="hljs-regexp">/app/</span>nginx<span class="hljs-regexp">/conf/</span>nginx.conf <span class="hljs-number">192.168</span>.<span class="hljs-number">10.30</span>:<span class="hljs-regexp">/app/</span>nginx<span class="hljs-regexp">/conf/</span>  <br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<h3 id="安装-Keepalived-服务软件"><a href="#安装-Keepalived-服务软件" class="headerlink" title="安装 Keepalived 服务软件"></a>安装 Keepalived 服务软件</h3><p>  第一步：安装软件<br>  <figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cmake">yum <span class="hljs-keyword">install</span> -y keepalived<br></code></pre></td></tr></table></figure><br><br><br>第二步：编写keepalived配置文件</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">vim <span class="hljs-regexp">/etc/</span>keepalived/keepalived.conf<br>man keepalived.conf   <span class="hljs-regexp">//</span>查看文件说明信息<br></code></pre></td></tr></table></figure>
+<p>配置文件结构：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">GLOBAL</span> <span class="hljs-keyword">CONFIGURATION</span>  <span class="hljs-comment">--- 全局配置</span><br>VRRPD <span class="hljs-keyword">CONFIGURATION</span>   <span class="hljs-comment">--- vrrp配置</span><br>LVS <span class="hljs-keyword">CONFIGURATION</span>     <span class="hljs-comment">--- LVS服务相关配置 （可以删掉不用） </span><br></code></pre></td></tr></table></figure>
+
+<p>kl1主 负载均衡器配置</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs awk">global_defs &#123;    <span class="hljs-regexp">//</span>全局配置<br>router_id kl1   <span class="hljs-regexp">//</span>定义路由标识信息，相同局域网唯一<br>       &#125;<br>       <br>vrrp_instance klg1 &#123;  <span class="hljs-regexp">//</span>Vrrp 配置<br>state MASTER    <span class="hljs-regexp">//</span>定义实例中主备状态的角色（MASTER/BACKUP）<br>interface eth0  <span class="hljs-regexp">//</span>设置主备服务器虚拟IP地址放置网卡位置<br>virtual_router_id <span class="hljs-number">31</span> <span class="hljs-regexp">//</span>虚拟路由ID标识，不同实例不同，主备相同<br>priority <span class="hljs-number">150</span>   <span class="hljs-regexp">//</span>设置抢占优先级，数值越大越优先<br>advert_int <span class="hljs-number">1</span>  <span class="hljs-regexp">//</span>主备间通讯时间间隔<br>authentication &#123;  <span class="hljs-regexp">//</span>主备间通过认证建立连接<br>auth_type PASS<br>auth_pass <span class="hljs-number">1111</span><br>&#125;<br>virtual_ipaddress &#123;   定义主备服务器之间使用的虚拟IP地址信息<br><span class="hljs-number">192.168</span>.<span class="hljs-number">10.60</span>/<span class="hljs-number">24</span> dev eth0 label eth0:<span class="hljs-number">1</span><br>           &#125;<br>&#125;<br><br><span class="hljs-regexp">/etc/i</span>nit.d<span class="hljs-regexp">/keepalived reload  /</span><span class="hljs-regexp">/平滑重启 Keeplived </span><br></code></pre></td></tr></table></figure>
+  <br>
+
+<p>kl2备 负载均衡器配置</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs angelscript">global_defs &#123;<br>router_id kl2<br>       &#125;<br>vrrp_instance klg1 &#123;<br>state BACKUP<br><span class="hljs-keyword">interface</span> <span class="hljs-symbol">eth0</span><br><span class="hljs-symbol">virtual_router_id</span> <span class="hljs-symbol">31</span><br><span class="hljs-symbol">priority</span> <span class="hljs-symbol">100</span><br><span class="hljs-symbol">advert_int</span> <span class="hljs-symbol">1</span><br><span class="hljs-symbol">authentication</span> &#123;<br>auth_type PASS<br>auth_pass <span class="hljs-number">1111</span><br>&#125;<br>virtual_ipaddress &#123;<br><span class="hljs-number">192.168</span><span class="hljs-number">.10</span><span class="hljs-number">.60</span>/<span class="hljs-number">24</span> dev eth0 label eth0:<span class="hljs-number">1</span><br>&#125;<br>&#125;<br>/etc/init.d/keepalived reload<br></code></pre></td></tr></table></figure>
+
+<h3 id="部署高可用服务时遇到的问题"><a href="#部署高可用服务时遇到的问题" class="headerlink" title="部署高可用服务时遇到的问题"></a>部署高可用服务时遇到的问题</h3><p> 同时在keepalived高可用集群中，出现了两个虚拟IP地址信息，这种情况就称为脑裂</p>
+<p>  脑裂情况出现原因：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> 心跳线出现问题<br>   网卡配置有问题<br>   交换设备有问题<br>   线缆连接有问题<br><span class="hljs-bullet">2.</span> 有防火墙软件阻止问题<br><span class="hljs-bullet">3.</span> virtual<span class="hljs-emphasis">_router_</span>id<br>   配置数值不正确  <br></code></pre></td></tr></table></figure>
+<p> 总之：只要备服务器收不到主服务器发出的组播包，就会成为主服务器，而主服务器资源没有释放，备服务器要篡位就会出现脑裂。</p>
+<br>
+
+
+  <br>
+
+<h3 id="利用shell脚本实现监控管理"><a href="#利用shell脚本实现监控管理" class="headerlink" title="利用shell脚本实现监控管理"></a>利用shell脚本实现监控管理</h3><pre><code>备设备有 VIP 就是表示不正常
+</code></pre>
+<ol>
+<li>真正实现主备切换    2. 出现脑裂情况了</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br>check_info=$(ip a|grep -c 192.168.10.60) //定义一个参数为VIP地址 .60<br><span class="hljs-keyword">if</span> [ <span class="hljs-variable">$check_info</span> -ne 0 ]  //如果等于 0 <br><span class="hljs-keyword">then</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;keepalived server error!!!&quot;</span> //打印告警提示 keepalived 服务出现错误<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+
+
+
+<br>
+
+<h3 id="Nginx反向代理监听虚拟IP地址"><a href="#Nginx反向代理监听虚拟IP地址" class="headerlink" title="Nginx反向代理监听虚拟IP地址"></a>Nginx反向代理监听虚拟IP地址</h3><ol>
+<li>编写nginx反向代理配置</li>
+</ol>
+  <figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs awk">  server &#123;<br>  listen      <span class="hljs-number">192.168</span>.<span class="hljs-number">10.60</span>:<span class="hljs-number">80</span>;<br>  server_name  www.rxinxin.org;<br>  root   html;<br>  index  index.html index.htm;<br>  location / &#123;<br>  proxy_pass http:<span class="hljs-regexp">//</span>xinxin;<br>  proxy_set_header host <span class="hljs-variable">$host</span>;<br>  proxy_set_header X-Forwarded-For <span class="hljs-variable">$remote_addr</span>;<br>        &#125;<br>  &#125;<br>  server &#123;<br>  listen       <span class="hljs-number">192.168</span>.<span class="hljs-number">10.60</span>:<span class="hljs-number">80</span>;<br>  server_name  bbs.rxinxin.org;<br>  root   html;<br>  index  index.html index.htm;<br>  location / &#123;<br>  proxy_pass http:<span class="hljs-regexp">//</span>xinxin;<br>  proxy_set_header host <span class="hljs-variable">$host</span>;<br>  proxy_set_header X-Forwarded-For <span class="hljs-variable">$remote_addr</span>;<br>       &#125;<br>    &#125;<br><span class="hljs-regexp">/application/</span>nginx<span class="hljs-regexp">/sbin/</span>nginx -s stop <span class="hljs-regexp">//</span>Nginx 更改ip 一定要重启<br><span class="hljs-regexp">/application/</span>nginx<span class="hljs-regexp">/sbin/</span>nginx<br>netstat -lntup|grep nginx <span class="hljs-regexp">//</span>查看端口<br>  tcp        <span class="hljs-number">0</span>      <span class="hljs-number">0</span> <span class="hljs-number">192.168</span>.<span class="hljs-number">10.60</span>:<span class="hljs-number">80</span>                 <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>:*                   LISTEN      <span class="hljs-number">53334</span>/nginx  虚拟IP地址<br></code></pre></td></tr></table></figure>
+<br>
+
+<p>实现监听本地网卡上没有的IP地址</p>
+<p>  <code>echo &#39;net.ipv4.ip_nonlocal_bind = 1&#39; &gt;&gt;/etc/sysctl.conf 更改内核</code> </p>
+<p>  <code>sysctl -p</code></p>
+<br>
+
+<h3 id="将高可用和反向代理服务建立联系"><a href="#将高可用和反向代理服务建立联系" class="headerlink" title="将高可用和反向代理服务建立联系"></a>将高可用和反向代理服务建立联系</h3><p>  因为Nginx 反向代理服务处于异常状态下，keepalived服务并没有从主服务器切换到备服务器，所以客户访问网站时反向代理服务一直处于挂了的异常状态导致网站无法正常访问。<br><br></p>
+<p>实现的目的：Nginx反向代理服务停止，Keepalived服务也停止 </p>
+<ol>
+<li>编写脚本</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br>web_info=$(ps -ef|grep [n]ginx|wc -l) //当Nginx进程小于2时<br><span class="hljs-keyword">if</span> [ <span class="hljs-variable">$web_info</span> -lt 2 ]<br><span class="hljs-keyword">then</span><br>/etc/init.d/keepalived stop   //关闭keepalived 服务<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+
+<p>2.运行脚本，实现监控nginx服务</p>
+<p>  编辑keepalived服务配置文件</p>
+  <figure class="highlight plaintext"><figcaption><span>check_web &#123;</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs vrrp_script">#定义一个监控脚本，脚本必须有执行权限<br>script &quot;/server/scripts/check_web.sh&quot;    <br>#指定脚本间隔时间<br>  interval 2   <br>  #脚本执行完成，让优先级值和权重值进行运算，从而实现主备切换		<br>  weight 2                                                                            <br>  &#125;<br>  track_script &#123;<br>  check_web<br>  &#125;	<br></code></pre></td></tr></table></figure>
+
+<p>chmod +x check_kls.sh   给予脚本可执行权限</p>
+<br>
+
+<h3 id="实现高可用集群架构中双主配置（互为主备配置）"><a href="#实现高可用集群架构中双主配置（互为主备配置）" class="headerlink" title="实现高可用集群架构中双主配置（互为主备配置）"></a>实现高可用集群架构中双主配置（互为主备配置）</h3><p>  由于企业实际环境，很少等主服务器挂掉才调用备服务器，所以会将Web服务分配给两节点或多个集群并行使用节约成本。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs angelscript">kl1<br>vrrp_instance klg1 &#123;<br> state MASTER<br> <span class="hljs-keyword">interface</span> <span class="hljs-symbol">eth0</span><br> <span class="hljs-symbol">virtual_router_id</span> <span class="hljs-symbol">31</span><br> <span class="hljs-symbol">priority</span> <span class="hljs-symbol">150</span><br> <span class="hljs-symbol">advert_int</span> <span class="hljs-symbol">1</span><br> <span class="hljs-symbol">authentication</span> &#123;<br> auth_type PASS<br> auth_pass <span class="hljs-number">1111</span><br>    &#125;<br>virtual_ipaddress &#123;<br> <span class="hljs-number">192.168</span><span class="hljs-number">.10</span><span class="hljs-number">.60</span>/<span class="hljs-number">24</span> dev eth0 label eth0:<span class="hljs-number">1</span><br>    &#125;<br>    &#125;<br>vrrp_instance klg2 &#123;<br>  state BACKUP<br>  <span class="hljs-keyword">interface</span> <span class="hljs-symbol">eth0</span><br>  <span class="hljs-symbol">virtual_router_id</span> <span class="hljs-symbol">32</span><br>  <span class="hljs-symbol">priority</span> <span class="hljs-symbol">100</span><br>  <span class="hljs-symbol">advert_int</span> <span class="hljs-symbol">1</span><br>  <span class="hljs-symbol">authentication</span> &#123;<br>  auth_type PASS<br>  auth_pass <span class="hljs-number">1111</span><br>    &#125;<br>virtual_ipaddress &#123;<br>  <span class="hljs-number">192.168</span><span class="hljs-number">.10</span><span class="hljs-number">.80</span>/<span class="hljs-number">24</span> dev eth0 label eth0:<span class="hljs-number">1</span><br>    &#125;<br>    &#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs angelscript">  kl2<br>vrrp_instance klg1 &#123;<br>  state BACKUP<br>  <span class="hljs-keyword">interface</span> <span class="hljs-symbol">eth0</span><br>  <span class="hljs-symbol">virtual_router_id</span> <span class="hljs-symbol">31</span><br>  <span class="hljs-symbol">priority</span> <span class="hljs-symbol">100</span><br>  <span class="hljs-symbol">advert_int</span> <span class="hljs-symbol">1</span><br>  <span class="hljs-symbol">authentication</span> &#123;<br>  auth_type PASS<br>  auth_pass <span class="hljs-number">1111</span><br>    &#125;<br>  virtual_ipaddress &#123;<br>  <span class="hljs-number">192.168</span><span class="hljs-number">.10</span><span class="hljs-number">.60</span>/<span class="hljs-number">24</span> dev eth0 label eth0:<span class="hljs-number">1</span><br>       &#125;<br>    &#125;<br>  vrrp_instance klg2 &#123;<br>    state MASTER<br>    <span class="hljs-keyword">interface</span> <span class="hljs-symbol">eth0</span><br>    <span class="hljs-symbol">virtual_router_id</span> <span class="hljs-symbol">32</span><br>    <span class="hljs-symbol">priority</span> <span class="hljs-symbol">150</span><br>    <span class="hljs-symbol">advert_int</span> <span class="hljs-symbol">1</span><br>    <span class="hljs-symbol">authentication</span> &#123;<br>    auth_type PASS<br>    auth_pass <span class="hljs-number">1111</span><br>    &#125;<br>    virtual_ipaddress &#123;<br>    <span class="hljs-number">192.168</span><span class="hljs-number">.10</span><span class="hljs-number">.80</span>/<span class="hljs-number">24</span> dev eth0 label eth0:<span class="hljs-number">1</span><br>    &#125;<br>    &#125;	 <br>	<br></code></pre></td></tr></table></figure>
+
+<pre><code>最后修改 Nginx 反向代理服务配置文件的监听IP地址信息 完成对 Keepalived 互为主备节点的配置部署。
+</code></pre>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/linux/">linux</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/">高可用</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2019/11/21/lnmp/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">LNMP网站架构实战</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/11/20/linux3/">
+                        <span class="hidden-mobile">Keepalived 高可用服务部署</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

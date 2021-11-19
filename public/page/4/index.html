@@ -1,0 +1,1048 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Ryan&#39;s Notebook">
+<meta property="og:url" content="http://example.com/page/4/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Ryan">
+<meta name="twitter:card" content="summary_large_image">
+  
+  <title>Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 100vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="Ryan&#39;s Notebook">
+              
+            </span>
+
+            
+          </div>
+
+          
+            <div class="scroll-down-bar">
+              <i class="iconfont icon-arrowdown"></i>
+            </div>
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      <div class="container nopadding-x-md">
+        <div class="py-5" id="board"
+          style=margin-top:0>
+          
+          <div class="container">
+            <div class="row">
+              <div class="col-12 col-md-10 m-auto">
+                
+
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/Keepalived%20%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2/" target="_self">
+          Keepalived 高可用服务部署
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/Keepalived%20%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2/" target="_self">
+          
+          
+            
+          
+          Keepalived 高可用服务部署
+Keepalived 软件最早是配合 LVS 负载均衡软件而设计的，
+    用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了VRRP 协议可以实现高可用的功能。
+  Keepalived软件主要是通过 VRRP 协议实现高可用功能的。VRRP 是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写，V
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 23:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+            
+              <a href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/">高可用</a>
+            
+              <a href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/linux3/" target="_self">
+          Keepalived 高可用服务部署
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/linux3/" target="_self">
+          
+          
+            
+          
+          Keepalived 高可用服务部署​    Keepalived 软件最早是配合 LVS 负载均衡软件而设计的，用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了VRRP 协议可以实现高可用的功能。
+软件主要是通过 VRRP 协议实现高可用功能的,VRRP 是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写，VRRP出现的目的就是为了解
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 23:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+            
+              <a href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/">高可用</a>
+            
+              <a href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/linux1/" target="_self">
+          Linux 基础知识
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/linux1/" target="_self">
+          
+          
+            
+          
+          Linux 基础Linux，全称GNU/Linux，是一套免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年第一次释出，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。Linux继承了Unix以网络为核心的设计思
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 23:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/linux2/" target="_self">
+          远程管理服务知识介绍
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/linux2/" target="_self">
+          
+          
+            
+          
+          远程管理服务知识介绍一、SSH远程登录服务介绍说明SSH是Secure Shell Protocol的简写，由 IETF 网络工作小组（Network Working Group）制定；在进行数据传输之前，SSH先对联机数据包通过加密技术进行加密处理，加密后在进行数据传输。确保了传递的数据安全。​    
+ SSH是专为远程登录会话和其他网络服务提供的安全性协议。
+利用SSH协议可以有效的防止远程
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 23:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux 学习之旅</a>
+            
+              <a href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B9%8B%E4%BA%8C/" target="_self">
+          伺服器集群架構之二
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B9%8B%E4%BA%8C/" target="_self">
+          
+          
+            
+          
+          集群架构环境统一规划说明
+①. 服务器及服务规划说明
+
+②. 主机地址及主机名规划
+
+③. 安装及配置路径等规划
+
+
+虚拟软件主机虚拟网络配置第一步：在虚拟软件中配置虚拟局域网    
+配置虚拟网段信息，以及虚拟网关信息
+
+
+
+第二步：在虚拟软件中虚拟机添加网卡
+虚拟主机中设置了两块网卡：
+
+eth0：nat模式网卡
+
+eth1：LAN区段网卡（区段名称为 172.16.1.0/24）
+
+
+
+第三
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 22:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux学习之旅</a>
+            
+              <a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%A7%8B/">集群架構</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/%E7%B6%B2%E5%8D%A1%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A9%B3%E8%A7%A3/" target="_self">
+          網卡文件配置文件詳解
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/%E7%B6%B2%E5%8D%A1%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%A9%B3%E8%A7%A3/" target="_self">
+          
+          
+            
+          
+          网卡文件配置文件详解文件路径：1//etc/sysconfig/network-scripts/ifcfg-eth0  为网卡文件路径 
+
+
+
+
+
+
+
+配置参数
+参数详解
+
+
+
+DEVICE=eth0
+网卡名字
+
+
+HWADDR=00:0c:29:bc:1f:24
+Hardware address 硬件地址
+
+
+TYPE=Ethernet
+网络类型 因特网
+
+
+UUID=1c340c4c-e0ec
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 21:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux学习之旅</a>
+            
+              <a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%A7%8B/">集群架構</a>
+            
+              <a href="/tags/Network/">Network</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/20/%E9%9B%86%E7%BE%A4%E4%B8%BB%E6%9C%BA%E5%90%8DIP%E5%9C%B0%E5%9D%80%E8%A7%84%E5%88%92/" target="_self">
+          集群伺服器地址規劃一覽表
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/20/%E9%9B%86%E7%BE%A4%E4%B8%BB%E6%9C%BA%E5%90%8DIP%E5%9C%B0%E5%9D%80%E8%A7%84%E5%88%92/" target="_self">
+          
+          
+            
+          
+          
+
+
+
+
+主机名和IP地址规划表前端服务器
+
+
+
+
+
+
+服务器说明
+外网IP
+内网IP
+主机名称
+
+
+
+nginx负载均衡服务器
+10.0.0.5/24
+172.16.1.5/24
+lb01
+
+
+nginx负载均衡服务器
+10.0.0.6/24
+172.16.1.6/24
+lb02
+
+
+Nginx网站服务器
+10.0.0.7/24
+172.16.1.7/24
+web01
+
+
+Nginx网站服务器
+
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-20 21:45" pubdate>
+              2019-11-20
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux学习之旅</a>
+            
+              <a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%A7%8B/">集群架構</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/19/Rsync%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%E4%B8%8E%E9%83%A8%E7%BD%B2/" target="_self">
+          Rsync 数据镜像备份工具
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/19/Rsync%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%E4%B8%8E%E9%83%A8%E7%BD%B2/" target="_self">
+          
+          
+            
+          
+          Rsync 数据镜像备份工具
+
+Rsync 是一款实现全量及增量复制同步的软件
+具有开源，快速，多功能，全量及增量本地同步和多平台的特性
+增量本地同步以 delta-transfer 算法闻名可减少内网带宽。（具体实现方法见下文）
+
+
+
+什么是增量同步？
+
+​    假如一个存储服务器要备份的目录大小为10G，第一次备份到备份服务器使用全量备份及所有数据全部备份到备份服务器中。
+这时由于用户使用存
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-19 23:45" pubdate>
+              2019-11-19
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux-%E6%9C%8D%E5%8A%A1/">Linux 服务</a>
+            
+              <a href="/tags/%E8%AF%BE%E7%A8%8B%E5%AE%9E%E6%88%98/">课程实战</a>
+            
+              <a href="/tags/Rsync/">Rsync</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B9%8B%E4%B8%80/" target="_self">
+          伺服器集群架構之一
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E4%B9%8B%E4%B8%80/" target="_self">
+          
+          
+            
+          
+          集群架构服务器组成
+
+基本架构组成：（用于让用户进行访问）
+通过给集群中物理设备起別名更容易理解和学习。
+
+
+
+
+
+前端服务部分
+
+ 1）顾客-用户
+
+是一个访问者，请求访问网站页面
+
+
+2）保安-防火墙设备
+对访问架构用户进行策略控制，正常访问网站用户，可以放行进入；非法人员（黑客）访问网站，禁止进入。
+3）对讲机-交换机（外网）
+ 提供架构中服务器相互通讯交流的需求（提供外部人员访问）
+4）迎
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-19 12:45" pubdate>
+              2019-11-19
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux学习之旅</a>
+            
+              <a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%A7%8B/">集群架構</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2019/11/11/%E5%9F%BA%E4%BA%8ELinux%20%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9C%8D%E5%8A%A1%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" target="_self">
+          基于 Linux 系统的服务课程笔记
+        </a>
+      </h1>
+
+      <p class="index-excerpt">
+        <a href="/2019/11/11/%E5%9F%BA%E4%BA%8ELinux%20%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9C%8D%E5%8A%A1%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" target="_self">
+          
+          
+            
+          
+          基于 Linux 系统的服务课程笔记
+
+
+
+​           互联网运维是一个融合多学科（网络、系统、开发、安全、应用架构、存储等）的综合性技术岗位，给运维工程师提供了一个很好的个人能力与技术的发展空间。运维工作的相关经验将会变得非常重要，而且也将成为个人的核心竞争力，优秀的运维工程师具备很好的各层面问题的解决能力及方案提供、全局思考的能力等。由于运维岗位所接触的知识面非常广阔，更容易培养或
+        </a>
+      </p>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2019-11-11 11:11" pubdate>
+              2019-11-11
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-category"></i>
+            
+              <a href="/categories/linux/">linux</a>
+            
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Linux%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%97%85/">Linux学习之旅</a>
+            
+              <a href="/tags/%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%A7%8B/">集群架構</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+
+
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <a class="extend prev" rel="prev" href="/page/3/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><span class="page-number current">4</span>
+    </span>
+  </nav>
+
+
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      jQuery.ajax({
+        type: 'GET',
+        url: 'https://v1.hitokoto.cn/',
+        headers: {},
+        dataType: 'json',
+        success: function (result) {
+          var text;
+          if (result) {
+            var keys = 'hitokoto'.split('.')
+            if (result instanceof Array) {
+              result = result[0]
+            }
+            for (const k of keys) {
+              var value = result[k]
+              if (typeof value === 'string') {
+                text = value
+                break
+              } else if (value instanceof Object) {
+                result = value
+              }
+            }
+          }
+          text ? typing(text) : typing(title);
+        },
+        error: function () {
+          typing(title)
+        }
+      })
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>

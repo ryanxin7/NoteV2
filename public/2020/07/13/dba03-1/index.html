@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
+  <link rel="icon" href="/img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#01393E">
+  <meta name="description" content="">
+  <meta name="author" content="Ryan">
+  <meta name="keywords" content="">
+  <meta name="description" content="DDL 语句的应用[[toc]] 1. 对库的定义   作用： 对数据库 逻辑对象库或表的定义操作          创建数据库 1CREATE DATABASE zabbix CHARSET utf8mb4 COLLATE utf8mb4_bin;    查看库信息 12SHOW DATABASES;SHOW CREATE DATABASE zabbix;     删除数据库 生产中危险操作 :">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDL 语句的应用">
+<meta property="og:url" content="http://example.com/2020/07/13/dba03-1/index.html">
+<meta property="og:site_name" content="Ryan&#39;s Notebook">
+<meta property="og:description" content="DDL 语句的应用[[toc]] 1. 对库的定义   作用： 对数据库 逻辑对象库或表的定义操作          创建数据库 1CREATE DATABASE zabbix CHARSET utf8mb4 COLLATE utf8mb4_bin;    查看库信息 12SHOW DATABASES;SHOW CREATE DATABASE zabbix;     删除数据库 生产中危险操作 :">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-2-1.png">
+<meta property="og:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-2-2.png">
+<meta property="article:published_time" content="2020-07-13T14:23:01.000Z">
+<meta property="article:modified_time" content="2021-11-15T01:51:42.439Z">
+<meta property="article:author" content="Ryan">
+<meta property="article:tag" content="DBA">
+<meta property="article:tag" content="RDBMS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-2-1.png">
+  
+  <title>DDL 语句的应用 - Ryan&#39;s Notebook</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.css" />
+  
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.8.12","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname"}},"search_path":"/local-search.xml"};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Ryan&#39;s Notebook</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/">
+                <i class="iconfont icon-link-fill"></i>
+                友链
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="DDL 语句的应用">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2020-07-13 22:23" pubdate>
+        2020年7月13日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      4.8k 字
+    </span>
+  
+
+  
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      15 分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">DDL 语句的应用</h1>
+            
+            <div class="markdown-body">
+              <h1 id="DDL-语句的应用"><a href="#DDL-语句的应用" class="headerlink" title="DDL 语句的应用"></a>DDL 语句的应用</h1><p>[[toc]]</p>
+<h2 id="1-对库的定义"><a href="#1-对库的定义" class="headerlink" title="1. 对库的定义"></a>1. 对库的定义</h2> <br>
+
+<p><strong>作用：</strong> 对数据库 逻辑对象库或表的定义操作 </p>
+  <br>
+
+  <br>
+
+<p><strong>创建数据库</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> DATABASE zabbix CHARSET utf8mb4 <span class="hljs-keyword">COLLATE</span> utf8mb4_bin;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>查看库信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SHOW</span> DATABASES;<br><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> DATABASE zabbix;<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>删除数据库</strong></p>
+<p>生产中危险操作 :warning: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">DROP</span> DATABASE xin;<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+ <br>
+
+ <br>
+
+<p><strong>修改数据库字符集</strong></p>
+<p><strong>注意</strong>: 字符集一定是 <strong>从小往大了改</strong>，比如utf8修改成utf8mb4</p>
+<p>目标字符集一定是源字符集的超集。</p>
+  <br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> DATABASE xin;<br><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> DATABASE xin;<br><span class="hljs-keyword">ALTER</span> DATABASE xin CHARSET utf8mb4;    <span class="hljs-comment">--更改字符集</span><br></code></pre></td></tr></table></figure>
+
+   <br>
+
+  <br>
+
+<h3 id="1-1-关于库定义规范"><a href="#1-1-关于库定义规范" class="headerlink" title="1.1 关于库定义规范"></a>1.1 关于库定义规范</h3>   <br>
+
+<p>:::tip 库定义规范 </p>
+<ul>
+<li><p>库名使用小写字符</p>
+</li>
+<li><p>库名不能以数字开头</p>
+</li>
+<li><p>不能是数据库内部的关键字</p>
+</li>
+<li><p>必须设置字符集</p>
+</li>
+</ul>
+<p> :::</p>
+   <br>
+
+  <br>
+
+<h2 id="2-对表的定义"><a href="#2-对表的定义" class="headerlink" title="2. 对表的定义"></a>2. 对表的定义</h2>  <br>
+
+<p><strong>建表需要定义以下属性：</strong></p>
+<ul>
+<li><p>表名</p>
+</li>
+<li><p>列名</p>
+</li>
+<li><p>列属性</p>
+</li>
+<li><p>表属性</p>
+ <br></li>
+</ul>
+<p><strong>使用数据库工具建表</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-2-1.png" srcset="/img/loading.gif" lazyload alt="使用数据库工具建表"></p>
+<p><strong>建表语句建表</strong></p>
+<p><img src="https://xin997.oss-cn-beijing.aliyuncs.com/xinblogs/webimg-DBA/Section3-2-2.png" srcset="/img/loading.gif" lazyload alt="使用数据库工具建表2"></p>
+   <br>
+
+   <br>
+
+<h3 id="2-1-列属性"><a href="#2-1-列属性" class="headerlink" title="2.1 列属性"></a>2.1 列属性</h3>   <br>
+
+<p><code>PRIMARY KEY</code> : 主键 约束,功能：表中只能有一个主键,主键列非空且唯一   <br><br><code>NOT NULL</code>  : 非空 约束,不允许空值   <br><br><code>UNIQUE KEY</code> : 唯一键约束,不允许重复值 （常用手机号，微信号唯一） 可以为空   <br></p>
+   <br>
+
+<p><strong>以上三个最常用</strong><br>  <br></p>
+<p><code>DEFAULT</code>   : 一般配合 NOT NULL 一起使用. 生成定义好的默认值   <br><br><code>UNSIGNED</code>  : 无符号,一般是配合数字列,非负数   <br><br><code>COMMENT</code>   : 注释   <br><br><code>AUTO_INCREMENT</code> : 自增长的列，无需插入数据   <br></p>
+  <br>
+
+<p><strong>例子：建表语句设置列属性</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> stu (<br>id <span class="hljs-type">INT</span> <span class="hljs-keyword">PRIMARY</span> KEY <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> AUTO_INCREMENT COMMENT <span class="hljs-string">&#x27;学号&#x27;</span>,<br>sname <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> COMMENT <span class="hljs-string">&#x27;姓名&#x27;</span>,<br>age TINYINT UNSIGNED <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span> COMMENT <span class="hljs-string">&#x27;年龄&#x27;</span>,<br>gender ENUM(<span class="hljs-string">&#x27;m&#x27;</span>,<span class="hljs-string">&#x27;f&#x27;</span>,<span class="hljs-string">&#x27;n&#x27;</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-string">&#x27;n&#x27;</span> COMMENT <span class="hljs-string">&#x27;性别&#x27;</span>,<br>intime DATETIME <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">DEFAULT</span> NOW() COMMENT <span class="hljs-string">&#x27;入学时间&#x27;</span><br>)ENGINE INNODB CHARSET utf8mb4;<br></code></pre></td></tr></table></figure>
+
+   <br>
+
+  <br>
+
+<h3 id="2-2-建表规范"><a href="#2-2-建表规范" class="headerlink" title="2.2 建表规范"></a><strong>2.2 建表规范</strong></h3>  <br>
+
+<p><strong>知识点等级</strong>​ :star2::star2::star2::star2::star2:</p>
+<p> :::tip 注意​ </p>
+<ul>
+<li>表名小写字母,不能数字开头,</li>
+<li>不能是保留字符,使用和业务有关的表名</li>
+<li>选择合适的数据类型及长度</li>
+<li>每个列设置 NOT NULL + DEFAULT .对于数字0填充,对于字符使用有效字符串填充</li>
+<li>每个列设置注释</li>
+<li>表必须设置存储引擎和字符集</li>
+<li>主键列尽量是无关列数字列,最好是自增长</li>
+<li>enum类型不要保存数字,只能是字符串类型</li>
+</ul>
+<p>:::</p>
+  <br>
+
+ <br>
+
+<h3 id="2-3-表的常规操作"><a href="#2-3-表的常规操作" class="headerlink" title="2.3 表的常规操作"></a>2.3 表的常规操作</h3> <br>
+
+<p><strong>查询建表信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SHOW</span> TABLES;<br><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> stu;<br><span class="hljs-keyword">DESC</span> stu;<br></code></pre></td></tr></table></figure>
+
+  <br>
+
+
+
+<p><strong>创建一个表结构一样的表</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> test <span class="hljs-keyword">LIKE</span> stu;<br></code></pre></td></tr></table></figure>
+
+   <br>
+
+<p><strong>删表</strong>  生产中危险操作 :warning:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> test;<br></code></pre></td></tr></table></figure>
+
+<p>​    <br></p>
+<p><strong>修改添加新列</strong></p>
+<p> 例如：在stu 表中添加QQ号信息列</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">DESC</span> stu;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">ADD</span> qq <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">20</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> COMMENT <span class="hljs-string">&#x27;qq号&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>​    <br></p>
+<p>:::tip 表操作要注意</p>
+<ul>
+<li>在线的DDL操作要尽量避免业务繁忙期</li>
+<li>表数据量大的话会长时间锁表 </li>
+<li>解决锁表情况可以使用pt-osc 工具 在线DDL或者 percona-toolkits Online 等第三方工具</li>
+</ul>
+<p>:::</p>
+<p><strong>在sname列后加微信列</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">ADD</span> wechat <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">64</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">UNIQUE</span> COMMENT <span class="hljs-string">&#x27;微信号&#x27;</span> AFTER sname;<br></code></pre></td></tr></table></figure>
+
+<p>​     <br></p>
+<p><strong>在id列前加一个新列num</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">ADD</span> num <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">UNIQUE</span> COMMENT <span class="hljs-string">&#x27;身份证&#x27;</span> <span class="hljs-keyword">FIRST</span> ;<br><span class="hljs-keyword">DESC</span> stu;<br></code></pre></td></tr></table></figure>
+
+<p>​     <br></p>
+<p><strong>把刚才添加的列都删掉</strong> （危险操作）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">DROP</span> num;<br><span class="hljs-keyword">DESC</span> stu;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">DROP</span> qq;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">DROP</span> wechat;<br></code></pre></td></tr></table></figure>
+
+<p>​      <br></p>
+<p><strong>修改snam数据类型的属性</strong> </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">DESC</span> stu;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu MODIFY sname <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">64</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> COMMENT <span class="hljs-string">&#x27;姓名&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<p><strong>将gender改为 sex 数据类型改为 CHAR类型</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu CHANGE gender sex <span class="hljs-type">CHAR</span>(<span class="hljs-number">4</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> COMMENT <span class="hljs-string">&#x27;性别&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="3-DCL-语句应用"><a href="#3-DCL-语句应用" class="headerlink" title="3. DCL 语句应用"></a>3. DCL 语句应用</h2><p><strong>DCL</strong>(Data Control Language)语句：数据控制语句，用于控制不同数据段直接的许可和访问级别的语句。这些语句定义了数据库、表、字段、用户的访问权限和安全级别。</p>
+<p>DCL语句主要作用：<strong>用户权限控制</strong></p>
+ <br>
+
+<p><code>grant</code>  授权</p>
+<p><code>revoke </code> 回收权限</p>
+  <br>
+
+<h3 id="3-1-查看用户权限"><a href="#3-1-查看用户权限" class="headerlink" title="3.1 查看用户权限"></a>3.1 查看用户权限</h3> <br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">SHOW</span> GRANTS <span class="hljs-keyword">FOR</span> xin;<br><span class="hljs-operator">+</span><span class="hljs-comment">-------------------------------------------+</span><br><span class="hljs-operator">|</span> Grants <span class="hljs-keyword">for</span> xin@<span class="hljs-operator">%</span>                         <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">-------------------------------------------+</span><br><span class="hljs-operator">|</span> <span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> PRIVILEGES <span class="hljs-keyword">ON</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">TO</span> <span class="hljs-string">&#x27;xin&#x27;</span>@<span class="hljs-string">&#x27;%&#x27;</span> <span class="hljs-operator">|</span><br><span class="hljs-operator">+</span><span class="hljs-comment">-------------------------------------------+ </span><br><span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.00</span> sec)<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<h3 id="3-2-用户授权"><a href="#3-2-用户授权" class="headerlink" title="3.2 用户授权"></a>3.2 用户授权</h3> <br>
+
+<p>对于新建的MySQL用户，必须给它授权，可以用<code>GRANT</code>语句来实现对新建用户的授权。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 授予数据库db1的所有权限给指定账户 </span><br><span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">ON</span> db1.<span class="hljs-operator">*</span> <span class="hljs-keyword">TO</span> <span class="hljs-string">&#x27;user1&#x27;</span>@<span class="hljs-string">&#x27;localhost&#x27;</span>; <br><span class="hljs-comment">-- 授予角色给指定的账户 </span><br><span class="hljs-keyword">GRANT</span> <span class="hljs-string">&#x27;role1&#x27;</span>, <span class="hljs-string">&#x27;role2&#x27;</span> <span class="hljs-keyword">TO</span> <span class="hljs-string">&#x27;user1&#x27;</span>@<span class="hljs-string">&#x27;localhost&#x27;</span>, <span class="hljs-string">&#x27;user2&#x27;</span>@<span class="hljs-string">&#x27;localhost&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+ <br>
+
+<p>:::tip 数据库权限类型</p>
+<ul>
+<li><code>SELECT</code>：表示授予用户可以使用 SELECT 语句访问特定数据库中所有表和视图的权限。</li>
+<li><code>INSERT</code>：表示授予用户可以使用 INSERT 语句向特定数据库中所有表添加数据行的权限。</li>
+<li><code>DELETE</code>：表示授予用户可以使用 DELETE 语句删除特定数据库中所有表的数据行的权限。</li>
+<li><code>UPDATE</code>：表示授予用户可以使用 UPDATE 语句更新特定数据库中所有数据表的值的权限。</li>
+<li><code>REFERENCES</code>：表示授予用户可以创建指向特定的数据库中的表外键的权限。</li>
+<li><code>CREATE</code>：表示授权用户可以使用 CREATE TABLE 语句在特定数据库中创建新表的权限。</li>
+<li><code>ALTER</code>：表示授予用户可以使用 ALTER TABLE 语句修改特定数据库中所有数据表的权限。</li>
+<li><code>SHOW VIEW</code>：表示授予用户可以查看特定数据库中已有视图的视图定义的权限。</li>
+<li><code>CREATE ROUTINE</code>：表示授予用户可以为特定的数据库创建存储过程和存储函数的权限。</li>
+<li><code>ALTER ROUTINE</code>：表示授予用户可以更新和删除数据库中已有的存储过程和存储函数的权限。</li>
+<li><code>INDEX</code>：表示授予用户可以在特定数据库中的所有数据表上定义和删除索引的权限。</li>
+<li><code>DROP</code>：表示授予用户可以删除特定数据库中所有表和视图的权限。</li>
+<li><code>CREATE TEMPORARY TABLES</code>：表示授予用户可以在特定数据库中创建临时表的权限。</li>
+<li><code>CREATE VIEW</code>：表示授予用户可以在特定数据库中创建新的视图的权限。</li>
+<li><code>EXECUTE ROUTINE</code>：表示授予用户可以调用特定数据库的存储过程和存储函数的权限。</li>
+<li><code>LOCK TABLES</code>：表示授予用户可以锁定特定数据库的已有数据表的权限。</li>
+<li><code>SHOW DATABASES</code>：表示授权可以使用<code>SHOW DATABASES</code>查看所有已有的数据库的定义权限。</li>
+<li><code>ALL</code>或<code>ALL PRIVILEGES</code>：表示以上所有权限。</li>
+</ul>
+<p>:::</p>
+ <br>
+
+<p>:::tip 表权限类型</p>
+<ul>
+<li><code>SELECT</code>：授予用户可以使用 SELECT 语句进行访问特定表的权限。</li>
+<li><code>INSERT</code>：授予用户可以使用 INSERT 语句向一个特定表中添加数据行的权限。</li>
+<li><code>DELETE</code>：授予用户可以使用 DELETE 语句从一个特定表中删除数据行的权限。</li>
+<li><code>DROP</code>：授予用户可以删除数据表的权限。</li>
+<li><code>UPDATE</code>：授予用户可以使用 UPDATE 语句更新特定数据表的权限。</li>
+<li><code>ALTER</code>：授予用户可以使用 ALTER TABLE 语句修改数据表的权限。</li>
+<li><code>REFERENCES</code>：授予用户可以创建一个外键来参照特定数据表的权限。</li>
+<li><code>CREATE</code>：授予用户可以使用特定的名字创建一个数据表的权限。</li>
+<li><code>INDEX</code>：授予用户可以在表上定义索引的权限。</li>
+<li><code>ALL</code>或<code>ALL PRIVILEGES</code>：所有的权限名。</li>
+</ul>
+<p>:::</p>
+ <br>
+
+ <br>
+
+
+
+<h3 id="3-3-权限回收"><a href="#3-3-权限回收" class="headerlink" title="3.3 权限回收"></a><strong>3.3 权限回收</strong></h3> <br>
+
+<p><code>REVOKE</code>语句主要用于撤销权限。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">revoke</span> <span class="hljs-keyword">all</span> <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> wang@<span class="hljs-string">&#x27;192.168.1.150&#x27;</span>;         <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">revoke</span> <span class="hljs-keyword">all</span> privileges <span class="hljs-keyword">on</span> <span class="hljs-operator">*</span>.<span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> wang@<span class="hljs-string">&#x27;192.168.1.%&#x27;</span>;       <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">revoke</span> <span class="hljs-keyword">insert</span>,<span class="hljs-keyword">select</span>,update,<span class="hljs-keyword">delete</span>,<span class="hljs-keyword">drop</span>，<span class="hljs-keyword">create</span>，<span class="hljs-keyword">alter</span> <span class="hljs-keyword">on</span> huanqiu.<span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> wang@<span class="hljs-string">&#x27;%&#x27;</span>;<br>mysql<span class="hljs-operator">&gt;</span> flush privileges<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+ <br>
+
+
+
+
+
+<h2 id="4-DML语句应用"><a href="#4-DML语句应用" class="headerlink" title="4. DML语句应用"></a>4. DML语句应用</h2> <br> 
+
+<p><strong>主要作用：对数据行增删改</strong></p>
+  <br>
+
+<h3 id="4-1-数据录入"><a href="#4-1-数据录入" class="headerlink" title="4.1 数据录入"></a>4.1 数据录入</h3>  <br>
+
+<p><strong>INSERT 语句 两种方法：</strong></p>
+<p><strong>最偷懒</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> stu <span class="hljs-keyword">VALUES</span>(<span class="hljs-number">1</span>,<span class="hljs-string">&#x27;zs&#x27;</span>,<span class="hljs-number">18</span>,<span class="hljs-string">&#x27;m&#x27;</span>,NOW());<br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> stu;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>最规范</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> stu(id,sname,age,sex,intime)<br><span class="hljs-keyword">VALUES</span> (<span class="hljs-number">2</span>,<span class="hljs-string">&#x27;ls&#x27;</span>,<span class="hljs-number">19</span>,<span class="hljs-string">&#x27;f&#x27;</span>,NOW());<br></code></pre></td></tr></table></figure>
+
+   <br>
+
+<h4 id="4-1-1-针对性的录入数据"><a href="#4-1-1-针对性的录入数据" class="headerlink" title="4.1.1 针对性的录入数据"></a>4.1.1 针对性的录入数据</h4>  <br>
+
+<p><strong>默认值的列不写</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> stu(sname,age,sex)<br><span class="hljs-keyword">VALUES</span> (<span class="hljs-string">&#x27;w5&#x27;</span>,<span class="hljs-number">11</span>,<span class="hljs-string">&#x27;m&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+   <br>
+
+ 
+
+<h4 id="4-1-2-一次性录入多行"><a href="#4-1-2-一次性录入多行" class="headerlink" title="4.1.2 一次性录入多行"></a>4.1.2 一次性录入多行</h4>  <br>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> stu(sname,age,sex)<br><span class="hljs-keyword">VALUES</span> <br>(<span class="hljs-string">&#x27;aa&#x27;</span>,<span class="hljs-number">11</span>,<span class="hljs-string">&#x27;m&#x27;</span>),<br>(<span class="hljs-string">&#x27;bb&#x27;</span>,<span class="hljs-number">12</span>,<span class="hljs-string">&#x27;f&#x27;</span>),<br>(<span class="hljs-string">&#x27;cc&#x27;</span>,<span class="hljs-number">13</span>,<span class="hljs-string">&#x27;m&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+   <br>
+
+  <br>
+
+<br>
+
+<h3 id="4-2-数据行更新数据"><a href="#4-2-数据行更新数据" class="headerlink" title="4.2 数据行更新数据"></a>4.2 数据行更新数据</h3>  <br>
+
+
+
+<p><strong>update 语句 (一定要加where条件)</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql">UPDATE stu <span class="hljs-keyword">SET</span> sname<span class="hljs-operator">=</span><span class="hljs-string">&#x27;aaa&#x27;</span>;<br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> stu;<br>UPDATE stu <span class="hljs-keyword">SET</span> sname<span class="hljs-operator">=</span><span class="hljs-string">&#x27;bb&#x27;</span> <span class="hljs-keyword">WHERE</span> id<span class="hljs-operator">=</span><span class="hljs-number">6</span>;<br></code></pre></td></tr></table></figure>
+
+<br>
+
+
+
+<p><strong>delete 语句删除数据行数据 (一定要有where条件)</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> stu;<br><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> stu <span class="hljs-keyword">WHERE</span> id<span class="hljs-operator">=</span><span class="hljs-number">9</span>;<br></code></pre></td></tr></table></figure>
+
+ <br>
+
+<br>
+
+<p><strong>生产中屏蔽delete功能，使用update 语句替代delete 语句操作</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> stu <span class="hljs-keyword">ADD</span> is_del TINYINT <span class="hljs-keyword">DEFAULT</span> <span class="hljs-number">0</span> ;<br>UPDATE stu <span class="hljs-keyword">SET</span> is_del<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">WHERE</span> id<span class="hljs-operator">=</span><span class="hljs-number">7</span>;<br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> stu <span class="hljs-keyword">WHERE</span> is_del<span class="hljs-operator">=</span><span class="hljs-number">0</span>;<br></code></pre></td></tr></table></figure>
+
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/DBA/">DBA</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/DBA/">DBA</a>
+                    
+                      <a class="hover-with-bg" href="/tags/RDBMS/">RDBMS</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/07/14/dba03-2/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">DQL 查询语句与元数据</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/13/dba03/">
+                        <span class="hidden-mobile">SQL 基本概念引入</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+    
+<a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-github-fill"></i></a> <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><i class="iconfont icon-weibo-fill"></i></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+  <!-- 备案信息 -->
+  <div class="beian">
+    <span>
+      <a href="http://beian.miit.gov.cn/" target="_blank" rel="nofollow noopener">
+        京ICP备19033045号-1
+      </a>
+    </span>
+    
+  </div>
+
+
+  
+</footer>
+
+
+  <!-- SCRIPTS -->
+  
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  
+    <script  src="https://cdn.jsdelivr.net/npm/tocbot@4/dist/tocbot.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3/dist/jquery.fancybox.min.js" ></script>
+  
+  
+    <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4/anchor.min.js" ></script>
+  
+  
+    <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js" ></script>
+  
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+</body>
+</html>
